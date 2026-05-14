@@ -7,7 +7,7 @@ services:
     image: otel/opentelemetry-collector
     env_file: .env
     volumes:
-      - .src/otel-collector/otel-collector-config.yaml:/etc/otelcol/config.yaml
+      - ./src/otel-collector/otel-collector-config.yaml:/etc/otelcol/config.yaml
     ports:
       - 1888:1888 # pprof extension
       - 8888:8888 # Prometheus metrics exposed by the Collector
