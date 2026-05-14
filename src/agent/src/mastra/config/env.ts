@@ -4,11 +4,10 @@
  */
 
 import dotenv from "dotenv";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const rootEnv = path.resolve(here, "../../../../../.env");
+// mastra dev/build/start runs with CWD = src/agent/, so the repo root is two levels up.
+const rootEnv = path.resolve(process.cwd(), "../../.env");
 
 dotenv.config({ path: rootEnv, override: true });
 
@@ -27,7 +26,7 @@ const createEnv = () => {
 
   if (!parsedEnv.success) {
     throw new Error(
-      `Invalid env provided.
+      `env.ts -> Invalid env provided.
 The following variables are missing or invalid:
 ${Object.entries(parsedEnv.error.flatten().fieldErrors)
   .map(([k, v]) => `- ${k}: ${v}`)
