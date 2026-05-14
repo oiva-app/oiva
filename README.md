@@ -12,7 +12,7 @@ docker compose up
 ```
 
 ### INSTALL MASTRA OTEL EXPORTER
-You may receive errors when installing the `@mastra/otel-exporter`, try the `--legacy-peer-deps` flag:
+If you receive errors when installing the `@mastra/otel-exporter`, try the `--legacy-peer-deps` flag:
 
 ```bash
 npm install @mastra/otel-exporter --legacy-peer-deps
