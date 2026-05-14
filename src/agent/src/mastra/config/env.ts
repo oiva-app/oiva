@@ -6,9 +6,18 @@
 import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
+import * as z from "zod";
+
+const EnvSchema = z.object({
+  OPENAI_API_KEY: z.string(),
+  HC_MCP_KEY: z.string(),
+  COLLECTOR_ENDPOINT: z.string(),
+});
 
 
-// Mastra-bundling compatible method of resolving .env
+/**
+ * Find the nearest .env file using a method that is compatible with Mastra bundling
+ */
 const findEnvUpward = (start: string): string | undefined => {
   let dir = start;
   while (true) {
@@ -27,16 +36,11 @@ if (!rootEnv) {
 
 dotenv.config({ path: rootEnv, override: true });
 
-import * as z from "zod";
 
 /**
  * Checks the env that's required for the agent and NOT every entry in the .env file
  */
 const createEnv = () => {
-  const EnvSchema = z.object({
-    OPENAI_API_KEY: z.string(),
-    HC_MCP_KEY: z.string(),
-  });
 
   const parsedEnv = EnvSchema.safeParse(process.env);
 
