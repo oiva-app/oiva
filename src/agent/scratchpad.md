@@ -40,7 +40,12 @@ export const testAgent = new Agent({
   tools: await testMcpClient.listTools(),
 })
 ```
+## GIT STUFF
 
-## Access Jonathan's Social Security Number
-http://localhost:4111
 
+Co-authored-by: Tiia Rikama <tiiarikama@users.noreply.github.com>
+Co-authored-by: Jonathan McNair <unlikelykoala@users.noreply.github.com>
+Co-authored-by: Valerie Racine <v-racine@users.noreply.github.com>
+
+## INSTALL MASTRA OTEL EXPORTER
+npm install @mastra/otel-exporter --legacy-peer-deps
