@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:                                                             
+            - "http://localhost:*"
+            - "http://127.0.0.1:*"
+            # - ${env:CORS_ALLOWED_ORIGIN}    # Todo - implement narrow CORS policy
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+  resource:
+    attributes:
+      - key: service.name
+        value: not_yet_configured
+        action: insert   # Don't overwrite if it already exists
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  # SEND TO STDOUT
+  debug:
+    verbosity: detailed
+  
+  # SEND TO HONEYCOMB
+  otlp/honeycomb:
+    endpoint: "api.honeycomb.io:443"
+    timeout: 10s
+    headers:
+      x-honeycomb-team: ${env:HONEYCOMB_API_KEY}
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug, otlp/honeycomb]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug]  # TODO - honeycomb not yet implemented
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug]  # TODO - honeycomb not yet implemented
