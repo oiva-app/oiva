@@ -4,10 +4,26 @@
  */
 
 import dotenv from "dotenv";
+import fs from "node:fs";
 import path from "node:path";
 
-// mastra dev/build/start runs with CWD = src/agent/, so the repo root is two levels up.
-const rootEnv = path.resolve(process.cwd(), "../../.env");
+
+// Mastra-bundling compatible method of resolving .env
+const findEnvUpward = (start: string): string | undefined => {
+  let dir = start;
+  while (true) {
+    const candidate = path.join(dir, ".env");
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) return undefined;
+    dir = parent;
+  }
+};
+
+const rootEnv = findEnvUpward(process.cwd());
+if (!rootEnv) {
+  throw new Error(`env.ts -> no .env file found upward from ${process.cwd()}`);
+}
 
 dotenv.config({ path: rootEnv, override: true });
 
