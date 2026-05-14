@@ -7,11 +7,10 @@ export const testMcpClient = new MCPClient({
   id: "test-mcp-client",
   servers: {
     honeycomb: {
-      // Valerie's ref -> https://docs.google.com/document/d/1rkxXoChttbApF2_3bfaym_XkJt4I-XEJq5WRpZyXjig/edit?tab=t.0
       url: new URL("https://mcp.honeycomb.io/mcp"),
       requestInit: {
         headers: {
-          Authorization: `Bearer ${env.HONEYCOMB_MCP_KEY}`,
+          Authorization: `Bearer ${env.HC_MCP_KEY}`,
         },
       },
     },
