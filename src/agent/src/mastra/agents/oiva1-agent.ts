@@ -1,9 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import { Agent } from "@mastra/core/agent";
-import dotenv from "dotenv";
 import { env } from "../config/env";
-
-dotenv.config({ path: ".env", override: true });
 
 // npm install @mastra/mcp@latest
 export const testMcpClient = new MCPClient({

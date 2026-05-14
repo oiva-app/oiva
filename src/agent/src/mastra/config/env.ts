@@ -1,12 +1,6 @@
 /**
-  This module assumes that the environment is loaded via 
-  Vite's built-in .env support.
-
-  Only environment vars prefixed with the value of PREFIX (see below) 
-  will be imported.
-
-  Inspiration: 
-  https://github.com/alan2207/bulletproof-react/blob/master/apps/react-vite/src/config/env.ts
+  This module centralizes environment variable loading and validation using zod.
+  It ensures that all required variables are present at startup.
  */
 
 import dotenv from 'dotenv'
