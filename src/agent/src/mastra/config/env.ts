@@ -4,11 +4,19 @@
  */
 
 import dotenv from "dotenv";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
-dotenv.config({ path: ".env", override: true });
+const here = path.dirname(fileURLToPath(import.meta.url));
+const rootEnv = path.resolve(here, "../../../../../.env");
+
+dotenv.config({ path: rootEnv, override: true });
 
 import * as z from "zod";
 
+/**
+ * Checks the env that's required for the agent and NOT every entry in the .env file
+ */
 const createEnv = () => {
   const EnvSchema = z.object({
     OPENAI_API_KEY: z.string(),
