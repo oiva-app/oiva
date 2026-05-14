@@ -6,8 +6,6 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector
     env_file: .env
-    environment:
-      HONEYCOMB_API_KEY: ${HONEYCOMB_API_KEY}
     volumes:
       - .src/otel-collector/otel-collector-config.yaml:/etc/otelcol/config.yaml
     ports:
@@ -18,7 +16,3 @@ services:
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
-
-volumes:
-  mongo_data:
-  pgdata:
