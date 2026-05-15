@@ -4,6 +4,7 @@ import { env } from "../config/env";
 import { prompt } from '../prompts/system-prompt.js';
 import { ObservationalMemory } from "@mastra/memory/processors";
 import { Memory } from '@mastra/memory';
+import { z } from "zod"
 
 
 // npm install @mastra/mcp@latest
@@ -22,24 +23,16 @@ export const testMcpClient = new MCPClient({
 });
 
 // https://mastra.ai/docs/mcp/overview#static-tools
-const {
-  honeycomb_get_workspace_context,
-  honeycomb_get_dataset,
-  honeycomb_run_query,
-  honeycomb_run_bubbleup,
-  honeycomb_get_query_results,
-  honeycomb_get_trace,
-} = await testMcpClient.listTools();
+const allTools = await testMcpClient.listTools();
 
-const honeycombSelectFew = {
-  honeycomb_get_workspace_context,
-  honeycomb_get_dataset,
-  honeycomb_run_query,
-  honeycomb_run_bubbleup,
-  honeycomb_get_query_results,
-  honeycomb_get_trace,
-};
-
+const allowedToolsSchema = z.object({
+  honeycomb_get_workspace_context: z.any(),
+  honeycomb_get_dataset: z.any(),
+  honeycomb_run_query: z.any(),
+  honeycomb_run_bubbleup: z.any(),
+  honeycomb_get_query_results: z.any(),
+  honeycomb_get_trace: z.any(),
+})
 
 
 export const oiva2 = new Agent({
@@ -48,5 +41,5 @@ export const oiva2 = new Agent({
   instructions: prompt,
   memory: new Memory(),  // 'when you were a child, your mother gave you a delicious madeleine.'
   model: "openai/gpt-5.4",
-  tools: honeycombSelectFew, // https://mastra.ai/docs/mcp/overview#using-mcpclient-with-an-agent
+  tools: allowedToolsSchema.parse(allTools), // https://mastra.ai/docs/mcp/overview#using-mcpclient-with-an-agent
 });
