@@ -16,7 +16,7 @@ services:
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
-  
+
   phoenix:
     image: arizephoenix/phoenix:latest
     ports:
@@ -26,9 +26,6 @@ services:
       - PHOENIX_WORKING_DIR=/mnt/data
     volumes:
       - phoenix_data:/mnt/data   # PHOENIX_WORKING_DIR (for SQLite DB)
-    depends_on:
-      otel_collector:
-        condition: service_started
 
 volumes:
   phoenix_data:
