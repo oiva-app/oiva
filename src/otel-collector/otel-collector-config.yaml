@@ -19,7 +19,7 @@ processors:
   resource:
     attributes:
       - key: service.name
-        value: not_yet_configured
+        value: not_yet_configured  # flag any service names that aren't configured
         action: insert   # Don't overwrite if it already exists
   batch:
     timeout: 1s
@@ -36,13 +36,19 @@ exporters:
     timeout: 10s
     headers:
       x-honeycomb-team: ${env:HONEYCOMB_API_KEY}
+  
+  # ARIZE PHOENIX
+  otlp/phoenix:
+    endpoint: phoenix:4317
+    tls: 
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [debug, otlp/honeycomb]
+      exporters: [debug, otlp/honeycomb, otlp/phoenix]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
