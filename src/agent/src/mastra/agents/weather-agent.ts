@@ -20,28 +20,28 @@ Your primary function is to help users get weather details for specific location
 Use the weatherTool to fetch current weather data.`,
   model: 'openai/gpt-5-mini',
   tools: { weatherTool },
-  scorers: {
-    toolCallAppropriateness: {
-      scorer: scorers.toolCallAppropriatenessScorer,
-      sampling: {
-        type: 'ratio',
-        rate: 1,
-      },
-    },
-    completeness: {
-      scorer: scorers.completenessScorer,
-      sampling: {
-        type: 'ratio',
-        rate: 1,
-      },
-    },
-    translation: {
-      scorer: scorers.translationScorer,
-      sampling: {
-        type: 'ratio',
-        rate: 1,
-      },
-    },
-  },
+  // scorers: {
+  //   toolCallAppropriateness: {
+  //     scorer: scorers.toolCallAppropriatenessScorer,
+  //     sampling: {
+  //       type: 'ratio',
+  //       rate: 1,
+  //     },
+  //   },
+  //   completeness: {
+  //     scorer: scorers.completenessScorer,
+  //     sampling: {
+  //       type: 'ratio',
+  //       rate: 1,
+  //     },
+  //   },
+  //   translation: {
+  //     scorer: scorers.translationScorer,
+  //     sampling: {
+  //       type: 'ratio',
+  //       rate: 1,
+  //     },
+  //   },
+  // },
   memory: new Memory(),
 });
