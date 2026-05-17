@@ -6,6 +6,11 @@ dist
 .env
 *.db
 *.db-*
+*.duckdb
+*.duckdb.*
+*.sqlite
+*.sqlite-*
+
 .netlify
 .vercel
 
