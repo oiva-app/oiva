@@ -9,24 +9,34 @@ import {
   MastraPlatformExporter,
   SensitiveDataFilter,
 } from "@mastra/observability";
-// @ts-expect-error - TODO - figure out why it's erroring
 import { OtelExporter } from "@mastra/otel-exporter";
 
-import { weatherWorkflow } from "./workflows/weather-workflow";
+import { oivaWorkflow } from "./workflows/oiva-workflow";
+// import { weatherWorkflow } from "./workflows/weather-workflow";
 import { helloWorldAgent } from "./agents/oiva1-agent";
 import { oiva2 } from "./agents/oiva2-agent";
 import { weatherAgent } from "./agents/weather-agent";
-import {
-  toolCallAppropriatenessScorer,
-  completenessScorer,
-  translationScorer,
-} from "./scorers/weather-scorer";
+// import {
+//   toolCallAppropriatenessScorer,
+//   completenessScorer,
+//   translationScorer,
+// } from "./scorers/weather-scorer";
+import { registerApiRoute } from "@mastra/core/server";
+import { alertHookHandler } from "./api/honeycomb-hook-handler";
 import { env } from "./config/env";
 
 export const mastra = new Mastra({
-  workflows: {},
+  workflows: { oivaWorkflow },
   agents: { helloWorldAgent, weatherAgent, oiva2 },
   scorers: {},
+  server: {
+    apiRoutes: [
+      registerApiRoute("/hook/honeycomb/alert", {
+        method: "POST",
+        handler: alertHookHandler,
+      }),
+    ],
+  },
   storage: new MastraCompositeStore({
     id: "composite-storage",
     default: new LibSQLStore({
@@ -52,7 +62,7 @@ export const mastra = new Mastra({
             provider: {
               custom: {
                 endpoint: env.COLLECTOR_ENDPOINT,
-                protocol: "http",
+                protocol: "http/protobuf",
               },
             },
           }),
