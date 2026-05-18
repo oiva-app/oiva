@@ -5,6 +5,10 @@ import {
   AlertContextSchema,
   FilteredOutcomeSchema,
 } from "../types/alert-context";
+import {
+  TelemetryStepOutputSchema,
+  TelemetryFindingsSchema,
+} from "../types/investigation";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
@@ -53,6 +57,37 @@ const normalizeStep = createStep({
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
 
+// step 4.1: telemetry agent investigation
+/**
+ * Invoke telemetery agent
+ * Return context used to generate report
+https://mastra.ai/docs/agents/structured-output  https://mastra.ai/reference/agents/generate#response-structure
+   
+ */
+const telemetryInvestigation = createStep({
+  id: "telemetry-investigation",
+  inputSchema: AlertContextSchema,
+  outputSchema: TelemetryStepOutputSchema,
+  execute: async ({ inputData, mastra }) => {
+    const telemetryAgent = mastra.getAgentById("telemetry-agent");
+    const response = await telemetryAgent.generate(inputData, {
+      structuredOutput: {
+        schema: TelemetryFindingsSchema,
+      },
+    });
+    const findings = response.object;
+
+    return {
+      alert: inputData,
+      telemetryFindings: findings,
+    };
+  },
+});
+
+// step 4.2 : code investigation
+
+// step 5: report
+
 // Workflow: ingestion only for now.
 // outputSchema is a union of the filtered terminal and the (eventual)
 // investigation result. As contextualize/investigate/report steps land,
@@ -79,6 +114,7 @@ export const oivaWorkflow = createWorkflow({
     return inputData;
   })
   .then(normalizeStep)
+  .then(telemetryInvestigation)
   .commit();
 
 //***INITIAL SPIKE WITH TEAM ***/
@@ -137,7 +173,7 @@ export const oivaWorkflow = createWorkflow({
 //   // execute: ({ inputData }) => {},
 // });
 
-// // step 3: contextualize
+// // step 3: contextualize (DEFERRED)
 // const contextualizeAlert = createStep({
 //   id: "contextualize-alert",
 //   description:
