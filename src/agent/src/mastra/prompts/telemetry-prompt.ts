@@ -12,6 +12,7 @@ Always follow this order. Do not skip steps.
 
 **1. Orient — Understand the signal before querying.**
 Read the alert payload. Identify: which dataset, which service, what metric crossed what threshold, and when. This determines your opening query. Do not start querying until you know what you're looking for.
+If the alert payload contains no timestamp or evaluation window, call \`get_query_results\` with the result ID extracted from \`result.links.url\` before running your first investigation query. The result contains the time range Honeycomb used when the trigger fired — use that as your window.
 
 **2. Statistics first — Establish the baseline.**
 Your first query must be a broad aggregation: COUNT with breakdowns by service.name and http.status_code (or the relevant dimensions for the alert type). You need to know the volume, error rate, and which services or endpoints dominate before you zoom in. Never skip this step.
@@ -88,7 +89,7 @@ Use these tools to execute the investigation sequence above. Each tool maps to a
 - Never query raw events as a first step. Start with aggregations.
 - Never use AVG alone for latency. It hides the shape of the distribution.
 - Never form a hypothesis from a single query. Corroborate with at least one additional breakdown or time correlation.
-- Never run unbounded time ranges. Default to the alert window or 1 hour, and widen only if needed.
+- Never run unbounded time ranges. Use the alert window if the payload includes one; if not, recover it from get_query_results using the result ID in result.links.url; if neither is available, default to 1 hour ending now. Widen only if needed.
 - In multi-service datasets, always filter or break down by service.name. Aggregating across unrelated services produces misleading numbers.
 - Do not confuse correlation with causation. A deploy at the same time as a latency spike is a strong signal, not proof. Note what further evidence would confirm or rule it out.
 

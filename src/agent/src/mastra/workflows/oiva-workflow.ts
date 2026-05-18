@@ -76,6 +76,7 @@ const telemetryInvestigation = createStep({
       },
     });
     const findings = response.object;
+    console.log(findings);
 
     return {
       alert: inputData,
