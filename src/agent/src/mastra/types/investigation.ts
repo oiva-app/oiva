@@ -31,7 +31,16 @@ const keySignalSchema = z.object({
     })
     .nullable(),
   timeWindow: timeWindowSchema.nullable(), // optional timeframe for when the signal can be observed
-  correlatedAttributes: z.record(z.string(), z.string()).nullable(), // the attributes that meaningfully differ from baselines, the agent can pull these from calling run_bubbleup
+  correlatedAttributes: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      }),
+    )
+    .nullable(),
+
+  //z.record(z.string(), z.string()).nullable(), // the attributes that meaningfully differ from baselines, the agent can pull these from calling run_bubbleup
 });
 
 // a shape used in telemetryFindingsSchema for specific telemetry samples
@@ -46,8 +55,13 @@ const telemetrySampleSchema = z.object({
   service: z.string(),
   operation: z.string().nullable(), // span name, log source, handler
   summary: z.string(), // tele agent's interpretation of why this piece of telemetry data matters
-  attributes: z // relevant key-value pairs pulled from the event from HC
-    .record(z.string(), z.string())
+  attributes: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      }),
+    )
     .nullable(),
   timestamp: z.iso.datetime().nullable(),
 });
@@ -76,3 +90,37 @@ const TelemetryStepOutputSchema = z.object({
 export { TelemetryFindingsSchema, TelemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof TelemetryFindingsSchema>;
 export type TelemetryStepOutput = z.infer<typeof TelemetryStepOutputSchema>;
+
+const potentialProblemSchema = z
+  .object({
+    description: z.string(),
+    confidence: z.enum(["high", "medium", "low"]),
+    file: z.string().nullable(),
+    line_range: z.array(z.number()).nullable(),
+    snippet: z.string().nullable(), // the relevant code, not a reproduction
+    reasoning: z.string(), // why this code is connected to the telemetry signal
+  })
+  .nullable(); // nullable = agent found nothing conclusive
+
+const recommendedFixSchema = z
+  .object({
+    description: z.string(), // what to change and why
+    file: z.string().nullable(),
+    line_range: z.array(z.number()).nullable(),
+    snippet: z.string().nullable(), // suggested corrected code
+    confidence: z.enum(["high", "medium", "low"]),
+    caveat: z.string().nullable(), // "this fix addresses the symptom but root cause may be upstream", etc.
+  })
+  .nullable(); // null if verdict isn't problem_found
+
+export const codebaseInvestigatorOutputSchema = z.object({
+  verdict: z.enum([
+    "problem_found",
+    "inconclusive",
+    "no_problem_found",
+    "needs_escalation",
+  ]),
+  summary: z.string(),
+  potential_problem: potentialProblemSchema, // null if verdict isn't problem_found
+  recommended_fix: recommendedFixSchema,
+});

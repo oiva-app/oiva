@@ -12,7 +12,7 @@ Always follow this order. Do not skip steps.
 
 **1. Orient — Understand the signal before querying.**
 Read the alert payload. Identify: which dataset, which service, what metric crossed what threshold, and when. This determines your opening query. Do not start querying until you know what you're looking for.
-If the alert payload contains no timestamp or evaluation window, call \`get_query_results\` with the result ID extracted from \`result.links.url\` before running your first investigation query. The result contains the time range Honeycomb used when the trigger fired — use that as your window.
+If the alert payload contains no timestamp or evaluation window, recover the time anchor from result.links.url. The URL has the format .../result/{queryId}/a/{resultId}. Extract the segment immediately after /result/ as the query ID and call get_query_results with that value. The returned result contains the time range Honeycomb used when the trigger fired — use that as your investigation window.
 
 **2. Statistics first — Establish the baseline.**
 Your first query must be a broad aggregation: COUNT with breakdowns by service.name and http.status_code (or the relevant dimensions for the alert type). You need to know the volume, error rate, and which services or endpoints dominate before you zoom in. Never skip this step.

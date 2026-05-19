@@ -16,6 +16,7 @@ import { weatherWorkflow } from "./workflows/weather-workflow";
 import { helloWorldAgent } from "./agents/oiva1-agent";
 import { oiva2 } from "./agents/oiva2-agent";
 import { telemetryAgent } from "./agents/telemetry-agent";
+import { codebaseInvestigator } from "./agents/codebase-investigator";
 import { weatherAgent } from "./agents/weather-agent";
 // import {
 //   toolCallAppropriatenessScorer,
@@ -28,7 +29,13 @@ import { env } from "./config/env";
 
 export const mastra = new Mastra({
   workflows: { oivaWorkflow, weatherWorkflow },
-  agents: { helloWorldAgent, weatherAgent, oiva2, telemetryAgent },
+  agents: {
+    helloWorldAgent,
+    weatherAgent,
+    oiva2,
+    telemetryAgent,
+    codebaseInvestigator,
+  },
   scorers: {},
   server: {
     apiRoutes: [
