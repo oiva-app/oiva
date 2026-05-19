@@ -12,6 +12,7 @@ const EnvSchema = z.object({
   OPENAI_API_KEY: z.string(),
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
+  GITHUB_PAT: z.string(),
   HC_SHARED_SECRET: z.string().optional(), //dev: unset = no enforcement
 });
 

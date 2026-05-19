@@ -5,6 +5,11 @@ import {
   AlertContextSchema,
   FilteredOutcomeSchema,
 } from "../types/alert-context";
+import {
+  TelemetryStepOutputSchema,
+  TelemetryFindingsSchema,
+  codebaseInvestigatorOutputSchema,
+} from "../types/investigation";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
@@ -53,6 +58,61 @@ const normalizeStep = createStep({
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
 
+// step 4.1: telemetry agent investigation
+/**
+ * Invoke telemetery agent
+ * Return context used to generate report
+https://mastra.ai/docs/agents/structured-output  https://mastra.ai/reference/agents/generate#response-structure
+   
+ */
+const investigateTelemetry = createStep({
+  id: "telemetry-investigation",
+  inputSchema: AlertContextSchema,
+  outputSchema: TelemetryStepOutputSchema,
+  execute: async ({ inputData, mastra }) => {
+    const telemetryAgent = mastra.getAgentById("telemetry-agent");
+    const response = await telemetryAgent.generate(
+      JSON.stringify(inputData, null, 2),
+      {
+        structuredOutput: {
+          schema: TelemetryFindingsSchema,
+        },
+      },
+    );
+    const findings = response.object;
+    console.log(findings);
+
+    return {
+      alert: inputData,
+      telemetryFindings: findings,
+    };
+  },
+});
+
+// step 4.2 : code investigation
+const investigateCodebase = createStep({
+  id: "investigate-codebase",
+  inputSchema: TelemetryStepOutputSchema,
+  outputSchema: codebaseInvestigatorOutputSchema,
+  execute: async ({ inputData, mastra }) => {
+    // setState was removed from the destructured param
+    // get something like an architecture.md file (either add to system prompt or add to inputData?)
+    const codebaseInvestigator = mastra.getAgentById("codebase-investigator");
+    const result = await codebaseInvestigator.generate(
+      JSON.stringify(inputData, null, 2),
+      {
+        structuredOutput: {
+          schema: codebaseInvestigatorOutputSchema,
+        },
+      },
+    );
+    // what needs to get added to the workflow state?
+    // await setState({ codebaseFindings: result })
+    return result.object;
+  },
+});
+// step 5: report
+
 // Workflow: ingestion only for now.
 // outputSchema is a union of the filtered terminal and the (eventual)
 // investigation result. As contextualize/investigate/report steps land,
@@ -79,6 +139,8 @@ export const oivaWorkflow = createWorkflow({
     return inputData;
   })
   .then(normalizeStep)
+  .then(investigateTelemetry)
+  .then(investigateCodebase)
   .commit();
 
 //***INITIAL SPIKE WITH TEAM ***/
@@ -137,7 +199,7 @@ export const oivaWorkflow = createWorkflow({
 //   // execute: ({ inputData }) => {},
 // });
 
-// // step 3: contextualize
+// // step 3: contextualize (DEFERRED)
 // const contextualizeAlert = createStep({
 //   id: "contextualize-alert",
 //   description:
