@@ -12,8 +12,8 @@ const EnvSchema = z.object({
   OPENAI_API_KEY: z.string(),
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
+  HC_SHARED_SECRET: z.string().optional(), //dev: unset = no enforcement
 });
-
 
 /**
  * Find the nearest .env file using a method that is compatible with Mastra bundling
@@ -36,12 +36,10 @@ if (!rootEnv) {
 
 dotenv.config({ path: rootEnv, override: true });
 
-
 /**
  * Checks the env that's required for the agent and NOT every entry in the .env file
  */
 const createEnv = () => {
-
   const parsedEnv = EnvSchema.safeParse(process.env);
 
   if (!parsedEnv.success) {
