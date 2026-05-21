@@ -117,7 +117,7 @@ const investigate = createStep({
   id: "investigate",
   inputSchema: AlertContextSchema,
   outputSchema: SupervisorAgentOutputSchema,
-  execute: async ({ inputData, mastra }) => {
+  execute: async ({ inputData, mastra, setState }) => {
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
     const response = await supervisorAgent.generate(
       JSON.stringify(inputData, null, 2),
@@ -128,6 +128,20 @@ const investigate = createStep({
       },
     );
     const findings = response.object;
+    setState({ alertcontext: inputData });
+    return findings;
+  },
+});
+
+const generateReport = createStep({
+  id: "report",
+  inputSchema: SupervisorAgentOutputSchema,
+  outputSchema: z.string(),
+  execute: async ({ inputData, mastra, state }) => {
+    const reportInput = { findings: inputData, alertContext: state.alertContext }
+    const reportAgent = mastra.getAgentById("report-agent");
+    const response = await reportAgent.generate(JSON.stringify(reportInput , null, 2));
+    const findings = response.text;
     return findings;
   },
 });
@@ -159,6 +173,7 @@ export const oivaWorkflow = createWorkflow({
   })
   .then(normalizeStep)
   .then(investigate)
+  .then(generateReport)
   .commit();
 
 //***INITIAL SPIKE WITH TEAM ***/
