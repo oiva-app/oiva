@@ -44,7 +44,7 @@ export const codebaseInvestigator: SubAgent = new Agent({
   id: "codebase-investigator",
   name: "Codebase Investigator",
   description:
-    "Investigates the codebase by looking for bugs in recent changesan d checking deployment history.",
+    "Investigates the codebase by looking for bugs in recent changes and checking deployment history.",
   instructions: prompt,
   defaultOptions: {
     maxSteps: 20,
