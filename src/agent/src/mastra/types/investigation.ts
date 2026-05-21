@@ -124,3 +124,59 @@ export const codebaseInvestigatorOutputSchema = z.object({
   potential_problem: potentialProblemSchema, // null if verdict isn't problem_found
   recommended_fix: recommendedFixSchema,
 });
+
+export const SupervisorAgentOutputSchema = z.object({
+  summary: z
+    .string()
+    .describe(
+      "A concise 2-3 sentence description of the incident: what is happening, which service is affected, when it started, and the current severity.",
+    ),
+  hypothesis: z.object({
+    category: z
+      .enum([
+        "code_change",
+        "infrastructure",
+        "traffic_pattern",
+        "external_dependency",
+        "configuration",
+        "inconclusive",
+      ])
+      .describe("A categorization of the incident type."),
+    description: z
+      .string()
+      .describe(
+        "Your leading theory stated as a causal chain — what caused what, and why.",
+      ),
+    confidence: z
+      .enum(["high", "medium", "low"])
+      .describe("The confidence level for the suggested hypothesis."),
+    evidence_for: z
+      .array(z.string())
+      .describe(
+        "Findings that support this hypothesis, with source attribution (telemetry or codebase).",
+      ),
+    evidence_against: z
+      .array(z.string())
+      .nullable()
+      .describe(
+        "Findings that weigh against alternative explanations, including negative results like 'no recent deployments found'.",
+      ),
+  }),
+  next_steps: z.array(
+    z.object({
+      action: z
+        .string()
+        .describe(
+          "A specific, actionable recommendation for the engineer to further investigate or resolve the issue.",
+        ),
+      rationale: z
+        .string()
+        .describe("An explanation for why this step matters."),
+      priority: z
+        .enum(["immediate", "short_term", "follow_up"])
+        .describe("A categorization of how urgent the suggested step is."),
+    }),
+  ),
+});
+
+export type SupervisorAgentOutput = z.infer<typeof SupervisorAgentOutputSchema>;

@@ -29,7 +29,6 @@ export const {
   github_get_repository_tree,
   github_get_file_contents,
   github_search_code,
-  github_search_repositories,
   github_list_commits,
   github_get_commit,
   github_list_pull_requests,

@@ -4,7 +4,6 @@ import {
   github_get_repository_tree,
   github_get_file_contents,
   github_search_code,
-  github_search_repositories,
   github_list_commits,
   github_get_commit,
   github_list_pull_requests,
@@ -16,6 +15,7 @@ import {
   github_get_workflow_run_logs,
 } from "../mcp/mcpClients";
 import { Agent } from "@mastra/core/agent";
+import type { SubAgent } from "@mastra/core/agent";
 import { prompt } from "../prompts/system-prompt-codebase-investigator";
 import { ObservationalMemory } from "@mastra/memory/processors";
 import { Memory } from "@mastra/memory";
@@ -27,7 +27,6 @@ const githubToolsSubset = {
   github_get_repository_tree,
   github_get_file_contents,
   github_search_code,
-  github_search_repositories,
   github_list_commits,
   github_get_commit,
   github_list_pull_requests,
@@ -39,9 +38,11 @@ const githubToolsSubset = {
   github_get_workflow_run_logs,
 };
 
-export const codebaseInvestigator = new Agent({
+export const codebaseInvestigator: SubAgent = new Agent({
   id: "codebase-investigator",
   name: "Codebase Investigator",
+  description:
+    "Investigates the codebase by looking for bugs in recent changes and checking deployment history.",
   instructions: prompt,
   defaultOptions: {
     maxSteps: 20,
