@@ -17,7 +17,7 @@ export const telemetryAgent: SubAgent = new Agent({
   id: "telemetry-agent",
   name: "Telemetry Agent",
   description:
-    "Investigates telemetry data from Honeycomb by exploring datastes, running queries, comparing anomalies against baselines and retrieving traces.",
+    "Investigates telemetry data from Honeycomb by exploring datasets, running queries, comparing anomalies against baselines and retrieving traces.",
   instructions: telemetryPrompt,
   model: "openai/gpt-5.4",
   defaultOptions: {
