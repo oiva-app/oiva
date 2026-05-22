@@ -21,7 +21,7 @@ npm install @mastra/otel-exporter --legacy-peer-deps
 ```
 
 ### ALERT WEBHOOK PAYLOAD FORMAT
-
+For proper functioning, you must use this alert template!
 
 This alert payload shape is a slightly modified version of the "Generic" Honeycomb (HC)Alert Trigger Template that is provided for HC users who don't know or care about their required payload shape.
 
@@ -70,6 +70,7 @@ This alert includes additional properties that aid our agent in its investigatio
 }
 
 ```
+More info in the Honeycomb Docs: https://docs.honeycomb.io/notify/webhooks and in the Go Docs, which defines the templating syntax: https://pkg.go.dev/text/template
 
 ## Sample alerts
 
