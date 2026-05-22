@@ -55,6 +55,9 @@ export function normalizeAlert(payload: HoneycombWebhookPayload): AlertContext {
     environment: payload.environment,
     datasets,
     groupsTriggered: payload.result.groupsTriggered,
+    alert: {
+      timestamp: payload.alert.timestamp,
+    },
     resultUrl: payload.result.links.url,
     triggerUrl: payload.links.url,
     instanceId: payload.alert.instanceId,

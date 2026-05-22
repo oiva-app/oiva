@@ -9,12 +9,14 @@ export const AlertContextSchema = z.object({
   datasets: z.array(z.string()),
   groupsTriggered: z.array(
     z.object({
-      field: z.string().optional(),  // MAKE OPTIONAL?  REMOVE ENTIRELY??
-      value: z.string().optional(),  // MAKE OPTIONAL?  REMOVE ENTIRELY??
-      count: z.number().optional(),  // MAKE OPTIONAL?  REMOVE ENTIRELY??
+      field: z.string().optional(),
+      value: z.string().optional(),
+      count: z.number().optional(),
     }),
-    // z.looseObject(z.string()),
   ),
+  alert: z.object({
+    timestamp: z.string()
+  }),
   resultUrl: z.string(),
   triggerUrl: z.string(),
   instanceId: z.string(),
