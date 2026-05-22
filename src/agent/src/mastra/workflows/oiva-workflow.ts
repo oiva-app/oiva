@@ -15,7 +15,7 @@ import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
 const OivaWorkflowStateSchema = z.object({
-  alertContext: AlertContextSchema,
+  alertContext: AlertContextSchema.optional(),
 });
 
 // step 1: verify alert
