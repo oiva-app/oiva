@@ -20,12 +20,13 @@ If you receive errors when installing the `@mastra/otel-exporter`, try the `--le
 npm install @mastra/otel-exporter --legacy-peer-deps
 ```
 
-### ALERT TRIGGER FORMAT
+### ALERT WEBHOOK PAYLOAD FORMAT
+For proper functioning, you must use this alert template!
 
+This alert payload shape is a slightly modified version of the "Generic" Honeycomb (HC)Alert Trigger Template that is provided for HC users who don't know or care about their required payload shape.
 
-Here's the "Generic" Honeycomb Alert Trigger Template.
+This alert includes additional properties that aid our agent in its investigation.
 
-TBD if it should be modified for our use??
 ```go
 {
   "name": "{{ .Name }}",
@@ -39,6 +40,7 @@ TBD if it should be modified for our use??
     "op": "{{ .Operator }}",
     "value": "{{ .Threshold }}"
   },
+  "datasets": {{ toJson .Datasets }},
   "result": {
     "groupsTriggered": [
       {{- $numGroups := len .Result.GroupsTriggered -}}
@@ -61,11 +63,14 @@ TBD if it should be modified for our use??
     "description": "{{ .Alert.Description }}",
     "status": "{{ .Alert.Status }}",
     "summary": "{{ .Alert.Summary }}",
+    "timestamp": "{{ .Alert.Timestamp }}",
     "isTest": {{ .Alert.IsTest }}
-  }
+  },
+  "secret": "{{.Recipient.Secret}}"
 }
 
 ```
+More info in the Honeycomb Docs: https://docs.honeycomb.io/notify/webhooks and in the Go Docs, which defines the templating syntax: https://pkg.go.dev/text/template
 
 ## Sample alerts
 
