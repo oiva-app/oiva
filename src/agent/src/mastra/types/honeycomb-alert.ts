@@ -5,6 +5,7 @@ export const RawAlertSchema = z.looseObject({
   description: z.string(),
   status: z.enum(["TRIGGERED", "OK"]),
   summary: z.string(),
+  timestamp: z.string(),
   isTest: z.boolean(),
 });
 
@@ -16,19 +17,19 @@ export const HoneycombWebhookPayloadSchema = z.object({
   links: z.object({ url: z.string() }),
   environment: z.string(),
   threshold: z.object({ op: z.string(), value: z.string() }),
+  datasets: z.array(z.string()),
   result: z.object({
     groupsTriggered: z.array(
       z.object({
-        field: z.string().optional(),   // MAKE OPTIONAL?  REMOVE ENTIRELY??
-        value: z.string().optional(),   // MAKE OPTIONAL?  REMOVE ENTIRELY??
-        count: z.number().optional(),   // MAKE OPTIONAL?  REMOVE ENTIRELY??
+        field: z.string().optional(),
+        value: z.string().optional(),
+        count: z.number().optional(),
       }),
       // z.looseObject(z.string()),
     ),
     links: z.object({ url: z.string() }),
   }),
   alert: RawAlertSchema,
-  datasets: z.array(z.string()).optional(),
 });
 
 export type RawAlert = z.infer<typeof RawAlertSchema>;
