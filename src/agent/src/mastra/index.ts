@@ -15,8 +15,7 @@ import { oivaWorkflow } from "./workflows/oiva-workflow";
 import { weatherWorkflow } from "./workflows/weather-workflow";
 import { helloWorldAgent } from "./agents/oiva1-agent";
 import { oiva2 } from "./agents/oiva2-agent";
-import { telemetryAgent } from "./agents/telemetry-agent";
-import { codebaseInvestigator } from "./agents/codebase-agent";
+import { reportAgent } from "./agents/report-agent";
 import { weatherAgent } from "./agents/weather-agent";
 import { supervisorAgent } from "./agents/supervisor-agent";
 // import {
@@ -34,6 +33,7 @@ export const mastra = new Mastra({
     helloWorldAgent,
     weatherAgent,
     oiva2,
+    reportAgent,
     supervisorAgent,
   },
   scorers: {},
