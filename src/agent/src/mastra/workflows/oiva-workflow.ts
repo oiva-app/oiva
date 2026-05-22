@@ -14,6 +14,10 @@ import {
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
+const OivaWorkflowStateSchema = z.object({
+  alertContext: AlertContextSchema.optional(),
+});
+
 // step 1: verify alert
 /**
  V: Outcomes (per VerifyResult in the HC adapter):
@@ -115,6 +119,7 @@ https://mastra.ai/docs/agents/structured-output  https://mastra.ai/reference/age
 
 const investigate = createStep({
   id: "investigate",
+  stateSchema: OivaWorkflowStateSchema,
   inputSchema: AlertContextSchema,
   outputSchema: SupervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
@@ -128,19 +133,25 @@ const investigate = createStep({
       },
     );
     const findings = response.object;
-    setState({ alertcontext: inputData });
+    await setState({ alertContext: inputData });
     return findings;
   },
 });
 
 const generateReport = createStep({
   id: "report",
+  stateSchema: OivaWorkflowStateSchema,
   inputSchema: SupervisorAgentOutputSchema,
   outputSchema: z.string(),
   execute: async ({ inputData, mastra, state }) => {
-    const reportInput = { findings: inputData, alertContext: state.alertContext }
+    const reportInput = {
+      findings: inputData,
+      alertContext: state.alertContext,
+    };
     const reportAgent = mastra.getAgentById("report-agent");
-    const response = await reportAgent.generate(JSON.stringify(reportInput , null, 2));
+    const response = await reportAgent.generate(
+      JSON.stringify(reportInput, null, 2),
+    );
     const findings = response.text;
     return findings;
   },
@@ -152,6 +163,7 @@ const generateReport = createStep({
 // extend the actionable side of this union (likely with a ReportSchema).
 export const oivaWorkflow = createWorkflow({
   id: "oiva-workflow",
+  stateSchema: OivaWorkflowStateSchema,
   inputSchema: HoneycombWebhookPayloadSchema,
   outputSchema: z.union([
     FilteredOutcomeSchema,
