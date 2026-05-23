@@ -89,6 +89,7 @@ From Astro Shop
     "op": "greater than",
     "value": "1"
   },
+  "datasets": ["frontend"],
   "result": {
     "groupsTriggered": [
       {
@@ -104,6 +105,7 @@ From Astro Shop
     "description": "astro-lisa environment:\nCurrent value (2.726 k) greater than threshold value (1)",
     "status": "TRIGGERED",
     "summary": "TRIGGER TEST: Triggered: error == true",
+    "timestamp": "13:21:03 UTC-04:00",
     "isTest": false
   }
 }
