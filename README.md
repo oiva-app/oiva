@@ -20,7 +20,8 @@ If you receive errors when installing the `@mastra/otel-exporter`, try the `--le
 npm install @mastra/otel-exporter --legacy-peer-deps
 ```
 
-### ALERT WEBHOOK PAYLOAD FORMAT
+
+## ALERT WEBHOOK PAYLOAD FORMAT
 For proper functioning, you must use this alert template!
 
 This alert payload shape is a slightly modified version of the "Generic" Honeycomb (HC)Alert Trigger Template that is provided for HC users who don't know or care about their required payload shape.
@@ -82,27 +83,54 @@ From Astro Shop
   "id": "2XteoXm4S78",
   "description": "",
   "links": {
-    "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/datasets/frontend/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
+    "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
   },
   "environment": "astro-lisa",
   "threshold": {
     "op": "greater than",
     "value": "1"
   },
-  "datasets": ["frontend"],
+  "datasets": ["__all__"],
   "result": {
     "groupsTriggered": [
       {
-        "count": 2726
+        "field": "service.name",
+        "value": "product-catalog",
+        "count": 2736
+      },
+      {
+        "field": "service.name",
+        "value": "frontend",
+        "count": 2734
+      },
+      {
+        "field": "service.name",
+        "value": "frontend-proxy",
+        "count": 684
+      },
+      {
+        "field": "service.name",
+        "value": "ad",
+        "count": 9
+      },
+      {
+        "field": "service.name",
+        "value": "fraud-detection",
+        "count": 9
+      },
+      {
+        "field": "service.name",
+        "value": "load-generator",
+        "count": 4
       }
     ],
     "links": {
-      "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/datasets/frontend/result/eLzr7yW3bQq/a/D37zNFYxc7f?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
+      "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
     }
   },
   "alert": {
     "instanceId": "1015bd0f-99a3-41e7-817e-9c831df21262",
-    "description": "astro-lisa environment:\nCurrent value (2.726 k) greater than threshold value (1)",
+    "description": "astro-lisa environment:\nCurrent value (6.176 k) greater than threshold value (1)",
     "status": "TRIGGERED",
     "summary": "TRIGGER TEST: Triggered: error == true",
     "timestamp": "13:21:03 UTC-04:00",
@@ -142,4 +170,13 @@ From Valerie's 3-service app
     "isTest": false
   }
 }
+```
+
+## EXAMINING MCP RESPONSES
+Honeycomb MCP responses are hard for a human to parse because of all the escape sequences.  You can use Python and XClip to make them human readable.  However, keep in mind that the ASCII-art charts that are included in the MCP responses are *much* lower fidelity than the charts that are available via the web ui.
+
+```bash
+xclip -selection clipboard -o \
+| python3 -c 'import sys; sys.stdout.write(sys.stdin.read().encode().decode("unicode_escape"))' \
+| xclip -selection clipboard -i
 ```
