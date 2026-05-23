@@ -1,6 +1,7 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import type { SubAgent } from "@mastra/core/agent";
+import { env } from "../config/env"
 import {
   honeycomb_get_workspace_context,
   honeycomb_get_dataset,
@@ -21,7 +22,7 @@ export const telemetryAgent: SubAgent = new Agent({
   instructions: telemetryPrompt,
   model: "openai/gpt-5.4",
   defaultOptions: {
-    maxSteps: 20,
+    maxSteps: env.TELEMETRY_MAX_STEPS,
   },
   tools: {
     honeycomb_get_workspace_context,

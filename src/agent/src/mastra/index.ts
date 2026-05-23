@@ -18,6 +18,7 @@ import { oiva2 } from "./agents/oiva2-agent";
 import { reportAgent } from "./agents/report-agent";
 import { weatherAgent } from "./agents/weather-agent";
 import { supervisorAgent } from "./agents/supervisor-agent";
+import { telemetryAgent } from "./agents/telemetry-agent";
 // import {
 //   toolCallAppropriatenessScorer,
 //   completenessScorer,
@@ -35,6 +36,7 @@ export const mastra = new Mastra({
     oiva2,
     reportAgent,
     supervisorAgent,
+    telemetryAgent,
   },
   scorers: {},
   server: {
