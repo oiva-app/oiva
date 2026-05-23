@@ -19,6 +19,7 @@ import type { SubAgent } from "@mastra/core/agent";
 import { prompt } from "../prompts/system-prompt-codebase-investigator";
 import { ObservationalMemory } from "@mastra/memory/processors";
 import { Memory } from "@mastra/memory";
+import { env } from "../config/env"
 
 // https://github.com/github/github-mcp-server/blob/main/README.md#available-toolsets
 const githubToolsSubset = {
@@ -45,7 +46,7 @@ export const codebaseInvestigator: SubAgent = new Agent({
     "Investigates the codebase by looking for bugs in recent changes and checking deployment history.",
   instructions: prompt,
   defaultOptions: {
-    maxSteps: 20,
+    maxSteps: env.CODEBASE_MAX_STEPS,
   },
   memory: new Memory(),
   model: "openai/gpt-5.4",

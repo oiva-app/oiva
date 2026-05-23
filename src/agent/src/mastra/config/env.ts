@@ -13,7 +13,19 @@ const EnvSchema = z.object({
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
   GITHUB_PAT: z.string(),
-  HC_SHARED_SECRET: z.string().optional(), //dev: unset = no enforcement
+
+  //  Unset = no secret enforcement on incoming webhooks.  Only for development.
+  HC_SHARED_SECRET: z.string().optional(), 
+
+  // Reduce max steps to save tokens
+  SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
+  REPORT_MAX_STEPS: z.coerce.number().default(10),
+  TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
+  CODEBASE_MAX_STEPS: z.coerce.number().default(20),
+  RUN_EVALS: z.stringbool().default(true),  // `false` to save tokens
+
+  // for future use - for implementing development-only logic
+  NODE_ENV: z.enum(["development", "production"]).default("production")
 });
 
 /**

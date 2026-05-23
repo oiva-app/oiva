@@ -3,6 +3,7 @@ import { Memory } from "@mastra/memory";
 import { supervisorPrompt } from "../prompts/supervisor-prompt";
 import { codebaseInvestigator } from "./codebase-agent";
 import { telemetryAgent } from "./telemetry-agent";
+import { env } from "../config/env"
 
 export const supervisorAgent = new Agent({
   id: "supervisor-agent",
@@ -12,7 +13,7 @@ export const supervisorAgent = new Agent({
   agents: { codebaseInvestigator, telemetryAgent },
   memory: new Memory(),
   defaultOptions: {
-    maxSteps: 30,
+    maxSteps: env.SUPERVISOR_MAX_STEPS,
     disableBackgroundTasks: true,
     delegation: {
       onDelegationStart: ({ primitiveId }) => {
