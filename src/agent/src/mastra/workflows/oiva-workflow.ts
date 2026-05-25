@@ -146,6 +146,10 @@ const generateReport = createStep({
   inputSchema: supervisorAgentOutputSchema,
   outputSchema: incidentReportSchema,
   execute: async ({ inputData, mastra, state }) => {
+    if (!state.alertContext) {
+      throw new Error("generateReport: alert context unavailable");
+    }
+
     const reportInput = {
       findings: inputData,
       alertContext: state.alertContext,
@@ -160,7 +164,11 @@ const generateReport = createStep({
       },
     );
 
-    const report: IncidentReport = response.object;
+    if (!response.object) {
+      throw new Error("generateReport: invalid agent output");
+    }
+
+    const report = response.object;
     return report;
   },
 });
