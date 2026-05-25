@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RawAlertSchema = z.looseObject({
+export const rawAlertSchema = z.looseObject({
   instanceId: z.string(),
   description: z.string(),
   status: z.enum(["TRIGGERED", "OK"]),
@@ -9,7 +9,7 @@ export const RawAlertSchema = z.looseObject({
   isTest: z.boolean(),
 });
 
-export const HoneycombWebhookPayloadSchema = z.object({
+export const honeycombWebhookPayloadSchema = z.object({
   secret: z.string().optional(),
   name: z.string(),
   id: z.string(),
@@ -29,12 +29,12 @@ export const HoneycombWebhookPayloadSchema = z.object({
     ),
     links: z.object({ url: z.string() }),
   }),
-  alert: RawAlertSchema,
+  alert: rawAlertSchema,
 });
 
-export type RawAlert = z.infer<typeof RawAlertSchema>;
+export type RawAlert = z.infer<typeof rawAlertSchema>;
 export type HoneycombWebhookPayload = z.infer<
-  typeof HoneycombWebhookPayloadSchema
+  typeof honeycombWebhookPayloadSchema
 >;
 
 /*

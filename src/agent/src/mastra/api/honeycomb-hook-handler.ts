@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { Mastra } from "@mastra/core/mastra";
-import { HoneycombWebhookPayloadSchema } from "../types/honeycomb-alert";
+import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import { verifyAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { z } from "zod";
@@ -33,7 +33,7 @@ export async function alertHookHandler(c: Context) {
   }
 
   // 2. Schema parse — is this even shaped like a Honeycomb webhook?
-  const parsed = HoneycombWebhookPayloadSchema.safeParse(rawBody);
+  const parsed = honeycombWebhookPayloadSchema.safeParse(rawBody);
   if (!parsed.success) {
     return c.json(
       {
