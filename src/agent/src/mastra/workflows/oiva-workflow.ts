@@ -1,21 +1,22 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
-import { HoneycombWebhookPayloadSchema } from "../types/honeycomb-alert";
+import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
-  AlertContextSchema,
-  FilteredOutcomeSchema,
+  alertContextSchema,
+  filteredOutcomeSchema,
 } from "../types/alert-context";
 import {
-  TelemetryStepOutputSchema,
-  TelemetryFindingsSchema,
+  telemetryStepOutputSchema,
+  telemetryFindingsSchema,
   codebaseInvestigatorOutputSchema,
-  SupervisorAgentOutputSchema,
+  supervisorAgentOutputSchema,
 } from "../types/investigation";
+import { incidentReportSchema } from "../types/report";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
-const OivaWorkflowStateSchema = z.object({
-  alertContext: AlertContextSchema.optional(),
+const oivaWorkflowStateSchema = z.object({
+  alertContext: alertContextSchema.optional(),
 });
 
 // step 1: verify alert
@@ -29,9 +30,9 @@ const verifyStep = createStep({
   id: "verify-alert",
   description:
     "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
-  inputSchema: HoneycombWebhookPayloadSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
   // Step output must satisfy bail (filtered) and pass-through (actionable).
-  outputSchema: z.union([HoneycombWebhookPayloadSchema, FilteredOutcomeSchema]),
+  outputSchema: z.union([honeycombWebhookPayloadSchema, filteredOutcomeSchema]),
   execute: async ({ inputData, bail }) => {
     const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
 
@@ -58,8 +59,8 @@ const normalizeStep = createStep({
   id: "normalize-alert",
   description:
     "Reshapes the HC payload into a vendor-neutral AlertContext for downstream steps.",
-  inputSchema: HoneycombWebhookPayloadSchema,
-  outputSchema: AlertContextSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
+  outputSchema: alertContextSchema,
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
 
@@ -119,19 +120,20 @@ https://mastra.ai/docs/agents/structured-output  https://mastra.ai/reference/age
 
 const investigate = createStep({
   id: "investigate",
-  stateSchema: OivaWorkflowStateSchema,
-  inputSchema: AlertContextSchema,
-  outputSchema: SupervisorAgentOutputSchema,
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: alertContextSchema,
+  outputSchema: supervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
     const response = await supervisorAgent.generate(
       JSON.stringify(inputData, null, 2),
       {
         structuredOutput: {
-          schema: SupervisorAgentOutputSchema,
+          schema: supervisorAgentOutputSchema,
         },
       },
     );
+
     const findings = response.object;
     await setState({ alertContext: inputData });
     return findings;
@@ -140,10 +142,14 @@ const investigate = createStep({
 
 const generateReport = createStep({
   id: "report",
-  stateSchema: OivaWorkflowStateSchema,
-  inputSchema: SupervisorAgentOutputSchema,
-  outputSchema: z.string(),
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: supervisorAgentOutputSchema,
+  outputSchema: incidentReportSchema,
   execute: async ({ inputData, mastra, state }) => {
+    if (!state.alertContext) {
+      throw new Error("generateReport: alert context unavailable");
+    }
+
     const reportInput = {
       findings: inputData,
       alertContext: state.alertContext,
@@ -151,9 +157,19 @@ const generateReport = createStep({
     const reportAgent = mastra.getAgentById("report-agent");
     const response = await reportAgent.generate(
       JSON.stringify(reportInput, null, 2),
+      {
+        structuredOutput: {
+          schema: incidentReportSchema,
+        },
+      },
     );
-    const findings = response.text;
-    return findings;
+
+    if (!response.object) {
+      throw new Error("generateReport: invalid agent output");
+    }
+
+    const report = response.object;
+    return report;
   },
 });
 
@@ -163,11 +179,11 @@ const generateReport = createStep({
 // extend the actionable side of this union (likely with a ReportSchema).
 export const oivaWorkflow = createWorkflow({
   id: "oiva-workflow",
-  stateSchema: OivaWorkflowStateSchema,
-  inputSchema: HoneycombWebhookPayloadSchema,
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
   outputSchema: z.union([
-    FilteredOutcomeSchema,
-    AlertContextSchema, // placeholder: replace with Report schema later
+    filteredOutcomeSchema,
+    alertContextSchema, // placeholder: replace with Report schema later
   ]),
 })
   .then(verifyStep)
