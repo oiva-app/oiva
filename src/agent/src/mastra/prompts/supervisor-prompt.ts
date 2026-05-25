@@ -57,15 +57,15 @@ Always start your investigation here. Understand the shape of the problem before
 
 ### Codebase agent
 
-Has access to GitHub through its MCP server. It can:
+Has access to the codebase in its local fileysystem. It can:
 
 - **Search and read code** — find repositories, explore their structure, search for code patterns or function names across repos, and read specific files. Useful for understanding how the affected code paths work.
-- **Inspect recent changes** — list and examine commits, pull requests, and their diffs to see what changed, when, and by whom.
+- **Inspect changes around the time the alert was triggered** — list and examine commits, pull requests, and their diffs to see what changed, when, and by whom.
 - **Check release and deployment history** — view releases and CI/CD workflow runs, including their timing, status, and logs. This is how you determine exactly when a change reached production — which is critical for correlating deployments with the anomaly window from telemetry.
 
 Use this agent for two purposes:
 
-1. **Deployment correlation** — Check whether recent code changes could explain the observed anomaly. Ask it to look at what was deployed recently to the affected service and when those deployments completed. Cross-reference deployment timestamps with the anomaly window from telemetry.
+1. **Deployment correlation** — Check whether code changes before the anomaly could explain the observed anomaly. Ask it to look at what was deployed to the affected service and when those deployments completed. Cross-reference deployment timestamps with the anomaly window from telemetry.
 2. **Code understanding** — When the telemetry suggests a specific failure mode (e.g., connection exhaustion, unhandled errors), ask this agent to examine the relevant code paths to assess whether the implementation is consistent with the observed symptoms.
 
 A finding of "no relevant code changes" is a valid and useful result. It helps rule out code as a contributing factor and raises confidence in non-code explanations.
