@@ -1,3 +1,5 @@
+This note is related to this entry in our ["Evals" Spreadsheet](https://docs.google.com/spreadsheets/d/1xcGs6bDF-ydtxYbzz5rFbCsyv-bsqmhda24Fy-a0D4s/edit?gid=794137155#gid=794137155&range=10:10)
+
 Here's a summary of what HC Canvas does:
 
 # 1ST PROMPT
@@ -31,7 +33,7 @@ ToolSearch: Understand what tools are available
 
 (1x) mcp_hc_run_query: similar to last query except additional WHERE clause: WHERE service.name = "product-catalog", GROUP BY "name".  
 
-The MCP returns an ASCII art chart of the counts broken down by group, a "markers" chart that lists the deploy marker, and a rendered graph.  Excerpt below, see (src/agent/docs/honeycomb_run_query_01.md) for full MCP payload.
+The MCP returns an ASCII art chart of the counts broken down by group, a "markers" chart that lists the deploy marker, and a rendered graph.  Excerpt below, see [here](./honeycomb_run_query_01.md) for full MCP payload.
 
 | COUNT | name |
 | --- | --- |
@@ -48,7 +50,7 @@ The MCP returns an ASCII art chart of the counts broken down by group, a "marker
 | 639 | OTHER |
 | 13648 | TOTAL |
 
-(1x) mcp_hc_run_query: similar to the last query except WHERE service.name = frontend.  The results chart from (src/agent/docs/honeycomb_run_query_02.md) show that the frontend is throwing errors while making requests to the ProductCatalogService and the `recommendations` service
+(1x) mcp_hc_run_query: similar to the last query except WHERE service.name = frontend.  The results chart from the [payload](./honeycomb_run_query_02.md) show that the frontend is throwing errors while making requests to the ProductCatalogService and the `recommendations` service
 
 | COUNT | name |
 | --- | --- |
