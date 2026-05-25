@@ -11,7 +11,7 @@ import {
   codebaseInvestigatorOutputSchema,
   supervisorAgentOutputSchema,
 } from "../types/investigation";
-import { incidentReportSchema, IncidentReport } from "../types/report";
+import { incidentReportSchema } from "../types/report";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
