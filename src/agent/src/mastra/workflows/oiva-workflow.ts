@@ -11,6 +11,7 @@ import {
   codebaseInvestigatorOutputSchema,
   SupervisorAgentOutputSchema,
 } from "../types/investigation";
+import { incidentReportSchema, IncidentReport } from "../types/report";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
@@ -132,6 +133,7 @@ const investigate = createStep({
         },
       },
     );
+
     const findings = response.object;
     await setState({ alertContext: inputData });
     return findings;
@@ -142,7 +144,7 @@ const generateReport = createStep({
   id: "report",
   stateSchema: OivaWorkflowStateSchema,
   inputSchema: SupervisorAgentOutputSchema,
-  outputSchema: z.string(),
+  outputSchema: incidentReportSchema,
   execute: async ({ inputData, mastra, state }) => {
     const reportInput = {
       findings: inputData,
@@ -151,9 +153,15 @@ const generateReport = createStep({
     const reportAgent = mastra.getAgentById("report-agent");
     const response = await reportAgent.generate(
       JSON.stringify(reportInput, null, 2),
+      {
+        structuredOutput: {
+          schema: incidentReportSchema,
+        },
+      },
     );
-    const findings = response.text;
-    return findings;
+
+    const report: IncidentReport = response.object;
+    return report;
   },
 });
 
