@@ -5,6 +5,7 @@ import { ToolCallFilter } from '@mastra/core/processors';
 import { env } from "../config/env";
 import { cbAgentThreeServicesDemoWorkspace } from "../workspaces/codebase-workspace-three-services";
 import { prompt } from "../prompts/system-prompt-codebase-three-services";
+import { investigationSchema } from "../memory/investigation-schema";
 
 export const threeServicesCodebaseInvestigator: SubAgent = new Agent({
   id: "codebase-investigator",
@@ -15,7 +16,15 @@ export const threeServicesCodebaseInvestigator: SubAgent = new Agent({
   defaultOptions: {
     maxSteps: env.CODEBASE_MAX_STEPS,
   },
-  memory: new Memory(),
+  memory: new Memory({
+    options: {
+      lastMessages: 20,
+      workingMemory: {
+        enabled: true,
+        schema: investigationSchema,
+      },
+    },
+  }),
   inputProcessors: [
      new ToolCallFilter({ filterAfterToolSteps: 3 })
   ],

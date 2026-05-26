@@ -19,6 +19,7 @@ import { reportAgent } from "./agents/report-agent";
 import { weatherAgent } from "./agents/weather-agent";
 import { supervisorAgent } from "./agents/supervisor-agent";
 import { telemetryAgent } from "./agents/telemetry-agent";
+import { threeServicesCodebaseInvestigator } from "./agents/codebase-agent-three-services";
 // import {
 //   toolCallAppropriatenessScorer,
 //   completenessScorer,
@@ -37,6 +38,7 @@ export const mastra = new Mastra({
     reportAgent,
     supervisorAgent,
     telemetryAgent,
+    threeServicesCodebaseInvestigator,
   },
   scorers: {},
   server: {
