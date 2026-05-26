@@ -62,11 +62,11 @@ const redactStep = createStep({
   id: "scrub-alert",
   description: "Remove context to keep info from Agent, with goal of improving investigation",
   inputSchema: alertContextSchema,
+  stateSchema: OivaWorkflowStateSchema,
   outputSchema: alertContextSchema,
-  execute: async ({ inputData, setState }) => {
-    const redacted = { ...inputData }
-    redacted.triggerUrl = ""
-    setState(() => {alertContext: redacted})
+  execute: async ({ inputData, state, setState }) => {
+    const redacted = { ...inputData, triggerUrl: "" }
+    await setState({ ...state, alertContext: redacted })
     return redacted
   }
 })
@@ -75,6 +75,7 @@ const getQueryResultsStep = createStep({
   id: "get-query-results",
   description: "Get query results via API",
   inputSchema: alertContextSchema,
+  stateSchema: OivaWorkflowStateSchema,
   outputSchema: z.object({
     content: z.any(),
   }),
@@ -82,7 +83,7 @@ const getQueryResultsStep = createStep({
     const tool = honeycomb_get_query_results
     if (!tool.execute) throw new Error("get_query_results has no execute()")
     const result = await tool.execute({url: inputData.resultUrl}, {})
-    setState( (s) => ({...s, queryResult: result}))
+    await setState({ ...state, queryResult: result })
     return result
   }
 })
