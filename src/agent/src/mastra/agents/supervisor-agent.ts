@@ -15,10 +15,5 @@ export const supervisorAgent = new Agent({
   defaultOptions: {
     maxSteps: env.SUPERVISOR_MAX_STEPS,
     disableBackgroundTasks: true,
-    delegation: {
-      onDelegationStart: ({ primitiveId }) => {
-        return { modifiedMaxSteps: 15 };
-      },
-    },
   },
 });
