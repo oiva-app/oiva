@@ -1,1 +1,0 @@
-[{"type": "text", "text": "{\"created\":[\"shape:06275ec1-b280-4194-b798-71c7dcf2caa6\",\"shape:554e401d-581f-4814-af53-6af5fff4400c\"]}"}]
