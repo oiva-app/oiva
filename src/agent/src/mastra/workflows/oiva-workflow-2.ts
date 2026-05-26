@@ -10,6 +10,10 @@ import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { graphAgent } from "../agents/graph-agent";
+import {
+  mcpToolResultSchema,
+  type McpResourceLink,
+} from "../types/mcp";
 
 const workflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
@@ -45,35 +49,6 @@ const HCQueryDetailsSchema = z.object({
   })
 });
 
-
-
-
-
-/**
- * MCP CallToolResult schema. 
- 
-    As defined by MCP spec:
-    https://modelcontextprotocol.io/specification/2025-11-25/server/tools
- */
-const mcpResourceLinkSchema = z.object({
-  type: z.literal("resource_link"),
-  uri: z.string(),
-  name: z.string().optional(),
-  mimeType: z.string().optional(),
-});
-type McpResourceLink = z.infer<typeof mcpResourceLinkSchema>;
-
-const mcpContentBlockSchema = z.union([
-  mcpResourceLinkSchema,
-  z.object({ type: z.string() }).loose(),
-]);
-
-const mcpToolResultSchema = z
-  .object({
-    content: z.array(mcpContentBlockSchema),
-    isError: z.boolean().optional(),
-  })
-  .loose();
 
 
 
