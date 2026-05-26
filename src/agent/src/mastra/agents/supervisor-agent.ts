@@ -1,7 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { supervisorPrompt } from "../prompts/supervisor-prompt";
-import { codebaseInvestigator } from "./codebase-agent";
 import { threeServicesCodebaseInvestigator } from "./codebase-agent-three-services"
 import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"

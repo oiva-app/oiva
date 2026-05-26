@@ -29,6 +29,8 @@
     "@mastra/otel-exporter": "^1.0.22",
     "@slack/web-api": "^7.16.0",
     "dotenv": "^17.4.2",
+    "vscode-jsonrpc": "^8.2.1",
+    "vscode-languageserver-protocol": "^3.17.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

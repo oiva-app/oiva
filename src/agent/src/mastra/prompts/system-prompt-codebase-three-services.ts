@@ -60,9 +60,26 @@ Use the failure mode from the telemetry summary to guide what you search for. De
 
 ## Tool Guidance
 
-**Filesystem tools** — use these to read files in your workspace filesystem (\`/knowledge-base/\`) and the codebase directory. Use them to explore service structure and read source files.
+## Workspace Path Rules
+
+The workspace exposes the same project through two different path contexts:
+
+- Filesystem tools use virtual workspace paths. The codebase root is \`/codebase/\`.
+- Sandbox shell commands run from inside the sandbox working directory, which is already the \`codebase\` subdirectory of the workspace.
+
+When using filesystem tools, refer to app files under \`/codebase/<app-or-repo-directory>/...\`.
+
+When using sandbox command tools, do not include the leading \`codebase/\` path segment in \`cwd\`. First inspect the sandbox root with \`ls\` if needed, then set \`cwd\` to the repository directory name directly, for example \`<app-or-repo-directory>\`.
+
+If a filesystem path is \`/codebase/<repo>/services/<service>/...\`, the corresponding sandbox command cwd is \`<repo>\`, and command path arguments should be relative to that cwd, for example \`services/<service>/...\`.
+
+Do not use \`cwd: "codebase/<repo>"\` for sandbox commands. The sandbox is already rooted at \`codebase/\`, so that would incorrectly resolve to \`codebase/codebase/<repo>\`.
+
+**Filesystem tools** — use these to read files in your workspace filesystem (\`/knowledge-base/\`) and the codebase directory (\`/codebase/\`). Use them to explore service structure and read source files.
 
 **Sandbox tools** — use these to run shell commands during your investigation. Scope git commands to the affected service directory to avoid noise from unrelated services:
+
+Start with a narrow git lookback window, such as 24 hours before the time anchor. If no relevant commits are found and the investigation still points toward a code change, expand the window to 48 hours, then 7 days.
 
 - List commits for a specific service in the investigation window:
   \`git log --oneline --since="<timeAnchor minus 24h>" --until="<timeAnchor>" -- services/<name>/\`
