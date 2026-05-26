@@ -123,9 +123,7 @@ const getQueryDetailsStep = createStep({
     content: z.any(),
   }),
   stateSchema: workflowStateSchema,
-  outputSchema: z.object({
-    content: z.any(),
-  }),
+  outputSchema: HCQueryDetailsSchema,
   execute: async ({ inputData, state, setState }) => {
     // The previous step returns the tool's { content: [...] } envelope, which
     // includes a resource_link to the raw query results as JSON.
@@ -141,10 +139,11 @@ const getQueryDetailsStep = createStep({
     if (!("text" in content)) {
       throw new Error("query results resource returned non-text content");
     }
-    const queryDetails = JSON.parse(content.text);
+    const t = JSON.parse(content.text);
+    const queryDetails = HCQueryDetailsSchema.parse(t)
 
     await setState({ ...state, queryDetails });
-    return { content: queryDetails };
+    return queryDetails;
   },
 });
 
