@@ -1,5 +1,7 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
   alertContextSchema,
@@ -11,7 +13,7 @@ import {
   codebaseInvestigatorOutputSchema,
   supervisorAgentOutputSchema,
 } from "../types/investigation";
-import { incidentReportSchema } from "../types/report";
+import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 
@@ -159,7 +161,7 @@ const generateReport = createStep({
       JSON.stringify(reportInput, null, 2),
       {
         structuredOutput: {
-          schema: incidentReportSchema,
+          schema: reportAgentOutputSchema,
         },
       },
     );
@@ -169,7 +171,22 @@ const generateReport = createStep({
     }
 
     const report = response.object;
-    return report;
+    // TODO: replace with DB insert once DB is set up — id will come from there
+    const id = crypto.randomUUID();
+
+    try {
+      const reportsDir = path.resolve(process.cwd(), "reports");
+      await fs.mkdir(reportsDir, { recursive: true });
+      await fs.writeFile(
+        path.join(reportsDir, `${id}.json`),
+        JSON.stringify({ id, ...report }, null, 2),
+        "utf-8",
+      );
+    } catch (err) {
+      console.error("generateReport: failed to write report to file", err);
+    }
+
+    return { id, ...report };
   },
 });
 
