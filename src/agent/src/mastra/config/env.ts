@@ -27,8 +27,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("production"),
 
   // for slack integration
-  SLACK_BOT_TOKEN: z.string(),
-  SLACK_CHANNEL_ID: z.string(),
+  SLACK_BOT_TOKEN: z.string().optional(),
+  SLACK_CHANNEL_ID: z.string().optional(),
 });
 
 /**
