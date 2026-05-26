@@ -19,7 +19,7 @@ export const supervisorAgent = new Agent({
     disableBackgroundTasks: true,
     delegation: {
       onDelegationStart: ({ primitiveId }) => {
-        return { modifiedMaxSteps: 30 };
+        return { modifiedMaxSteps: 15 };
       },
     },
   },

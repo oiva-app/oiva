@@ -21,12 +21,16 @@ export const threeServicesCodebaseInvestigator: SubAgent = new Agent({
       lastMessages: 20,
       workingMemory: {
         enabled: true,
+        scope: "thread",
         schema: investigationSchema,
       },
     },
   }),
   inputProcessors: [
-     new ToolCallFilter({ filterAfterToolSteps: 3 })
+     new ToolCallFilter({
+      filterAfterToolSteps: 8,
+      preserveModelOutput: true,
+    }),
   ],
   model: "openai/gpt-5.4",
   workspace: cbAgentThreeServicesDemoWorkspace,
