@@ -1,0 +1,1973 @@
+{
+  "input": {
+    "find": ""
+  },
+  "status": "success",
+  "steps": {
+    "listTools": {
+      "id": "listTools",
+      "payload": {
+        "find": ""
+      },
+      "startedAt": 1779819970112,
+      "status": "success",
+      "output": [
+        {
+          "id": "honeycomb_feedback",
+          "description": "Submit feedback about Honeycomb's MCP server to the agentic-observability team.\n\nWhen to use:\n  - A tool returned unexpected, wrong, or confusing data.\n  - You wanted a capability that no tool in this server provides.\n  - A workflow felt unnecessarily clunky or required too many tool calls.\n  - A tool description was misleading and caused you to use the wrong tool.\n\nBe specific: name the tool you used, what you tried, what you expected, and what you observed. Vague feedback is hard to act on.\n\nPairs with: any tool — call this after completing (or failing) a task to report quality issues.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_find_columns",
+          "description": "Search for columns and calculated fields by intent across one or all datasets in an environment.\n\nWhen to use:\n  - \"What column has the error rate?\" / \"Find columns related to duration or latency\" — intent-based discovery.\n  - Before composing a run_query, to confirm that columns with the right names exist.\n  - When you are not sure which dataset contains the column you need (omit dataset_slug to search all).\n  - After get_dataset_columns returns too many results to scan, use this to narrow by semantic relevance.\n\nDifference from get_dataset_columns: this tool ranks results by relevance to your search input across all datasets; get_dataset_columns returns the complete schema for one specific dataset.\n\nPairs with: get_dataset_columns (full schema once you know the right dataset); run_query (use validated column names here); get_dataset (confirm dataset exists before scoping search).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_find_queries",
+          "description": "Search query history and saved queries by intent; returns matching queries with their run PKs.\n\nWhen to use:\n  - \"Has anyone queried the error rate for checkout?\" — check existing work before composing a new query.\n  - Before calling run_query, verify a semantically similar query does not already exist.\n  - \"Show me recent queries for service X\" — surface what the team has been investigating.\n  - When the user pastes a query name or description and wants to find the underlying spec.\n\nReturns query specifications and run_pks. Pass a run_pk to get_query_results to retrieve the full results from that specific execution.\n\nPairs with: get_query_results (fetch results from a returned run_pk); run_query (run a new query once you've confirmed no similar one exists); create_board (add a found query_id as a panel).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_dataset",
+          "description": "Get dataset metadata and its full column schema (columns + calculated fields), sorted by most recent write activity.\n\nWhen to use:\n  - \"What columns does the api-service dataset have?\" — retrieve the schema for one dataset.\n  - Before run_query, to verify column names and types exist in the target dataset.\n  - \"When was this dataset last updated?\" — dataset metadata includes oldest queryable event time.\n\nDifference from get_dataset_columns: this tool returns dataset-level metadata (description, granularity, oldest event) alongside the column list. get_dataset_columns additionally supports fetching sample values for specific columns and has metrics-dataset support via metric_name.\n\nPairs with: get_environment (upstream — confirms the dataset slug); get_dataset_columns (fetch sample values for columns or explore metrics datasets); find_columns (search across all datasets when the right dataset is unknown).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_dataset_columns",
+          "description": "Get the full column schema for one dataset, with optional sample values for specific columns.\n\nWhen to use:\n  - Validating column names before composing a run_query (check the column exists and note its type).\n  - \"What values does the status column hold?\" — pass the column name in 'columns' to fetch sample values.\n  - Exploring a metrics dataset: list metric names first, then pass metric_name to discover filterable attributes.\n  - When find_columns returns too many results and you want the authoritative schema for one dataset.\n\nPairs with: find_columns (intent-based search when you do not know the dataset); get_dataset (dataset metadata alongside schema); run_query (use validated column names here).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_environment",
+          "description": "Get details for a specific environment, including its dataset list sorted by most recent activity.\n\nWhen to use:\n  - After get_workspace_context returns environment slugs, drill into one to see which datasets it contains.\n  - \"What datasets exist in staging?\" — list mode for dataset discovery.\n  - Before calling get_dataset or get_dataset_columns, confirm the dataset slug by checking environment contents.\n\nReturns up to 100 datasets per page by default, sorted by most recent write activity.\n\nPairs with: get_workspace_context (upstream — provides environment slugs); get_dataset (drill into a specific dataset's schema); get_dataset_columns (full column schema once you know the dataset slug); find_columns (search across all datasets in this environment by intent).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_query_results",
+          "description": "Retrieve results and metadata from an existing query execution. Accepts a Honeycomb URL, a run_pk, or a query_id (returns most recent run). Provide exactly one of these three inputs.\n\nWhen to use:\n  - After find_queries returns a run_pk and you want the actual result rows.\n  - The user pastes a Honeycomb query URL from the browser — extract results without re-running.\n  - After run_query executes a new query and returns a run_pk, use this to fetch the structured output.\n  - You have a query_id and want the latest available result without triggering a new execution.\n\nPairs with: find_queries (source of run_pks); run_query (source of fresh run_pks); list_boards (board detail mode returns query_ids per panel — pass them as query_id here to get the most recent run).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_semconv_attribute",
+          "description": "Get the full definitions of one or more semantic convention attributes by their exact names.\n\nReturns complete metadata for each attribute: type, brief description, detailed note, stability,\ndeprecation status, requirement level, and examples. Accepts a batch of IDs so you can resolve\nall column names observed in a trace (e.g. from get_trace) in a single call.\n\nAttributes not found in the registry are returned in the \"not_found\" list rather than causing an error.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_span_details",
+          "description": "Summarize attributes and their common values observed on spans with a specific name.\n\nUSE THIS AFTER list_spans (or whenever you already know a span_name) and BEFORE run_query. It tells you which attributes are populated on that operation, how many distinct values each has, and the top observed values — enough to answer most \"what does X look like / what fields does X have / what status codes does X return / which users hit X\" questions directly, without composing a custom query.\n\nOnly escalate to run_query when you need: exhaustive value distributions beyond the sample cap, custom calculations (P95/P99, HEATMAP, math across columns), per-attribute COUNT/SUM aggregates over the full time range, or comparison/baseline analysis.\n\nResults are paginated with page and items_per_page after applying the sample cap. Paging is a presentation control, not an exhaustive cursor. Values are based on matching span samples, capped at 1000 rows across the selected time range.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_trace",
+          "description": "Retrieve all spans for a specific trace ID and render them as a waterfall.\n\nWhen to use:\n  - User pastes a trace ID from logs, a Slack alert, or the Honeycomb UI — fetch it here.\n  - Drilling into a specific trace from a run_query result (trace.trace_id column).\n  - Comparing parent/child span timing for a known trace to diagnose latency attribution.\n\nPairs with:\n  - run_query — filter where trace.trace_id = <value> to find traces matching a pattern, then drill in here.\n  - list_spans / get_span_details — use first to discover span names so you can focus this view with focus_span_id.\n  - run_bubbleup — if a query surfaces an anomalous cluster, BubbleUp identifies why; get_trace lets you verify with individual examples.\n\n<sampling>\nSpan counts are actual stored spans, not sample-rate-adjusted. When sampling is active, the output includes a mean sample rate. Do not compare corrected query COUNTs (which are sample-rate-adjusted) directly to trace span counts.\n</sampling>",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_triggers",
+          "description": "List triggers (alert rules) for the team, or fetch full configuration for a single trigger.\n\nWhen to use:\n  - \"What alerts are firing?\" / \"What triggers do we have?\" — list mode (no trigger_id).\n  - \"Show me the config for trigger X\" / \"Who gets paged for this alert?\" — detail mode by trigger_id.\n  - Auditing trigger configurations before creating or updating triggers.\n  - Investigating an active alert to understand its threshold, query, and recipients.\n\nModes:\n  - List mode (no trigger_id): paginated table with name, status, threshold, frequency, recipients, and tags.\n  - Detail mode (trigger_id provided): full query spec (calculations, filters, group-by, formulas), threshold, schedule, and recipient list.\n\nRecipients are shown as: type (name/target) [id:ID] — e.g. 'pagerduty (Platform Rotation) [id:abc123]'.\n\nPairs with:\n  - create_trigger / update_trigger — list first to avoid duplicates; detail view shows current config to inform updates.\n  - list_recipients — to resolve recipient IDs to human-readable names before creating or updating a trigger.\n  - find_queries — to inspect the underlying saved query for a saved-query-backed trigger.\n  - get_slos — SLO burn alerts appear as triggers; cross-reference here when an SLO's burn alert fires.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_get_workspace_context",
+          "description": "Call this tool first to orient yourself in a Honeycomb workspace. Takes no parameters. Returns the team name and slug, the current time, and a list of available environments with their slugs and dataset counts. Use the returned environment slugs with 'get_environment' to get dataset details for a specific environment.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_list_boards",
+          "description": "List boards (saved dashboards) in an environment, or fetch one board's full contents by ID.\n\nWhen to use:\n  - \"What dashboards do we have for service X\" / \"is there an existing board for Y\" — list mode with tag filters.\n  - \"Show me the contents of board Z\" — detail mode by board_id, returns every panel (queries, SLOs, text) with descriptions.\n  - Before calling create_board, to check whether a similar board already exists.\n\nModes:\n  - List mode (default): pass environment_slug, optionally filter by tags (AND semantics across multiple tags). Returns paginated board metadata only.\n  - Detail mode: pass board_id (environment_slug still required). Returns the single board with all panels and their underlying queries/SLOs resolved.\n\nPairs with: create_board (this tool's output reveals existing tags and naming conventions to follow); get_query_results (panel query_ids from detail mode can be passed as query_id to fetch the most recent run's results).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_list_semconv_namespaces",
+          "description": "List the top-level semantic convention namespaces available in this team's registry.\n\nReturns namespace prefixes like \"http\", \"db\", \"messaging\", \"rpc\", \"k8s\". Use this to orient\nyourself before calling search_semconv — it tells you what telemetry domains have\nstandardised attribute definitions.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_list_spans",
+          "description": "List span names in trace data, ranked by count, with how often each is a trace root and which dataset the count came from.\n\nUSE THIS FIRST for any question about what's happening in the system: \"what's slow\", \"what's erroring\", \"what does service X do\", \"which endpoints exist\", \"what jobs run here\", \"show me the operations on Y\". It is faster, cheaper, and more diagnostic than composing an equivalent run_query by hand, and it works across all trace-aware datasets in the environment without you having to know which dataset to target.\n\nWorkflow:\n  1. Call list_spans (this tool) to see the span-name landscape and pick a candidate.\n  2. Call get_span_details with that span_name (and its dataset_slug from the row) to learn which attributes and values are present.\n  3. ONLY if you need a custom calculation, exhaustive value distribution, percentile/heatmap, or per-attribute aggregate that get_span_details cannot express — fall through to run_query, scoped to the dataset_slug from the row.\n\nEach row has:\n  - span_name: the operation/endpoint/job name.\n  - dataset_slug: which dataset this row's counts came from. The same span_name can appear in multiple datasets (e.g. a service emits to several); each (span_name, dataset_slug) pair is a separate row. Use the dataset_slug in follow-up tool calls so aggregates aren't smeared across datasets.\n  - count: total spans with that name in that dataset over the time range.\n  - root_count: subset of those spans that have no parent (i.e. are trace roots).\n  Names where root_count == count are always trace entry points (HTTP handlers, root jobs). Names where 0 < root_count < count are operations that appear as both roots and children — common for shared names across services. Names where root_count == 0 are always children (DB calls, internal helpers).\n\nResults are paginated with page and items_per_page after applying the query cap. Paging is a presentation control, not an exhaustive cursor; narrow the time range or dataset when you need deeper coverage.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_refinery_docs",
+          "description": "Read Honeycomb Refinery documentation. Refinery is Honeycomb's trace-aware tail-based sampling proxy.\n\nAvailable topics:\n- overview: Refinery overview and key concepts\n- architecture: Architecture, deployment patterns, and how it works\n- sampling-types: Sampling strategies (deterministic, dynamic, rules-based, throughput)\n- stress-relief: How stress relief works and how to respond when it activates\n- troubleshooting: Common Refinery issues, diagnostic queries, and solutions\n- metrics: Complete reference of all Refinery metrics with descriptions\n- configuration: Configuration reference for all Refinery settings\n- rules: Guide to writing sampling rules for the rules-based sampler\n\nUse this tool when you need detailed technical information about Honeycomb Refinery to answer user questions.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_run_bubbleup",
+          "description": "Run BubbleUp analysis to find what makes a selected data subset different from the baseline.\n\nBubbleUp compares value distributions across all schema columns between a \"foreground\" selection (the interesting region) and the remaining data (the baseline). Columns where the foreground and baseline distributions diverge most are ranked highest.\n\nWhen to use:\n  - User asks \"why did latency spike at 14:00?\" — pick a heatmap region and BubbleUp it.\n  - Investigating a heatmap selection returned by run_query; you already have a query_pk.\n  - \"Compare this known-bad subset to baseline\" — user wants to know what's different.\n  - After a run_query heatmap shows an interesting region, surface the root-cause attributes.\n\nPairs with:\n  - run_query — must run first to obtain a query_pk; that query's time range becomes the baseline.\n  - get_trace — drill into specific traces that fall inside the anomalous selection.\n  - find_columns / get_dataset_columns — if you need to know what columns exist before starting analysis.\n\nModes:\n  - New analysis: provide query_pk + selection (heatmap or group selection).\n  - Paginate existing results: provide bubbleup_result_id (query_pk and selection are ignored).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_run_query",
+          "description": "Run a time-series aggregation query against a Honeycomb dataset and return computed results.\n\nWhen to use this tool:\n  - \"Compute a percentile / histogram of X\" — use P50/P99/HEATMAP calculations.\n  - \"Show me error rate before and after deploy\" — use two named calcs + a formula, scoped by time.\n  - \"Rank services by p99 latency\" — use P99 with a breakdown + order.\n  - \"See distinct values of X and their frequency\" — COUNT with a breakdown on X.\n  - \"Compare request volume across services\" — COUNT breakdown on service.name.\n  - \"Find endpoints where tail latency exceeds 1s\" — P99 + having clause.\n  - \"Generate a heatmap of request duration\" — HEATMAP calculation.\n\nWhen NOT to use this tool:\n  - Discovering what spans or operations exist → use list_spans instead.\n  - Looking at a specific trace → use get_trace instead.\n  - Finding existing saved queries → use find_queries instead.\n  - Exploring which columns a dataset has → use get_dataset_columns or find_columns first.\n\nPairs with: list_spans, get_span_details, find_columns, get_dataset_columns, get_trace, run_bubbleup.\n\n<interpreting_results>\nThe response is rendered as Markdown with these sections (each is omitted if empty):\n\n  - \"# Results\" — a Markdown table of aggregate rows. Headers are breakdown columns followed by calculation/formula columns. If a breakdown's cardinality exceeded the spec's limit, an \"OTHER\" row collapses the remainder; a \"TOTAL\" row may also appear summing across groups. A \"Truncated: shown N / total M\" footer indicates more rows than the table displays.\n  - 1D heatmaps render inline within Results when a HEATMAP calculation has no breakdown.\n  - \"# Samples\" — present only when include_samples=true. Up to 10 raw matching events; aggregations are stripped from the underlying execution in this mode, so samples replace aggregates rather than accompany them.\n  - \"# Time Series\" — ASCII line graphs per group when the spec has a granularity (time-bucketed series). Width 120, height 12.\n  - \"# Heatmaps\" — 2D time-series heatmaps when a HEATMAP calculation is paired with breakdowns or granularity.\n  - \"# Markers\" — deploy/incident markers overlapping the time range, when present.\n  - \"# Query Spec\" — the canonicalized JSON spec the server actually executed. Useful when comparing what you sent to what ran.\n  - \"Metadata:\" YAML block at the bottom — contains query_run_pk (passable to get_query_results), query_url (Honeycomb permalink to share with humans), query_result_json / query_result_image (download URLs), elapsed_str, granularity, total (result count), rows_examined.\n\nWhen data is sampled, a sampling banner appears above Results listing the mean sample rate and which calculations are sample-rate-weighted vs. raw. If mean_sample_rate > 10x and usage_mode is off, an extra warning notes that COUNT values are corrected estimates and won't match raw trace span counts.\n</interpreting_results>\n\nImportant: filter operators use symbols (=, >=, !=). Expression functions inside calculated_fields use words (GTE, EQUALS). Never use GTE/LTE as filter operators.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "honeycomb_search_semconv",
+          "description": "Search the semantic convention registry for attributes matching a query.\n\nReturns structured attribute definitions including name, type, brief description, stability, and\ndeprecation status. Use this to discover canonical attribute names before constructing queries.\n\nThe registry is backed by OTel semantic conventions at the team's configured version (defaulting\nto the latest release). Teams with a custom attribute schema will also see their custom attributes.\n\nTypical workflow:\n1. list_semconv_namespaces → understand what telemetry domains are covered\n2. search_semconv(query=\"http status\") → find relevant attribute names\n3. get_semconv_attribute(id=\"http.response.status_code\") → get full definition before using in a query\n\nWhen building queries across datasets with mixed schema versions, search_semconv returns\nthe canonical name at the team's configured version. Use that name in queries — Honeycomb\nnormalises attribute names at ingest using schema migration transforms.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "honeycomb",
+            "serverVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "github_add_comment_to_pending_review",
+          "description": "Add review comment to the requester's latest pending pull request review. A pending review needs to already exist to call this (check with the user if not sure).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_add_issue_comment",
+          "description": "Add a comment to a specific issue in a GitHub repository. Use this tool to add comments to pull requests as well (in this case pass pull request number as issue_number), but only if user is not asking specifically to add review comments.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_add_reply_to_pull_request_comment",
+          "description": "Add a reply to an existing pull request comment. This creates a new comment that is linked as a reply to the specified comment.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_create_branch",
+          "description": "Create a new branch in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_create_or_update_file",
+          "description": "Create or update a single file in a GitHub repository. \nIf updating, you should provide the SHA of the file you want to update. Use this tool to create or update a file in a GitHub repository remotely; do not use it for local file operations.\n\nIn order to obtain the SHA of original file version before updating, use the following git command:\ngit rev-parse <branch>:<path to file>\n\nSHA MUST be provided for existing file updates.\n",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_create_pull_request",
+          "description": "Create a new pull request in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_create_repository",
+          "description": "Create a new GitHub repository in your account or specified organization",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_delete_file",
+          "description": "Delete a file from a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_fork_repository",
+          "description": "Fork a GitHub repository to your account or specified organization",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_commit",
+          "description": "Get details for a commit from a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_file_contents",
+          "description": "Get the contents of a file or directory from a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_label",
+          "description": "Get a specific label from a repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_latest_release",
+          "description": "Get the latest release in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_me",
+          "description": "Get details of the authenticated GitHub user. Use this when a request is about the user's own profile for GitHub. Or when information is missing to build other tool calls.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_release_by_tag",
+          "description": "Get a specific release by its tag name in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_tag",
+          "description": "Get details about a specific git tag in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_team_members",
+          "description": "Get member usernames of a specific team in an organization. Limited to organizations accessible with current credentials",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_get_teams",
+          "description": "Get details of the teams the user is a member of. Limited to organizations accessible with current credentials",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_issue_read",
+          "description": "Get information about a specific issue in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_issue_write",
+          "description": "Create a new or update an existing issue in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_branches",
+          "description": "List branches in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_commits",
+          "description": "Get list of commits of a branch in a GitHub repository. Returns at least 30 results per page by default, but can return more if specified using the perPage parameter (up to 100).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_issue_types",
+          "description": "List supported issue types for repository owner (organization).",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_issues",
+          "description": "List issues in a GitHub repository. For pagination, use the 'endCursor' from the previous response's 'pageInfo' in the 'after' parameter.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_pull_requests",
+          "description": "List pull requests in a GitHub repository. If the user specifies an author, then DO NOT use this tool and use the search_pull_requests tool instead.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_releases",
+          "description": "List releases in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_repository_collaborators",
+          "description": "List collaborators of a GitHub repository. Results are paginated; the response includes `nextPage`, `prevPage`, `firstPage`, and `lastPage` fields. To get the next page, use the `nextPage` value as the `page` parameter.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_list_tags",
+          "description": "List git tags in a GitHub repository",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_merge_pull_request",
+          "description": "Merge a pull request in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_pull_request_read",
+          "description": "Get information on a specific pull request in GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_pull_request_review_write",
+          "description": "Create and/or submit, delete review of a pull request.\n\nAvailable methods:\n- create: Create a new review of a pull request. If \"event\" parameter is provided, the review is submitted. If \"event\" is omitted, a pending review is created.\n- submit_pending: Submit an existing pending review of a pull request. This requires that a pending review exists for the current user on the specified pull request. The \"body\" and \"event\" parameters are used when submitting the review.\n- delete_pending: Delete an existing pending review of a pull request. This requires that a pending review exists for the current user on the specified pull request.\n- resolve_thread: Resolve a review thread. Requires only \"threadId\" parameter with the thread's node ID (e.g., PRRT_kwDOxxx). The owner, repo, and pullNumber parameters are not used for this method. Resolving an already-resolved thread is a no-op.\n- unresolve_thread: Unresolve a previously resolved review thread. Requires only \"threadId\" parameter. The owner, repo, and pullNumber parameters are not used for this method. Unresolving an already-unresolved thread is a no-op.\n",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_push_files",
+          "description": "Push multiple files to a GitHub repository in a single commit",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_request_copilot_review",
+          "description": "Request a GitHub Copilot code review for a pull request. Use this for automated feedback on pull requests, usually before requesting a human reviewer.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_run_secret_scanning",
+          "description": "Scan files, content, or recent changes for secrets such as API keys, passwords, tokens, and credentials.\n\nThis tool is intended for targeted scans of specific files, snippets, or diffs provided directly as content. The files parameter accepts either a single string or an array of strings containing raw file contents or diff hunks, and returns detected secrets with their locations and related secret scanning metadata. Content must not be empty. For full repository scanning, other mechanisms are available.\n\nCaveats:\n\n- Only files within the codebase should be scanned. Files outside of the codebase should not be sent.\n- Files listed in .gitignore should be skipped.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_search_code",
+          "description": "Fast and precise code search across ALL GitHub repositories using GitHub's native search engine. Best for finding exact symbols, functions, classes, or specific code patterns.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_search_issues",
+          "description": "Search for issues in GitHub repositories using issues search syntax already scoped to is:issue",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_search_pull_requests",
+          "description": "Search for pull requests in GitHub repositories using issues search syntax already scoped to is:pr",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_search_repositories",
+          "description": "Find GitHub repositories by name, description, readme, topics, or other metadata. Perfect for discovering projects, finding examples, or locating specific repositories across GitHub.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_search_users",
+          "description": "Find GitHub users by username, real name, or other profile information. Useful for locating developers, contributors, or team members.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_sub_issue_write",
+          "description": "Add a sub-issue to a parent issue in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_update_pull_request",
+          "description": "Update an existing pull request in a GitHub repository.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        },
+        {
+          "id": "github_update_pull_request_branch",
+          "description": "Update the branch of a pull request with the latest changes from the base branch.",
+          "inputSchema": {
+            "~standard": {
+              "version": 1,
+              "vendor": "json-schema",
+              "jsonSchema": {}
+            }
+          },
+          "requireApproval": false,
+          "mcpMetadata": {
+            "serverName": "github",
+            "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+          }
+        }
+      ],
+      "endedAt": 1779819970716
+    }
+  },
+  "result": [
+    {
+      "id": "honeycomb_feedback",
+      "description": "Submit feedback about Honeycomb's MCP server to the agentic-observability team.\n\nWhen to use:\n  - A tool returned unexpected, wrong, or confusing data.\n  - You wanted a capability that no tool in this server provides.\n  - A workflow felt unnecessarily clunky or required too many tool calls.\n  - A tool description was misleading and caused you to use the wrong tool.\n\nBe specific: name the tool you used, what you tried, what you expected, and what you observed. Vague feedback is hard to act on.\n\nPairs with: any tool — call this after completing (or failing) a task to report quality issues.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_find_columns",
+      "description": "Search for columns and calculated fields by intent across one or all datasets in an environment.\n\nWhen to use:\n  - \"What column has the error rate?\" / \"Find columns related to duration or latency\" — intent-based discovery.\n  - Before composing a run_query, to confirm that columns with the right names exist.\n  - When you are not sure which dataset contains the column you need (omit dataset_slug to search all).\n  - After get_dataset_columns returns too many results to scan, use this to narrow by semantic relevance.\n\nDifference from get_dataset_columns: this tool ranks results by relevance to your search input across all datasets; get_dataset_columns returns the complete schema for one specific dataset.\n\nPairs with: get_dataset_columns (full schema once you know the right dataset); run_query (use validated column names here); get_dataset (confirm dataset exists before scoping search).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_find_queries",
+      "description": "Search query history and saved queries by intent; returns matching queries with their run PKs.\n\nWhen to use:\n  - \"Has anyone queried the error rate for checkout?\" — check existing work before composing a new query.\n  - Before calling run_query, verify a semantically similar query does not already exist.\n  - \"Show me recent queries for service X\" — surface what the team has been investigating.\n  - When the user pastes a query name or description and wants to find the underlying spec.\n\nReturns query specifications and run_pks. Pass a run_pk to get_query_results to retrieve the full results from that specific execution.\n\nPairs with: get_query_results (fetch results from a returned run_pk); run_query (run a new query once you've confirmed no similar one exists); create_board (add a found query_id as a panel).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_dataset",
+      "description": "Get dataset metadata and its full column schema (columns + calculated fields), sorted by most recent write activity.\n\nWhen to use:\n  - \"What columns does the api-service dataset have?\" — retrieve the schema for one dataset.\n  - Before run_query, to verify column names and types exist in the target dataset.\n  - \"When was this dataset last updated?\" — dataset metadata includes oldest queryable event time.\n\nDifference from get_dataset_columns: this tool returns dataset-level metadata (description, granularity, oldest event) alongside the column list. get_dataset_columns additionally supports fetching sample values for specific columns and has metrics-dataset support via metric_name.\n\nPairs with: get_environment (upstream — confirms the dataset slug); get_dataset_columns (fetch sample values for columns or explore metrics datasets); find_columns (search across all datasets when the right dataset is unknown).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_dataset_columns",
+      "description": "Get the full column schema for one dataset, with optional sample values for specific columns.\n\nWhen to use:\n  - Validating column names before composing a run_query (check the column exists and note its type).\n  - \"What values does the status column hold?\" — pass the column name in 'columns' to fetch sample values.\n  - Exploring a metrics dataset: list metric names first, then pass metric_name to discover filterable attributes.\n  - When find_columns returns too many results and you want the authoritative schema for one dataset.\n\nPairs with: find_columns (intent-based search when you do not know the dataset); get_dataset (dataset metadata alongside schema); run_query (use validated column names here).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_environment",
+      "description": "Get details for a specific environment, including its dataset list sorted by most recent activity.\n\nWhen to use:\n  - After get_workspace_context returns environment slugs, drill into one to see which datasets it contains.\n  - \"What datasets exist in staging?\" — list mode for dataset discovery.\n  - Before calling get_dataset or get_dataset_columns, confirm the dataset slug by checking environment contents.\n\nReturns up to 100 datasets per page by default, sorted by most recent write activity.\n\nPairs with: get_workspace_context (upstream — provides environment slugs); get_dataset (drill into a specific dataset's schema); get_dataset_columns (full column schema once you know the dataset slug); find_columns (search across all datasets in this environment by intent).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_query_results",
+      "description": "Retrieve results and metadata from an existing query execution. Accepts a Honeycomb URL, a run_pk, or a query_id (returns most recent run). Provide exactly one of these three inputs.\n\nWhen to use:\n  - After find_queries returns a run_pk and you want the actual result rows.\n  - The user pastes a Honeycomb query URL from the browser — extract results without re-running.\n  - After run_query executes a new query and returns a run_pk, use this to fetch the structured output.\n  - You have a query_id and want the latest available result without triggering a new execution.\n\nPairs with: find_queries (source of run_pks); run_query (source of fresh run_pks); list_boards (board detail mode returns query_ids per panel — pass them as query_id here to get the most recent run).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_semconv_attribute",
+      "description": "Get the full definitions of one or more semantic convention attributes by their exact names.\n\nReturns complete metadata for each attribute: type, brief description, detailed note, stability,\ndeprecation status, requirement level, and examples. Accepts a batch of IDs so you can resolve\nall column names observed in a trace (e.g. from get_trace) in a single call.\n\nAttributes not found in the registry are returned in the \"not_found\" list rather than causing an error.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_span_details",
+      "description": "Summarize attributes and their common values observed on spans with a specific name.\n\nUSE THIS AFTER list_spans (or whenever you already know a span_name) and BEFORE run_query. It tells you which attributes are populated on that operation, how many distinct values each has, and the top observed values — enough to answer most \"what does X look like / what fields does X have / what status codes does X return / which users hit X\" questions directly, without composing a custom query.\n\nOnly escalate to run_query when you need: exhaustive value distributions beyond the sample cap, custom calculations (P95/P99, HEATMAP, math across columns), per-attribute COUNT/SUM aggregates over the full time range, or comparison/baseline analysis.\n\nResults are paginated with page and items_per_page after applying the sample cap. Paging is a presentation control, not an exhaustive cursor. Values are based on matching span samples, capped at 1000 rows across the selected time range.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_trace",
+      "description": "Retrieve all spans for a specific trace ID and render them as a waterfall.\n\nWhen to use:\n  - User pastes a trace ID from logs, a Slack alert, or the Honeycomb UI — fetch it here.\n  - Drilling into a specific trace from a run_query result (trace.trace_id column).\n  - Comparing parent/child span timing for a known trace to diagnose latency attribution.\n\nPairs with:\n  - run_query — filter where trace.trace_id = <value> to find traces matching a pattern, then drill in here.\n  - list_spans / get_span_details — use first to discover span names so you can focus this view with focus_span_id.\n  - run_bubbleup — if a query surfaces an anomalous cluster, BubbleUp identifies why; get_trace lets you verify with individual examples.\n\n<sampling>\nSpan counts are actual stored spans, not sample-rate-adjusted. When sampling is active, the output includes a mean sample rate. Do not compare corrected query COUNTs (which are sample-rate-adjusted) directly to trace span counts.\n</sampling>",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_triggers",
+      "description": "List triggers (alert rules) for the team, or fetch full configuration for a single trigger.\n\nWhen to use:\n  - \"What alerts are firing?\" / \"What triggers do we have?\" — list mode (no trigger_id).\n  - \"Show me the config for trigger X\" / \"Who gets paged for this alert?\" — detail mode by trigger_id.\n  - Auditing trigger configurations before creating or updating triggers.\n  - Investigating an active alert to understand its threshold, query, and recipients.\n\nModes:\n  - List mode (no trigger_id): paginated table with name, status, threshold, frequency, recipients, and tags.\n  - Detail mode (trigger_id provided): full query spec (calculations, filters, group-by, formulas), threshold, schedule, and recipient list.\n\nRecipients are shown as: type (name/target) [id:ID] — e.g. 'pagerduty (Platform Rotation) [id:abc123]'.\n\nPairs with:\n  - create_trigger / update_trigger — list first to avoid duplicates; detail view shows current config to inform updates.\n  - list_recipients — to resolve recipient IDs to human-readable names before creating or updating a trigger.\n  - find_queries — to inspect the underlying saved query for a saved-query-backed trigger.\n  - get_slos — SLO burn alerts appear as triggers; cross-reference here when an SLO's burn alert fires.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_get_workspace_context",
+      "description": "Call this tool first to orient yourself in a Honeycomb workspace. Takes no parameters. Returns the team name and slug, the current time, and a list of available environments with their slugs and dataset counts. Use the returned environment slugs with 'get_environment' to get dataset details for a specific environment.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_list_boards",
+      "description": "List boards (saved dashboards) in an environment, or fetch one board's full contents by ID.\n\nWhen to use:\n  - \"What dashboards do we have for service X\" / \"is there an existing board for Y\" — list mode with tag filters.\n  - \"Show me the contents of board Z\" — detail mode by board_id, returns every panel (queries, SLOs, text) with descriptions.\n  - Before calling create_board, to check whether a similar board already exists.\n\nModes:\n  - List mode (default): pass environment_slug, optionally filter by tags (AND semantics across multiple tags). Returns paginated board metadata only.\n  - Detail mode: pass board_id (environment_slug still required). Returns the single board with all panels and their underlying queries/SLOs resolved.\n\nPairs with: create_board (this tool's output reveals existing tags and naming conventions to follow); get_query_results (panel query_ids from detail mode can be passed as query_id to fetch the most recent run's results).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_list_semconv_namespaces",
+      "description": "List the top-level semantic convention namespaces available in this team's registry.\n\nReturns namespace prefixes like \"http\", \"db\", \"messaging\", \"rpc\", \"k8s\". Use this to orient\nyourself before calling search_semconv — it tells you what telemetry domains have\nstandardised attribute definitions.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_list_spans",
+      "description": "List span names in trace data, ranked by count, with how often each is a trace root and which dataset the count came from.\n\nUSE THIS FIRST for any question about what's happening in the system: \"what's slow\", \"what's erroring\", \"what does service X do\", \"which endpoints exist\", \"what jobs run here\", \"show me the operations on Y\". It is faster, cheaper, and more diagnostic than composing an equivalent run_query by hand, and it works across all trace-aware datasets in the environment without you having to know which dataset to target.\n\nWorkflow:\n  1. Call list_spans (this tool) to see the span-name landscape and pick a candidate.\n  2. Call get_span_details with that span_name (and its dataset_slug from the row) to learn which attributes and values are present.\n  3. ONLY if you need a custom calculation, exhaustive value distribution, percentile/heatmap, or per-attribute aggregate that get_span_details cannot express — fall through to run_query, scoped to the dataset_slug from the row.\n\nEach row has:\n  - span_name: the operation/endpoint/job name.\n  - dataset_slug: which dataset this row's counts came from. The same span_name can appear in multiple datasets (e.g. a service emits to several); each (span_name, dataset_slug) pair is a separate row. Use the dataset_slug in follow-up tool calls so aggregates aren't smeared across datasets.\n  - count: total spans with that name in that dataset over the time range.\n  - root_count: subset of those spans that have no parent (i.e. are trace roots).\n  Names where root_count == count are always trace entry points (HTTP handlers, root jobs). Names where 0 < root_count < count are operations that appear as both roots and children — common for shared names across services. Names where root_count == 0 are always children (DB calls, internal helpers).\n\nResults are paginated with page and items_per_page after applying the query cap. Paging is a presentation control, not an exhaustive cursor; narrow the time range or dataset when you need deeper coverage.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_refinery_docs",
+      "description": "Read Honeycomb Refinery documentation. Refinery is Honeycomb's trace-aware tail-based sampling proxy.\n\nAvailable topics:\n- overview: Refinery overview and key concepts\n- architecture: Architecture, deployment patterns, and how it works\n- sampling-types: Sampling strategies (deterministic, dynamic, rules-based, throughput)\n- stress-relief: How stress relief works and how to respond when it activates\n- troubleshooting: Common Refinery issues, diagnostic queries, and solutions\n- metrics: Complete reference of all Refinery metrics with descriptions\n- configuration: Configuration reference for all Refinery settings\n- rules: Guide to writing sampling rules for the rules-based sampler\n\nUse this tool when you need detailed technical information about Honeycomb Refinery to answer user questions.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_run_bubbleup",
+      "description": "Run BubbleUp analysis to find what makes a selected data subset different from the baseline.\n\nBubbleUp compares value distributions across all schema columns between a \"foreground\" selection (the interesting region) and the remaining data (the baseline). Columns where the foreground and baseline distributions diverge most are ranked highest.\n\nWhen to use:\n  - User asks \"why did latency spike at 14:00?\" — pick a heatmap region and BubbleUp it.\n  - Investigating a heatmap selection returned by run_query; you already have a query_pk.\n  - \"Compare this known-bad subset to baseline\" — user wants to know what's different.\n  - After a run_query heatmap shows an interesting region, surface the root-cause attributes.\n\nPairs with:\n  - run_query — must run first to obtain a query_pk; that query's time range becomes the baseline.\n  - get_trace — drill into specific traces that fall inside the anomalous selection.\n  - find_columns / get_dataset_columns — if you need to know what columns exist before starting analysis.\n\nModes:\n  - New analysis: provide query_pk + selection (heatmap or group selection).\n  - Paginate existing results: provide bubbleup_result_id (query_pk and selection are ignored).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_run_query",
+      "description": "Run a time-series aggregation query against a Honeycomb dataset and return computed results.\n\nWhen to use this tool:\n  - \"Compute a percentile / histogram of X\" — use P50/P99/HEATMAP calculations.\n  - \"Show me error rate before and after deploy\" — use two named calcs + a formula, scoped by time.\n  - \"Rank services by p99 latency\" — use P99 with a breakdown + order.\n  - \"See distinct values of X and their frequency\" — COUNT with a breakdown on X.\n  - \"Compare request volume across services\" — COUNT breakdown on service.name.\n  - \"Find endpoints where tail latency exceeds 1s\" — P99 + having clause.\n  - \"Generate a heatmap of request duration\" — HEATMAP calculation.\n\nWhen NOT to use this tool:\n  - Discovering what spans or operations exist → use list_spans instead.\n  - Looking at a specific trace → use get_trace instead.\n  - Finding existing saved queries → use find_queries instead.\n  - Exploring which columns a dataset has → use get_dataset_columns or find_columns first.\n\nPairs with: list_spans, get_span_details, find_columns, get_dataset_columns, get_trace, run_bubbleup.\n\n<interpreting_results>\nThe response is rendered as Markdown with these sections (each is omitted if empty):\n\n  - \"# Results\" — a Markdown table of aggregate rows. Headers are breakdown columns followed by calculation/formula columns. If a breakdown's cardinality exceeded the spec's limit, an \"OTHER\" row collapses the remainder; a \"TOTAL\" row may also appear summing across groups. A \"Truncated: shown N / total M\" footer indicates more rows than the table displays.\n  - 1D heatmaps render inline within Results when a HEATMAP calculation has no breakdown.\n  - \"# Samples\" — present only when include_samples=true. Up to 10 raw matching events; aggregations are stripped from the underlying execution in this mode, so samples replace aggregates rather than accompany them.\n  - \"# Time Series\" — ASCII line graphs per group when the spec has a granularity (time-bucketed series). Width 120, height 12.\n  - \"# Heatmaps\" — 2D time-series heatmaps when a HEATMAP calculation is paired with breakdowns or granularity.\n  - \"# Markers\" — deploy/incident markers overlapping the time range, when present.\n  - \"# Query Spec\" — the canonicalized JSON spec the server actually executed. Useful when comparing what you sent to what ran.\n  - \"Metadata:\" YAML block at the bottom — contains query_run_pk (passable to get_query_results), query_url (Honeycomb permalink to share with humans), query_result_json / query_result_image (download URLs), elapsed_str, granularity, total (result count), rows_examined.\n\nWhen data is sampled, a sampling banner appears above Results listing the mean sample rate and which calculations are sample-rate-weighted vs. raw. If mean_sample_rate > 10x and usage_mode is off, an extra warning notes that COUNT values are corrected estimates and won't match raw trace span counts.\n</interpreting_results>\n\nImportant: filter operators use symbols (=, >=, !=). Expression functions inside calculated_fields use words (GTE, EQUALS). Never use GTE/LTE as filter operators.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "honeycomb_search_semconv",
+      "description": "Search the semantic convention registry for attributes matching a query.\n\nReturns structured attribute definitions including name, type, brief description, stability, and\ndeprecation status. Use this to discover canonical attribute names before constructing queries.\n\nThe registry is backed by OTel semantic conventions at the team's configured version (defaulting\nto the latest release). Teams with a custom attribute schema will also see their custom attributes.\n\nTypical workflow:\n1. list_semconv_namespaces → understand what telemetry domains are covered\n2. search_semconv(query=\"http status\") → find relevant attribute names\n3. get_semconv_attribute(id=\"http.response.status_code\") → get full definition before using in a query\n\nWhen building queries across datasets with mixed schema versions, search_semconv returns\nthe canonical name at the team's configured version. Use that name in queries — Honeycomb\nnormalises attribute names at ingest using schema migration transforms.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "honeycomb",
+        "serverVersion": "1.0.0"
+      }
+    },
+    {
+      "id": "github_add_comment_to_pending_review",
+      "description": "Add review comment to the requester's latest pending pull request review. A pending review needs to already exist to call this (check with the user if not sure).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_add_issue_comment",
+      "description": "Add a comment to a specific issue in a GitHub repository. Use this tool to add comments to pull requests as well (in this case pass pull request number as issue_number), but only if user is not asking specifically to add review comments.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_add_reply_to_pull_request_comment",
+      "description": "Add a reply to an existing pull request comment. This creates a new comment that is linked as a reply to the specified comment.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_create_branch",
+      "description": "Create a new branch in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_create_or_update_file",
+      "description": "Create or update a single file in a GitHub repository. \nIf updating, you should provide the SHA of the file you want to update. Use this tool to create or update a file in a GitHub repository remotely; do not use it for local file operations.\n\nIn order to obtain the SHA of original file version before updating, use the following git command:\ngit rev-parse <branch>:<path to file>\n\nSHA MUST be provided for existing file updates.\n",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_create_pull_request",
+      "description": "Create a new pull request in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_create_repository",
+      "description": "Create a new GitHub repository in your account or specified organization",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_delete_file",
+      "description": "Delete a file from a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_fork_repository",
+      "description": "Fork a GitHub repository to your account or specified organization",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_commit",
+      "description": "Get details for a commit from a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_file_contents",
+      "description": "Get the contents of a file or directory from a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_label",
+      "description": "Get a specific label from a repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_latest_release",
+      "description": "Get the latest release in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_me",
+      "description": "Get details of the authenticated GitHub user. Use this when a request is about the user's own profile for GitHub. Or when information is missing to build other tool calls.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_release_by_tag",
+      "description": "Get a specific release by its tag name in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_tag",
+      "description": "Get details about a specific git tag in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_team_members",
+      "description": "Get member usernames of a specific team in an organization. Limited to organizations accessible with current credentials",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_get_teams",
+      "description": "Get details of the teams the user is a member of. Limited to organizations accessible with current credentials",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_issue_read",
+      "description": "Get information about a specific issue in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_issue_write",
+      "description": "Create a new or update an existing issue in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_branches",
+      "description": "List branches in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_commits",
+      "description": "Get list of commits of a branch in a GitHub repository. Returns at least 30 results per page by default, but can return more if specified using the perPage parameter (up to 100).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_issue_types",
+      "description": "List supported issue types for repository owner (organization).",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_issues",
+      "description": "List issues in a GitHub repository. For pagination, use the 'endCursor' from the previous response's 'pageInfo' in the 'after' parameter.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_pull_requests",
+      "description": "List pull requests in a GitHub repository. If the user specifies an author, then DO NOT use this tool and use the search_pull_requests tool instead.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_releases",
+      "description": "List releases in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_repository_collaborators",
+      "description": "List collaborators of a GitHub repository. Results are paginated; the response includes `nextPage`, `prevPage`, `firstPage`, and `lastPage` fields. To get the next page, use the `nextPage` value as the `page` parameter.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_list_tags",
+      "description": "List git tags in a GitHub repository",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_merge_pull_request",
+      "description": "Merge a pull request in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_pull_request_read",
+      "description": "Get information on a specific pull request in GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_pull_request_review_write",
+      "description": "Create and/or submit, delete review of a pull request.\n\nAvailable methods:\n- create: Create a new review of a pull request. If \"event\" parameter is provided, the review is submitted. If \"event\" is omitted, a pending review is created.\n- submit_pending: Submit an existing pending review of a pull request. This requires that a pending review exists for the current user on the specified pull request. The \"body\" and \"event\" parameters are used when submitting the review.\n- delete_pending: Delete an existing pending review of a pull request. This requires that a pending review exists for the current user on the specified pull request.\n- resolve_thread: Resolve a review thread. Requires only \"threadId\" parameter with the thread's node ID (e.g., PRRT_kwDOxxx). The owner, repo, and pullNumber parameters are not used for this method. Resolving an already-resolved thread is a no-op.\n- unresolve_thread: Unresolve a previously resolved review thread. Requires only \"threadId\" parameter. The owner, repo, and pullNumber parameters are not used for this method. Unresolving an already-unresolved thread is a no-op.\n",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_push_files",
+      "description": "Push multiple files to a GitHub repository in a single commit",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_request_copilot_review",
+      "description": "Request a GitHub Copilot code review for a pull request. Use this for automated feedback on pull requests, usually before requesting a human reviewer.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_run_secret_scanning",
+      "description": "Scan files, content, or recent changes for secrets such as API keys, passwords, tokens, and credentials.\n\nThis tool is intended for targeted scans of specific files, snippets, or diffs provided directly as content. The files parameter accepts either a single string or an array of strings containing raw file contents or diff hunks, and returns detected secrets with their locations and related secret scanning metadata. Content must not be empty. For full repository scanning, other mechanisms are available.\n\nCaveats:\n\n- Only files within the codebase should be scanned. Files outside of the codebase should not be sent.\n- Files listed in .gitignore should be skipped.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_search_code",
+      "description": "Fast and precise code search across ALL GitHub repositories using GitHub's native search engine. Best for finding exact symbols, functions, classes, or specific code patterns.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_search_issues",
+      "description": "Search for issues in GitHub repositories using issues search syntax already scoped to is:issue",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_search_pull_requests",
+      "description": "Search for pull requests in GitHub repositories using issues search syntax already scoped to is:pr",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_search_repositories",
+      "description": "Find GitHub repositories by name, description, readme, topics, or other metadata. Perfect for discovering projects, finding examples, or locating specific repositories across GitHub.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_search_users",
+      "description": "Find GitHub users by username, real name, or other profile information. Useful for locating developers, contributors, or team members.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_sub_issue_write",
+      "description": "Add a sub-issue to a parent issue in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_update_pull_request",
+      "description": "Update an existing pull request in a GitHub repository.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    },
+    {
+      "id": "github_update_pull_request_branch",
+      "description": "Update the branch of a pull request with the latest changes from the base branch.",
+      "inputSchema": {
+        "~standard": {
+          "version": 1,
+          "vendor": "json-schema",
+          "jsonSchema": {}
+        }
+      },
+      "requireApproval": false,
+      "mcpMetadata": {
+        "serverName": "github",
+        "serverVersion": "github-mcp-server/remote-31a0f90b8d22e63b7d46011ad041942d067bb9dd"
+      }
+    }
+  ]
+}

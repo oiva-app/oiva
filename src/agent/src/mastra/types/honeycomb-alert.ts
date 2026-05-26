@@ -9,7 +9,7 @@ export const RawAlertSchema = z.looseObject({
   isTest: z.boolean(),
 });
 
-export const HoneycombWebhookPayloadSchema = z.object({
+export const honeycombWebhookPayloadSchema = z.object({
   secret: z.string().optional(),
   name: z.string(),
   id: z.string(),
@@ -34,7 +34,7 @@ export const HoneycombWebhookPayloadSchema = z.object({
 
 export type RawAlert = z.infer<typeof RawAlertSchema>;
 export type HoneycombWebhookPayload = z.infer<
-  typeof HoneycombWebhookPayloadSchema
+  typeof honeycombWebhookPayloadSchema
 >;
 
 /*

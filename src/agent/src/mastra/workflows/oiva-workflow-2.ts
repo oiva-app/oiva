@@ -1,6 +1,6 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
-import { HoneycombWebhookPayloadSchema } from "../types/honeycomb-alert";
+import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
   alertContextSchema,
   filteredOutcomeSchema,
@@ -24,9 +24,9 @@ const verifyStep = createStep({
   id: "verify-alert",
   description:
     "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
-  inputSchema: HoneycombWebhookPayloadSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
   // Step output must satisfy bail (filtered) and pass-through (actionable).
-  outputSchema: z.union([HoneycombWebhookPayloadSchema, filteredOutcomeSchema]),
+  outputSchema: z.union([honeycombWebhookPayloadSchema, filteredOutcomeSchema]),
   execute: async ({ inputData, bail }) => {
     const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
 
@@ -53,7 +53,7 @@ const normalizeStep = createStep({
   id: "normalize-alert",
   description:
     "Normalize the HC payload into a vendor-neutral AlertContext for downstream steps.",
-  inputSchema: HoneycombWebhookPayloadSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
   outputSchema: alertContextSchema,
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
@@ -92,7 +92,7 @@ const scrubStep = createStep({
 export const oivaWorkflow2 = createWorkflow({
   id: "oiva-workflow-2",
   stateSchema: OivaWorkflowStateSchema,
-  inputSchema: HoneycombWebhookPayloadSchema,
+  inputSchema: honeycombWebhookPayloadSchema,
   outputSchema: z.union([
     filteredOutcomeSchema,
     alertContextSchema, // placeholder: replace with Report schema later
@@ -109,5 +109,5 @@ export const oivaWorkflow2 = createWorkflow({
   })
   .then(normalizeStep)
   .then(scrubStep)
-  .then(getQueryResultsStep)
+  // .then(getQueryResultsStep)
   .commit();

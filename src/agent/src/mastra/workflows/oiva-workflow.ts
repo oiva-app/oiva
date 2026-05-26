@@ -219,11 +219,11 @@ export const oivaWorkflow = createWorkflow({
 //   id: "verify-alert",
 //   description:
 //     "Verifies the incoming alert is valid: a genuine alert triggered by Honeycomnb, not a test",
-//   // inputSchema: HoneycombWebhookPayloadSchema,
+//   // inputSchema: honeycombWebhookPayloadSchema,
 //   inputSchema: z.object({
-//     alert: HoneycombWebhookPayloadSchema,
+//     alert: honeycombWebhookPayloadSchema,
 //   }),
-//   outputSchema: HoneycombWebhookPayloadSchema,
+//   outputSchema: honeycombWebhookPayloadSchema,
 //   execute: async ({ inputData, bail }) => {
 //     // check if it's valid
 //     const { alert } = inputData;
@@ -266,7 +266,7 @@ export const oivaWorkflow = createWorkflow({
 //   description:
 //     "Creates a textual description of the alert to help Oiva reason about the alert",
 //   inputSchema: z.object({
-//     alert: HoneycombWebhookPayloadSchema,
+//     alert: honeycombWebhookPayloadSchema,
 //   }),
 //   outputSchema: z.object({}),
 //   // execute: ({ inputData }) => {},

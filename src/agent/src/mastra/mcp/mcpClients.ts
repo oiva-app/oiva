@@ -49,4 +49,3 @@ export const {
   honeycomb_analyze_columns,
 } = await mvpMcpClient.listTools();
 
-console.log(await mvpMcpClient.listTools())
