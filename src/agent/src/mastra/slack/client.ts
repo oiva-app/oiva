@@ -62,3 +62,17 @@ export async function postErrorMessage(
     text: fallbackText,
   });
 }
+
+export async function postErrorToThread(
+  channel: string,
+  threadTs: string,
+  blocks: (Block | KnownBlock)[],
+  fallbackText: string,
+): Promise<void> {
+  await client.chat.postMessage({
+    channel,
+    thread_ts: threadTs,
+    blocks,
+    text: fallbackText,
+  });
+}
