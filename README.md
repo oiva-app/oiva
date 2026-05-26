@@ -69,15 +69,36 @@ This alert includes additional properties that aid our agent in its investigatio
   },
   "secret": "{{.Recipient.Secret}}"
 }
-
 ```
 More info in the Honeycomb Docs: https://docs.honeycomb.io/notify/webhooks and in the Go Docs, which defines the templating syntax: https://pkg.go.dev/text/template
+
+### Timestamps
+Example timestamp given by [the docs](https://docs.honeycomb.io/notify/webhooks/variables): 
+2024-11-21T16:40:22.896871538Z
+
+Format:
+RFC 3339 / ISO 8601 timestamp with nanosecond precision.
+
+┌────────────┬─────────────────────────────────────────────┐
+│    Part    │                   Meaning                   │
+├────────────┼─────────────────────────────────────────────┤
+│ 2024-11-21 │ Date — year-month-day                       │
+├────────────┼─────────────────────────────────────────────┤
+│ T          │ Separator between date and time             │
+├────────────┼─────────────────────────────────────────────┤
+│ 16:40:22   │ Time — hours:minutes:seconds (24-hour)      │
+├────────────┼─────────────────────────────────────────────┤
+│ .896871538 │ Fractional seconds — 9 digits = nanoseconds │
+├────────────┼─────────────────────────────────────────────┤
+│ Z          │ "Zulu time" = UTC (zero offset)             │
+└────────────┴─────────────────────────────────────────────┘
+More info: https://en.wikipedia.org/wiki/ISO_8601
 
 ## Sample alerts
 
 From Astro Shop
 
-```go
+```json
 {
   "name": "error == true",
   "id": "2XteoXm4S78",
