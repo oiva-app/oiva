@@ -45,6 +45,47 @@ const HCQueryDetailsSchema = z.object({
   })
 });
 
+
+
+
+
+/**
+ * MCP CallToolResult schema. 
+ 
+    As defined by MCP spec:
+    https://modelcontextprotocol.io/specification/2025-11-25/server/tools
+ */
+const mcpResourceLinkSchema = z.object({
+  type: z.literal("resource_link"),
+  uri: z.string(),
+  name: z.string().optional(),
+  mimeType: z.string().optional(),
+});
+type McpResourceLink = z.infer<typeof mcpResourceLinkSchema>;
+
+const mcpContentBlockSchema = z.union([
+  mcpResourceLinkSchema,
+  z.object({ type: z.string() }).loose(),
+]);
+
+const mcpToolResultSchema = z
+  .object({
+    content: z.array(mcpContentBlockSchema),
+    isError: z.boolean().optional(),
+  })
+  .loose();
+
+
+
+/*
+SOME OF THESE STEPS WOULD BE BETTER USING THE HONEYCOMB API
+INSTEAD OF THE HONEYCOMB MCP
+
+However, the API requires an Enterprise license
+ */
+
+
+
 const verifyStep = createStep({
   id: "verify-alert",
   description:
@@ -104,9 +145,7 @@ const getQueryResultsStep = createStep({
   description: "Get query results via API",
   inputSchema: alertContextSchema,
   stateSchema: workflowStateSchema,
-  outputSchema: z.object({
-    content: z.any(),
-  }),
+  outputSchema: mcpToolResultSchema,
   execute: async ({ inputData, state, setState }) => {
     const tool = honeycomb_get_query_results;
     if (!tool.execute) throw new Error("get_query_results has no execute()");
@@ -119,17 +158,14 @@ const getQueryResultsStep = createStep({
 const getQueryDetailsStep = createStep({
   id: "get-query-details",
   description: "Get more details about the query",
-  inputSchema: z.object({
-    content: z.any(),
-  }),
+  inputSchema: mcpToolResultSchema,
   stateSchema: workflowStateSchema,
   outputSchema: HCQueryDetailsSchema,
   execute: async ({ inputData, state, setState }) => {
     // The previous step returns the tool's { content: [...] } envelope, which
     // includes a resource_link to the raw query results as JSON.
-    console.log(inputData);
-    const link = inputData.content?.find(
-      (c: any) =>
+    const link = inputData.content.find(
+      (c): c is McpResourceLink =>
         c.type === "resource_link" && c.mimeType === "application/json",
     );
     if (!link?.uri) throw new Error("no JSON resource_link in query results");
