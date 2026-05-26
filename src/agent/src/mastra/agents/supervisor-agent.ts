@@ -5,7 +5,7 @@ import { codebaseInvestigator } from "./codebase-agent";
 import { threeServicesCodebaseInvestigator } from "./codebase-agent-three-services"
 import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
-import { supervisorThreeServicesDemoWorkspace } from "../workspaces/codebase-three-services";
+import { supervisorThreeServicesDemoWorkspace } from "../workspaces/supervisor-workspace-three-services";
 
 export const supervisorAgent = new Agent({
   id: "supervisor-agent",
@@ -17,11 +17,6 @@ export const supervisorAgent = new Agent({
   defaultOptions: {
     maxSteps: env.SUPERVISOR_MAX_STEPS,
     disableBackgroundTasks: true,
-    delegation: {
-      onDelegationStart: ({ primitiveId }) => {
-        return { modifiedMaxSteps: 15 };
-      },
-    },
   },
   workspace: supervisorThreeServicesDemoWorkspace,
 });

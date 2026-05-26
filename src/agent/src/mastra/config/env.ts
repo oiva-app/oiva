@@ -25,7 +25,10 @@ const EnvSchema = z.object({
   RUN_EVALS: z.stringbool().default(true),  // `false` to save tokens
 
   // for future use - for implementing development-only logic
-  NODE_ENV: z.enum(["development", "production"]).default("production")
+  NODE_ENV: z.enum(["development", "production"]).default("production"),
+
+  CODEBASE_AGENT_WORKSPACE_PATH: z.string(),
+  SUPERVISOR_WORKSPACE_PATH: z.string(),
 });
 
 /**
