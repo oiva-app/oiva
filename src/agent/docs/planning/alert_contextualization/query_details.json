@@ -1,0 +1,6192 @@
+{
+    "elapsed_str": "250.470696ms",
+    "header": [
+      {
+        "alias": "service.name",
+        "derived": false,
+        "key_name": "service.name",
+        "per_time": 0,
+        "type": "string"
+      },
+      {
+        "alias": "COUNT",
+        "derived": false,
+        "key_name": "COUNT",
+        "per_time": 0,
+        "type": ""
+      }
+    ],
+    "info": {
+      "granularity_seconds": 0.5,
+      "mean_sample_rate": 1,
+      "rows_examined": 1888007
+    },
+    "other_by_aggregate": {
+      "data": {
+        "COUNT": 0
+      }
+    },
+    "results": [
+      {
+        "data": {
+          "COUNT": 2736,
+          "service.name": "product-catalog"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 2734,
+          "service.name": "frontend"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 684,
+          "service.name": "frontend-proxy"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "ad"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "fraud-detection"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "load-generator"
+        }
+      }
+    ],
+    "series": [
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 30,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:18:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:18:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:11Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:11Z"
+      },
+      {
+        "data": {
+          "COUNT": 19,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:11Z"
+      },
+      {
+        "data": {
+          "COUNT": 45,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 48,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 21,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:18.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:18.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:18.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:19Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:19Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:19Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:20Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:20Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:20Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 30,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:25Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:25Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:25Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:18:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:18:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 29,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 23,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:47Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:47Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:47Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 19,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 15,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 23,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:18:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:18:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:18:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:01Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:01Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:01Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 25,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:05Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:05Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 23,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 21,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:08Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:08Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:08Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:19:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:19:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:14.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:14.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:14.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:19.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:19.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:19.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:20.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:20.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:20.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:22Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:22Z"
+      },
+      {
+        "data": {
+          "COUNT": 18,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:22Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:26.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:26.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:26.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 17,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:30.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 25,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:30.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:30.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:31.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:31.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:31.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:35Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:35Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:35Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:46Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:46Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:46Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:47.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:47.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:47.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:48.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:48.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:48.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "load-generator"
+        },
+        "time": "2026-05-18T17:19:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 25,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 30,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 15,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 23,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:53.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 17,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:53.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:53.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 25,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:57.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:57.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:57.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 29,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:19:59.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:19:59.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:19:59.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:02Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 33,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 36,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:09Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:09Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:09Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:20:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:20:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:12Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:12Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:12Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:13Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:13Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:13Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "load-generator"
+        },
+        "time": "2026-05-18T17:20:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 19,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 32,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 29,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 26,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:28.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "load-generator"
+        },
+        "time": "2026-05-18T17:20:28.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 27,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:28.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 26,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:28.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 13,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:34Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:34Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:34Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:34.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:34.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:34.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 12,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 48,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 45,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 11,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:40.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:40.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:40.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 7,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 17,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 35,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "ad"
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "fraud-detection"
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 3,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 12,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:52.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:52.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:55Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:55Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:55Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 18,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 24,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 6,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1,
+          "service.name": "load-generator"
+        },
+        "time": "2026-05-18T17:20:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 10,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:20:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:20:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:20:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 14,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:21:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:21:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:21:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:21:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:21:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:21:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:21:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2,
+          "service.name": "frontend-proxy"
+        },
+        "time": "2026-05-18T17:21:02Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "frontend"
+        },
+        "time": "2026-05-18T17:21:02Z"
+      },
+      {
+        "data": {
+          "COUNT": 8,
+          "service.name": "product-catalog"
+        },
+        "time": "2026-05-18T17:21:02Z"
+      }
+    ],
+    "template": {
+      "breakdowns": [
+        "service.name"
+      ],
+      "calculations": [
+        {
+          "op": "COUNT"
+        }
+      ],
+      "end_time": 1779124863,
+      "filters": [
+        {
+          "column": "error",
+          "join_column": "",
+          "op": "=",
+          "value": true
+        }
+      ],
+      "limit": 1000,
+      "orders": [
+        {
+          "op": "COUNT",
+          "order": "descending"
+        }
+      ],
+      "start_time": 1779124683
+    },
+    "total_by_aggregate": {
+      "data": {
+        "COUNT": 6176
+      }
+    },
+    "total_by_aggregate_series": [
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 4
+        },
+        "time": "2026-05-18T17:19:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 23
+        },
+        "time": "2026-05-18T17:18:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 31
+        },
+        "time": "2026-05-18T17:19:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 10
+        },
+        "time": "2026-05-18T17:19:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:20:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:34Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:19:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 17
+        },
+        "time": "2026-05-18T17:20:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:26.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:19:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:20:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:40.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 31
+        },
+        "time": "2026-05-18T17:19:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 34
+        },
+        "time": "2026-05-18T17:21:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 31
+        },
+        "time": "2026-05-18T17:19:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 52
+        },
+        "time": "2026-05-18T17:20:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:18Z"
+      },
+      {
+        "data": {
+          "COUNT": 55
+        },
+        "time": "2026-05-18T17:19:30.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 16
+        },
+        "time": "2026-05-18T17:20:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:18:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 72
+        },
+        "time": "2026-05-18T17:18:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 1
+        },
+        "time": "2026-05-18T17:18:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:19:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:43Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:19:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 15
+        },
+        "time": "2026-05-18T17:18:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 56
+        },
+        "time": "2026-05-18T17:20:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:19:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 23
+        },
+        "time": "2026-05-18T17:18:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22
+        },
+        "time": "2026-05-18T17:19:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 67
+        },
+        "time": "2026-05-18T17:19:58.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 67
+        },
+        "time": "2026-05-18T17:20:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 9
+        },
+        "time": "2026-05-18T17:20:52.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:19:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16
+        },
+        "time": "2026-05-18T17:20:04Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:35Z"
+      },
+      {
+        "data": {
+          "COUNT": 31
+        },
+        "time": "2026-05-18T17:20:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 14
+        },
+        "time": "2026-05-18T17:20:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 14
+        },
+        "time": "2026-05-18T17:18:45Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:19:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 70
+        },
+        "time": "2026-05-18T17:18:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 40
+        },
+        "time": "2026-05-18T17:20:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 62
+        },
+        "time": "2026-05-18T17:20:28.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:19:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 35
+        },
+        "time": "2026-05-18T17:20:15.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 40
+        },
+        "time": "2026-05-18T17:19:20.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 41
+        },
+        "time": "2026-05-18T17:18:11Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:48.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:20:02Z"
+      },
+      {
+        "data": {
+          "COUNT": 17
+        },
+        "time": "2026-05-18T17:18:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 21
+        },
+        "time": "2026-05-18T17:20:59Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:46Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 17
+        },
+        "time": "2026-05-18T17:19:01Z"
+      },
+      {
+        "data": {
+          "COUNT": 16
+        },
+        "time": "2026-05-18T17:19:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 35
+        },
+        "time": "2026-05-18T17:18:54Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:18:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:18:09.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 41
+        },
+        "time": "2026-05-18T17:20:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:14.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 23
+        },
+        "time": "2026-05-18T17:19:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:19:51Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:33Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:08Z"
+      },
+      {
+        "data": {
+          "COUNT": 44
+        },
+        "time": "2026-05-18T17:19:53.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 17
+        },
+        "time": "2026-05-18T17:19:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:55Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:18:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 77
+        },
+        "time": "2026-05-18T17:20:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:19:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:18:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 31
+        },
+        "time": "2026-05-18T17:20:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:21:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 56
+        },
+        "time": "2026-05-18T17:19:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:19:32Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:21:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:18:20Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:45.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:34.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 52
+        },
+        "time": "2026-05-18T17:20:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:20:02.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:18.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:25Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 55
+        },
+        "time": "2026-05-18T17:19:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:20:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:37Z"
+      },
+      {
+        "data": {
+          "COUNT": 21
+        },
+        "time": "2026-05-18T17:20:39.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:03.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 38
+        },
+        "time": "2026-05-18T17:20:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:19:29Z"
+      },
+      {
+        "data": {
+          "COUNT": 52
+        },
+        "time": "2026-05-18T17:20:01.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:17.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:19:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:38.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:18:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:20:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 15
+        },
+        "time": "2026-05-18T17:20:09Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 43
+        },
+        "time": "2026-05-18T17:18:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 21
+        },
+        "time": "2026-05-18T17:18:47Z"
+      },
+      {
+        "data": {
+          "COUNT": 23
+        },
+        "time": "2026-05-18T17:20:10Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:20:16.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:20:42Z"
+      },
+      {
+        "data": {
+          "COUNT": 1
+        },
+        "time": "2026-05-18T17:19:03Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:19.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 34
+        },
+        "time": "2026-05-18T17:20:44Z"
+      },
+      {
+        "data": {
+          "COUNT": 61
+        },
+        "time": "2026-05-18T17:20:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:12Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:58Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:15Z"
+      },
+      {
+        "data": {
+          "COUNT": 33
+        },
+        "time": "2026-05-18T17:19:50Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:19:38Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 28
+        },
+        "time": "2026-05-18T17:19:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 32
+        },
+        "time": "2026-05-18T17:19:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:05.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 105
+        },
+        "time": "2026-05-18T17:20:39Z"
+      },
+      {
+        "data": {
+          "COUNT": 53
+        },
+        "time": "2026-05-18T17:18:43.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 37
+        },
+        "time": "2026-05-18T17:19:30Z"
+      },
+      {
+        "data": {
+          "COUNT": 16
+        },
+        "time": "2026-05-18T17:20:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:20:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:20:04.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:49Z"
+      },
+      {
+        "data": {
+          "COUNT": 22
+        },
+        "time": "2026-05-18T17:18:44.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:20:00.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:31.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:59.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:19:47.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 22
+        },
+        "time": "2026-05-18T17:20:52Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:25.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:20:06.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:27.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 103
+        },
+        "time": "2026-05-18T17:18:11.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 43
+        },
+        "time": "2026-05-18T17:18:56.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:19:36.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 48
+        },
+        "time": "2026-05-18T17:19:07Z"
+      },
+      {
+        "data": {
+          "COUNT": 1
+        },
+        "time": "2026-05-18T17:20:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:40Z"
+      },
+      {
+        "data": {
+          "COUNT": 53
+        },
+        "time": "2026-05-18T17:19:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 70
+        },
+        "time": "2026-05-18T17:19:51.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 49
+        },
+        "time": "2026-05-18T17:18:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:19:05Z"
+      },
+      {
+        "data": {
+          "COUNT": 52
+        },
+        "time": "2026-05-18T17:20:28Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:19:06Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:22.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:46.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:55.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:33.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 5
+        },
+        "time": "2026-05-18T17:18:36Z"
+      },
+      {
+        "data": {
+          "COUNT": 27
+        },
+        "time": "2026-05-18T17:19:57.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:10.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:18:35.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 2
+        },
+        "time": "2026-05-18T17:18:24Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:00Z"
+      },
+      {
+        "data": {
+          "COUNT": 34
+        },
+        "time": "2026-05-18T17:19:48Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:20:29.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:53Z"
+      },
+      {
+        "data": {
+          "COUNT": 54
+        },
+        "time": "2026-05-18T17:19:16Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:20:42.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:21:02Z"
+      },
+      {
+        "data": {
+          "COUNT": 13
+        },
+        "time": "2026-05-18T17:18:32.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:41Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:12.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 19
+        },
+        "time": "2026-05-18T17:18:54.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 16
+        },
+        "time": "2026-05-18T17:20:21Z"
+      },
+      {
+        "data": {
+          "COUNT": 70
+        },
+        "time": "2026-05-18T17:18:23.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:24.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 67
+        },
+        "time": "2026-05-18T17:18:37.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:20:13Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:50.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 38
+        },
+        "time": "2026-05-18T17:19:22Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:19:27Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:18:07.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:23Z"
+      },
+      {
+        "data": {
+          "COUNT": 72
+        },
+        "time": "2026-05-18T17:20:17Z"
+      },
+      {
+        "data": {
+          "COUNT": 36
+        },
+        "time": "2026-05-18T17:20:56Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:19:49.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:19Z"
+      },
+      {
+        "data": {
+          "COUNT": 20
+        },
+        "time": "2026-05-18T17:20:21.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:13.5Z"
+      },
+      {
+        "data": {
+          "COUNT": 29
+        },
+        "time": "2026-05-18T17:18:57Z"
+      },
+      {
+        "data": {
+          "COUNT": 18
+        },
+        "time": "2026-05-18T17:18:16.5Z"
+      }
+    ]
+}

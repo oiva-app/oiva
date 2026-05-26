@@ -14,6 +14,35 @@ import { graphAgent } from "../agents/graph-agent";
 const workflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
   queryResult: z.any().default(null),
+  queryDetails: z.any().default(null),
+});
+
+// This is a partial model of
+// src/agent/docs/planning/alert_contextualization/query_details.json
+const HCQueryDetailsSchema = z.object({
+  results: z.array(
+    z.object({
+      data: z.record(z.string(), z.unknown()),
+    }),
+  ),
+  template: z.object({
+    breakdowns: z.array(z.string()).describe("GROUP: How are spans grouped?"),
+    calculations: z
+      .array(
+        z.object({
+          op: z.string(),
+        }),
+      )
+      .describe("SELECT: how are spans selected?"),
+    filters: z.array(
+      z.record(z.string(), z.union([z.string(), z.boolean(), z.number()])),
+    ).describe("FILTER: how are spans filtered?"),
+    start_time: z.int(),
+    end_time: z.int(),
+  }),
+  info: z.object({
+    granularity_seconds: z.number()
+  })
 });
 
 const verifyStep = createStep({
@@ -81,9 +110,9 @@ const getQueryResultsStep = createStep({
   execute: async ({ inputData, state, setState }) => {
     const tool = honeycomb_get_query_results;
     if (!tool.execute) throw new Error("get_query_results has no execute()");
-    const result = await tool.execute({ url: inputData.resultUrl }, {});
-    await setState({ ...state, queryResult: result });
-    return result;
+    const queryResult = await tool.execute({ url: inputData.resultUrl }, {});
+    await setState({ ...state, queryResult });
+    return queryResult;
   },
 });
 
@@ -100,6 +129,7 @@ const getQueryDetailsStep = createStep({
   execute: async ({ inputData, state, setState }) => {
     // The previous step returns the tool's { content: [...] } envelope, which
     // includes a resource_link to the raw query results as JSON.
+    console.log(inputData);
     const link = inputData.content?.find(
       (c: any) =>
         c.type === "resource_link" && c.mimeType === "application/json",
@@ -111,12 +141,12 @@ const getQueryDetailsStep = createStep({
     if (!("text" in content)) {
       throw new Error("query results resource returned non-text content");
     }
-    const queryResult = JSON.parse(content.text);
+    const queryDetails = JSON.parse(content.text);
 
-    await setState({ ...state, queryResult });
-    return { content: queryResult };
+    await setState({ ...state, queryDetails });
+    return { content: queryDetails };
   },
-})
+});
 
 const returnStateStep = createStep({
   id: "return-state",
@@ -150,5 +180,6 @@ export const oivaWorkflow2 = createWorkflow({
   .then(normalizeStep)
   .then(redactStep)
   .then(getQueryResultsStep)
+  .then(getQueryDetailsStep)
   .then(returnStateStep)
   .commit();
