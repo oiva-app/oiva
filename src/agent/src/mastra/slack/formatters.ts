@@ -15,7 +15,6 @@ function toMrkdwn(markdown: string | undefined | null): string {
 
 export function buildSummaryBlocks(
   report: IncidentReport,
-  reportId: string,
 ): (Block | KnownBlock)[] {
   return [
     {
@@ -51,13 +50,13 @@ export function buildSummaryBlocks(
           type: "button",
           text: { type: "plain_text", text: "👍", emoji: true },
           action_id: "positive_rating",
-          value: reportId,
+          value: report.id,
         },
         {
           type: "button",
           text: { type: "plain_text", text: "👎", emoji: true },
           action_id: "negative_rating",
-          value: reportId,
+          value: report.id,
         },
       ],
     },
