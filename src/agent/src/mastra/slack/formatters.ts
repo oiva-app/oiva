@@ -1,0 +1,108 @@
+import type { Block, KnownBlock } from "@slack/web-api";
+import type { IncidentReport } from "../types/report";
+import type { AlertContext } from "../types/alert-context";
+
+function toMrkdwn(markdown: string): string {
+  return markdown
+    .replace(/\*\*(.*?)\*\*|\*(.*?)\*/g, (_, bold, italic) =>
+      bold !== undefined ? `*${bold}*` : `_${italic}_`,
+    )
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<$2|$1>");
+}
+
+export function buildSummaryBlocks(
+  report: IncidentReport,
+  reportId: string,
+): (Block | KnownBlock)[] {
+  return [
+    {
+      type: "header",
+      text: { type: "plain_text", text: report.title, emoji: false },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: toMrkdwn(report.summary) },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
+      },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Next Steps*\n${toMrkdwn(report.nextSteps)}`,
+      },
+    },
+    { type: "divider" },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "👍", emoji: true },
+          action_id: "positive_rating",
+          value: reportId,
+        },
+        {
+          type: "button",
+          text: { type: "plain_text", text: "👎", emoji: true },
+          action_id: "negative_rating",
+          value: reportId,
+        },
+      ],
+    },
+  ];
+}
+
+export function renderFullReportMarkdown(report: IncidentReport): string {
+  return [
+    `# ${report.title}`,
+    `## Summary\n${report.summary}`,
+    `## Alert Overview\n${report.alertOverview}`,
+    `## Hypothesis\n${report.hypothesis}`,
+    `## Findings\n${report.findings}`,
+    `## Next Steps\n${report.nextSteps}`,
+    `## Investigation Steps\n${report.investigationSteps}`,
+  ].join("\n\n");
+}
+
+export function buildErrorBlocks(
+  alertContext: AlertContext,
+  errorMessage: string,
+): (Block | KnownBlock)[] {
+  return [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: "Oiva could not generate a report",
+        emoji: false,
+      },
+    },
+    {
+      type: "section",
+      fields: [
+        { type: "mrkdwn", text: `*Alert*\n${alertContext.triggerName}` },
+        { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
+      ],
+    },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: `*Error*\n${errorMessage}` },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${alertContext.resultUrl}|View in Honeycomb>`,
+      },
+    },
+  ];
+}
