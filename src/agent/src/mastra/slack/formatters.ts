@@ -5,17 +5,12 @@ import type { AlertContext } from "../types/alert-context";
 function toMrkdwn(markdown: string | undefined | null): string {
   if (!markdown) return "";
 
-  return (
-    markdown
-      // Convert bold to a temporary placeholder to avoid double-processing
-      .replace(/\*\*(.*?)\*\*/g, "\u0001$1\u0001")
-      // Convert italic
-      .replace(/\*(.*?)\*/g, "_$1_")
-      // Restore bold as Slack mrkdwn '*'
-      .replace(/\u0001(.*?)\u0001/g, "*$1*")
-      // Convert links, supporting URLs with nested parentheses
-      .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>")
-  );
+  // Placeholder prevents bold markers from being re-matched as italic in a second pass
+  return markdown
+    .replace(/\*\*(.*?)\*\*/g, "\u0001$1\u0001")
+    .replace(/\*(.*?)\*/g, "_$1_")
+    .replace(/\u0001(.*?)\u0001/g, "*$1*")
+    .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>");
 }
 
 export function buildSummaryBlocks(
@@ -37,7 +32,7 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
+        text: `*🔍 Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
       },
     },
     { type: "divider" },
@@ -45,7 +40,7 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*Next Steps*\n${toMrkdwn(report.nextSteps)}`,
+        text: `*📋 Next Steps*\n${toMrkdwn(report.nextSteps)}`,
       },
     },
     { type: "divider" },
