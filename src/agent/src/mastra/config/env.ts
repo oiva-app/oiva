@@ -15,20 +15,22 @@ const EnvSchema = z.object({
   GITHUB_PAT: z.string(),
 
   //  Unset = no secret enforcement on incoming webhooks.  Only for development.
-  HC_SHARED_SECRET: z.string().optional(), 
+  HC_SHARED_SECRET: z.string().optional(),
 
   // Reduce max steps to save tokens
   SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
-  REPORT_MAX_STEPS: z.coerce.number().default(10),
   TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
   CODEBASE_MAX_STEPS: z.coerce.number().default(20),
-  RUN_EVALS: z.stringbool().default(true),  // `false` to save tokens
+  RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
 
   // for future use - for implementing development-only logic
   NODE_ENV: z.enum(["development", "production"]).default("production"),
 
   CODEBASE_AGENT_WORKSPACE_PATH: z.string(),
   SUPERVISOR_WORKSPACE_PATH: z.string(),
+  // for slack integration
+  SLACK_BOT_TOKEN: z.string().optional(),
+  SLACK_CHANNEL_ID: z.string().optional(),
 });
 
 /**

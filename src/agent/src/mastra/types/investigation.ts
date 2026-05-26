@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AlertContextSchema } from "./alert-context";
+import { alertContextSchema } from "./alert-context";
 
 // this is a type used within the telemetryFindingsSchema below (produced by the tele agent loop) in order to highlight the main signals pulled from the telemetry data
 
@@ -67,7 +67,7 @@ const telemetrySampleSchema = z.object({
 });
 
 // produced by the agentic telemetry agent loop within step 4.1
-const TelemetryFindingsSchema = z.object({
+const telemetryFindingsSchema = z.object({
   hypothesis: z.string(), // statement of what it thinks is going wrong and why based on findings
   confidence: z.enum(["high", "medium", "low"]), // tells code agent how strong the evidence is, guiding how much it can narrow the search
   onset: z.iso.datetime().nullable(), // the earliest point an anomaly was detected in tele data, points code agent to code change timelines
@@ -82,14 +82,14 @@ const TelemetryFindingsSchema = z.object({
 // the structured output from step 4.1. (that wraps the agent loop)
 // combines the alert and findings from the wrapped tele agent loop
 
-const TelemetryStepOutputSchema = z.object({
-  alert: AlertContextSchema,
-  telemetryFindings: TelemetryFindingsSchema, // tele agent’s findings
+const telemetryStepOutputSchema = z.object({
+  alert: alertContextSchema,
+  telemetryFindings: telemetryFindingsSchema, // tele agent’s findings
 });
 
-export { TelemetryFindingsSchema, TelemetryStepOutputSchema };
-export type TelemetryFindings = z.infer<typeof TelemetryFindingsSchema>;
-export type TelemetryStepOutput = z.infer<typeof TelemetryStepOutputSchema>;
+export { telemetryFindingsSchema, telemetryStepOutputSchema };
+export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;
+export type TelemetryStepOutput = z.infer<typeof telemetryStepOutputSchema>;
 
 const potentialProblemSchema = z
   .object({
@@ -125,7 +125,7 @@ export const codebaseInvestigatorOutputSchema = z.object({
   recommended_fix: recommendedFixSchema,
 });
 
-export const SupervisorAgentOutputSchema = z.object({
+export const supervisorAgentOutputSchema = z.object({
   summary: z
     .string()
     .describe(
@@ -179,4 +179,4 @@ export const SupervisorAgentOutputSchema = z.object({
   ),
 });
 
-export type SupervisorAgentOutput = z.infer<typeof SupervisorAgentOutputSchema>;
+export type SupervisorAgentOutput = z.infer<typeof supervisorAgentOutputSchema>;
