@@ -1,5 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import { env } from "../config/env";
+import { convertProcessSignalToExitCode } from "node:util";
 
 export const mvpMcpClient = new MCPClient({
   id: "honeycomb-mcp-client",
@@ -47,3 +48,5 @@ export const {
   honeycomb_find_columns,
   honeycomb_analyze_columns,
 } = await mvpMcpClient.listTools();
+
+console.log(await mvpMcpClient.listTools())

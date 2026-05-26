@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { alertContextSchema } from "./alert-context";
+import { AlertContextSchema } from "./alert-context";
 
 // this is a type used within the telemetryFindingsSchema below (produced by the tele agent loop) in order to highlight the main signals pulled from the telemetry data
 
-const timeWindowSchema = z.object({
+const TimeWindowSchema = z.object({
   start: z.iso.datetime(),
   end: z.iso.datetime(),
 });
 
-const keySignalSchema = z.object({
+const KeySignalSchema = z.object({
   signalType: z.enum([
     // categorizes what type of metric or behavior changed
     "error_rate", // error rate increase, eg. failed requests,exception count increased
@@ -30,7 +30,7 @@ const keySignalSchema = z.object({
       unit: z.string(),
     })
     .nullable(),
-  timeWindow: timeWindowSchema.nullable(), // optional timeframe for when the signal can be observed
+  timeWindow: TimeWindowSchema.nullable(), // optional timeframe for when the signal can be observed
   correlatedAttributes: z
     .array(
       z.object({
@@ -71,7 +71,7 @@ const telemetryFindingsSchema = z.object({
   hypothesis: z.string(), // statement of what it thinks is going wrong and why based on findings
   confidence: z.enum(["high", "medium", "low"]), // tells code agent how strong the evidence is, guiding how much it can narrow the search
   onset: z.iso.datetime().nullable(), // the earliest point an anomaly was detected in tele data, points code agent to code change timelines
-  keySignals: z.array(keySignalSchema).min(1), // specific observed anomalies found in data that point code agent to specific timeframes where the anomalies started occurring
+  keySignals: z.array(KeySignalSchema).min(1), // specific observed anomalies found in data that point code agent to specific timeframes where the anomalies started occurring
   suspectServices: z.array(z.string()).min(1), // instant lookup for affected services
   telemetrySamples: z.array(telemetrySampleSchema).max(5).nullable(), // specific spans, traces, logs pulled from HC when relevant
   relevantErrorPatterns: z.array(z.string()).nullable(), // specific error messages, exception types, status codes, code agent can search where these get thrown in the code
@@ -83,7 +83,7 @@ const telemetryFindingsSchema = z.object({
 // combines the alert and findings from the wrapped tele agent loop
 
 const telemetryStepOutputSchema = z.object({
-  alert: alertContextSchema,
+  alert: AlertContextSchema,
   telemetryFindings: telemetryFindingsSchema, // tele agent’s findings
 });
 

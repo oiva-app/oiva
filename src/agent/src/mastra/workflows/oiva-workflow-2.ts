@@ -14,6 +14,7 @@ import {
 } from "../types/investigation";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
+import { honeycomb_get_query_results } from "../mcp/mcpClients";
 
 const OivaWorkflowStateSchema = z.object({
   alertContext: AlertContextSchema.optional(),
@@ -72,15 +73,21 @@ const scrubStep = createStep({
   }
 })
 
-const getQueryResultsStep = createStep({
-  id: "get-query-results",
-  description: "Get query results via API",
-  inputSchema: z.union([AlertContextSchema, ScrubbedAlertContextSchema]),
-  outputSchema: z.string(),
-  execute: async ({ inputData }) => {
-    return "beep boop"
-  }
-})
+// const getQueryResultsStep = createStep({
+//   id: "get-query-results",
+//   description: "Get query results via API",
+//   inputSchema: z.union([AlertContextSchema, ScrubbedAlertContextSchema]),
+//   outputSchema: z.object(),
+//   execute: async ({ inputData }) => {
+//     const tool = honeycomb_get_query_results
+//     if (!tool.execute) throw new Error("get_query_results has no execute()")
+//     return await tool.execute({
+//       queryUrl: inputData.resultUrl
+//     })
+//   }
+// })
+
+
 
 export const oivaWorkflow2 = createWorkflow({
   id: "oiva-workflow-2",

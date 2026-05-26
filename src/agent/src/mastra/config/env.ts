@@ -11,6 +11,7 @@ import * as z from "zod";
 const EnvSchema = z.object({
   OPENAI_API_KEY: z.string(),
   HC_MCP_KEY: z.string(),
+  HC_API_KEY: z.string().optional(),  // read-only calls to HC API
   COLLECTOR_ENDPOINT: z.string(),
   GITHUB_PAT: z.string(),
 
