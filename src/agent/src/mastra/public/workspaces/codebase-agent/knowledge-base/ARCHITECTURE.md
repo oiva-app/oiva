@@ -1,273 +1,150 @@
-# Architecture
+# three-services-demo-app
 
-## Purpose
+A small, deliberately observable application built as the **demo target** for our team's incident-investigation agent. It is _not_ the agent itself.
 
-This repository is the **demo target** for an incident-investigation AI agent. It is not the agent itself.
+## What this is and why it exists
 
-The app exists so the agent has something realistic to investigate: three TypeScript microservices that emit OpenTelemetry traces to Honeycomb, with typed failure modes built in. When the agent demos, it is pointed at incidents in this app.
+The investigation agent needs something to investigate. This repo is that "something": three TypeScript microservices that emit OpenTelemetry traces to Honeycomb, with realistic failure modes built in. When we demo the agent, we can point it at this app's incidents.
 
----
+## Why this app provides a useful demo target
 
-## Repository Structure
+1. **Realistic without being huge.** Three services with real cross-service calls, each small enough to reason about in a few minutes. Big enough to demonstrate distributed-tracing problems matter.
 
-```
-services/
-  gateway/          public entry point (opaque proxy)
-    src/
-      domain/       port interfaces
-      http/         Express routes + middleware
-      infra/        HTTP client to orders, OTel SDK init
-  orders/           order orchestration
-    src/
-      domain/       order types, pure business logic
-      http/         Express routes + middleware
-      infra/        HTTP client to inventory, OTel SDK init
-  inventory/        stock authority
-    src/
-      domain/       inventory types, reserve logic
-      http/         Express routes + middleware
-      infra/        in-memory store, OTel SDK init
-  loadgen/          synthetic traffic generator (not part of demo target)
-    src/
-      infra/        OTel SDK init
+2. **Multi-hop call graph.** A request flows `client → gateway → orders → inventory`. Single-hop traces only answer "did this endpoint fail?" Multi-hop traces let the agent ask the more interesting question: _"where in the chain did it fail, and why?"_ That's the question worth investigating.
 
-docker-compose.yml
-tsconfig.base.json
+3. **Built for OpenTelemetry from day one.** Hexagonal architecture (domain at center, adapters at edges) puts infrastructure boundaries exactly where OTel hooks naturally.
+
+4. **Already-existing failure modes.** Real HTTP error paths exist today — `404 unknown_sku`, `409 insufficient`, `400 invalid_quantity`, `502 upstream_unavailable`. The agent has things to find without us writing fake bugs.
+
+5. **Industry-standard observability stack.** OTel + Honeycomb is what the agent will see in real customer environments.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Client((curl / loadgen)) -->|"POST /api/orders"| Gateway
+    Gateway[<b>gateway</b><br/>:3000<br/><i>opaque proxy</i>] -->|"POST /orders"| Orders
+    Orders[<b>orders</b><br/>:3002<br/><i>orchestrates</i>] -->|"POST /inventory/reserve"| Inventory
+    Inventory[<b>inventory</b><br/>:3001<br/><i>in-memory store</i>]
+
+    Gateway -.->|spans| Honeycomb
+    Orders -.->|spans| Honeycomb
+    Inventory -.->|spans| Honeycomb
+    Honeycomb[(Honeycomb)]
 ```
 
-There is no frontend, no database, and no migration system. Inventory state is held in memory, seeded at process startup.
-
----
-
-## Codebase Map
-
-| Path | Responsibility |
-|---|---|
-| `services/gateway/src/domain/gateway.ts` | `OrdersClient` interface + `UpstreamResponse` type |
-| `services/gateway/src/http/routes.ts` | Proxy `POST /api/orders` and `GET /api/orders/:id` to orders |
-| `services/gateway/src/http/middleware/headerToBaggage.ts` | Reads `x-fault-inject` header, writes it to W3C baggage |
-| `services/gateway/src/http/middleware/faultInjection.ts` | Reads baggage; if target matches, injects latency or error |
-| `services/gateway/src/http/middleware/errorHandler.ts` | Records unhandled exceptions on the active span, returns 500 |
-| `services/gateway/src/infra/httpOrdersClient.ts` | HTTP adapter implementing `OrdersClient` |
-| `services/gateway/src/infra/telemetry.ts` | OTel SDK init, OTLP exporter, propagator config |
-| `services/gateway/src/server.ts` | Express app assembly, graceful shutdown |
-| `services/orders/src/domain/orders.ts` | `Order` types, `InventoryClient` interface, ID/type generators |
-| `services/orders/src/http/routes.ts` | `POST /orders` (reserve + create), `GET /orders/:id` (synthetic) |
-| `services/orders/src/http/middleware/faultInjection.ts` | Same baggage-based fault injection, `SERVICE_NAME=orders` |
-| `services/orders/src/http/middleware/errorHandler.ts` | Same span-recording error handler |
-| `services/orders/src/infra/httpInventoryClient.ts` | HTTP adapter implementing `InventoryClient` |
-| `services/orders/src/infra/telemetry.ts` | OTel SDK init |
-| `services/orders/src/server.ts` | Express app assembly, graceful shutdown |
-| `services/inventory/src/domain/inventory.ts` | `StockLevel`, `InventoryStore` interface, pure `reserve()` function |
-| `services/inventory/src/http/routes.ts` | `POST /inventory/reserve`, `GET /inventory/check/:sku` |
-| `services/inventory/src/http/middleware/faultInjection.ts` | Same baggage-based fault injection, `SERVICE_NAME=inventory` |
-| `services/inventory/src/http/middleware/errorHandler.ts` | Same span-recording error handler |
-| `services/inventory/src/infra/inventoryStore.ts` | `InMemoryInventoryStore` implementation + seed data |
-| `services/inventory/src/infra/telemetry.ts` | OTel SDK init |
-| `services/inventory/src/server.ts` | Express app assembly, graceful shutdown |
-| `services/loadgen/src/main.ts` | Fires `POST /api/orders` (~70%) and `GET /api/orders/:id` (~30%) at configurable RPS |
-| `services/loadgen/src/infra/telemetry.ts` | OTel SDK init (loadgen is trace root for each request) |
-
----
-
-## Runtime Components
-
-| Component | Entry point | Port | Responsibility |
-|---|---|---|---|
-| gateway | `services/gateway/src/server.ts` | 3000 | Public entry point; opaque proxy — forwards requests to orders without inspecting payloads |
-| orders | `services/orders/src/server.ts` | 3002 | Orchestrates order creation; calls inventory to reserve stock |
-| inventory | `services/inventory/src/server.ts` | 3001 | Stock authority; validates and processes reservations against in-memory state |
-| loadgen | `services/loadgen/src/main.ts` | — | Synthetic traffic generator; drives continuous requests through gateway |
-
-Docker Compose startup order: `inventory` → `orders` → `gateway` → `loadgen`. Each service waits for the previous service's `/healthz` to pass before starting.
-
----
-
-## Request Flow
-
 ```
-loadgen
-  -> POST /api/orders (or GET /api/orders/:id)
-gateway :3000
-  -> POST /orders (or GET /orders/:id)
-orders :3002
-  -> POST /inventory/reserve
-inventory :3001
-  -> in-memory StockLevel map
+                                    ┌────────────┐
+                                    │ Honeycomb  │
+                                    └─────▲──────┘
+                                          │ spans (OTel)
+                ┌─────────────────────────┴─────────────────────────┐
+                │                         │                         │
+client ──HTTP──►  gateway  ──HTTP──►   orders   ──HTTP──►  inventory
+                  :3000                 :3002                :3001
+                  (proxy)              (orchestr.)         (in-mem)
 ```
 
-W3C TraceContext headers (`traceparent`, `tracestate`) are propagated at each HTTP hop. All spans for a single request share one `traceId` and form a parent/child tree in Honeycomb.
+Each request produces one trace. Spans from all three services share the same `traceId` and form a parent/child tree
+the agent can walk top-down.
 
----
+## Current status
 
-## API Surface
+| Phase                              | Status   |
+| ---------------------------------- | -------- |
+| Service: inventory                 | shipped  |
+| Service: orders                    | shipped  |
+| Service: gateway                   | shipped  |
+| OTel SDK in each service           | shipped  |
+| OTel → Honeycomb (sub-phase C)     | shipped  |
+| Wide span attributes (sub-phase D) | shipped  |
+| Load generator                     | shipped  |
+| Dockerization                      | shipped  |
+| Terraform / deployment             | deferred |
 
-### Public (via gateway)
+## Services
 
-| Method | Path | Proxied to |
-|---|---|---|
-| `POST` | `/api/orders` | `POST /orders` on orders |
-| `GET` | `/api/orders/:id` | `GET /orders/:id` on orders |
-| `GET` | `/healthz` | — (local, returns `{"status":"ok"}`) |
+| Service       | Port | Role                                                                                                                                                                                        |
+| ------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **gateway**   | 3000 | Public entry point. Thin opaque proxy — forwards `POST /api/orders` and `GET /api/orders/:id` to orders without parsing payloads.                                                           |
+| **orders**    | 3002 | Order orchestration. Receives orders, calls inventory to reserve stock, returns a created order. `GET /orders/:id` is intentionally synthetic — there is no order persistence in this demo. |
+| **inventory** | 3001 | Stock authority. Tracks SKU quantities in memory. Validates reservation requests and rejects with typed reasons (`unknown_sku`, `insufficient`, `invalid_quantity`).                        |
 
-### Internal — orders
+All three follow the same hexagonal layout (`domain/`, `infra/`, `http/`).
 
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/orders` | Validates body, calls inventory, returns created order |
-| `GET` | `/orders/:id` | Synthetic — no persistence; echoes id back with randomized type |
-| `GET` | `/healthz` | Health check |
+## Prerequisites
 
-### Internal — inventory
-
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/inventory/reserve` | Reserves stock; mutates in-memory state |
-| `GET` | `/inventory/check/:sku` | Read-only stock level lookup |
-| `GET` | `/healthz` | Health check |
-
----
-
-## Fault Injection
-
-Fault injection lets you trigger controlled failures in any service without changing code. It is disabled by default; set `FAULT_INJECTION_ENABLED=true` in a service's env to enable it.
-
-**How it works:**
-
-1. A caller sets the `x-fault-inject` HTTP header on a request to gateway.
-2. Gateway's `headerToBaggage` middleware reads the header and writes it as the `fault.inject` W3C baggage key.
-3. W3C Baggage propagates automatically with each downstream HTTP call.
-4. Each service's `faultInjection` middleware reads the baggage on every incoming request. If the spec's `target` matches the service's own name (`gateway`, `orders`, or `inventory`), the fault fires. Otherwise the request continues normally.
-
-**Spec format:**
+You need a Honeycomb Ingest API key, scoped to the environment you send traces to. Each service reads it from its own `.env`:
 
 ```
-<target>:<mode>=<value>
-
-Examples:
-  orders:latency=2000     inject 2000ms delay into orders
-  inventory:error=503     return HTTP 503 from inventory
-  gateway:error=500       return HTTP 500 from gateway
+services/gateway/.env
+services/orders/.env
+services/inventory/.env
+services/loadgen/.env
 ```
 
-Modes:
-- `latency` — sleeps for `valueMs` before calling `next()`
-- `error` — returns the specified HTTP status with `{"error":"fault_injected","spec":"<raw>"}` and short-circuits the handler
+Quickest setup: each service ships a `.env.example` you can copy:
 
----
+```bash
+ cp services/gateway/.env.example services/gateway/.env
+ cp services/orders/.env.example services/orders/.env
+ cp services/inventory/.env.example services/inventory/.env
+ cp services/loadgen/.env.example services/loadgen/.env
+```
 
-## Key Span Attributes
+Then fill in `HONEYCOMB_API_KEY` in each. The other variables have working localhost defaults.
 
-Spans are enriched with structured fields at each layer. These are the fields to query in Honeycomb when investigating an incident.
+`.env` is gitignored. All four services - gateway, orders, inventory, and loadgen - use the same key (Honeycomb routes per `service.name` into separate datasets).
 
-### gateway spans
+## Running it locally
 
-| Attribute | Type | Notes |
-|---|---|---|
-| `upstream.reachable` | boolean | `false` if orders threw or timed out |
-| `upstream.status` | number | HTTP status returned by orders |
-| `order.id` | string | Set on `GET /api/orders/:id` |
+You can run the full chain in two ways: with Docker Compose (one command, deterministic boot) or in host mode with per-service `npm run dev`.
 
-### orders spans
+### With Docker Compose (recommended)
 
-| Attribute | Type | Notes |
-|---|---|---|
-| `sku` | string | |
-| `quantity_requested` | number | |
-| `validation.ok` | boolean | `false` = bad request body |
-| `validation.error` | string | `missing_or_wrong_type` |
-| `reservation.ok` | boolean | |
-| `reservation.reason` | string | `insufficient`, `unknown_sku`, `invalid_quantity`, `upstream_unavailable` |
-| `inventory.stock.after` | number | Remaining stock after successful reservation |
-| `order.id` | string | |
-| `order.type` | string | `standard`, `express`, or `bulk` |
-| `order.status` | string | `created` |
+```bash
+docker compose up
+```
 
-### inventory spans
+Brings up `inventory`, `orders`, `gateway`, and `loadgen` together. Compose waits for each service's `/healthz` to pass before starting the next, so the boot order is deterministic and nothing sends traffic to a not-yet-ready upstream. Loadgen starts automatically once gateway is healthy.
 
-| Attribute | Type | Notes |
-|---|---|---|
-| `sku` | string | |
-| `quantity_requested` | number | |
-| `validation.ok` | boolean | |
-| `validation.error` | string | |
-| `reservation.ok` | boolean | |
-| `reservation.reason` | string | `insufficient`, `unknown_sku`, `invalid_quantity` |
-| `inventory.warehouse` | string | e.g. `us-east`, `us-west`, `eu-central` |
-| `inventory.stock.before` | number | Stock level before reservation |
-| `inventory.stock.after` | number | Stock level after reservation |
-| `inventory.found` | boolean | Set on `GET /inventory/check/:sku` |
+Smoke test:
 
-All services also record unhandled handler exceptions on the active span (via `errorHandler` middleware): `error.type`, `exception.message`, `exception.stacktrace`, and `span.status=ERROR`.
+```bash
+curl -s -X POST http://localhost:3000/api/orders \
+  -H 'Content-Type: application/json' \
+  -d '{"sku":"SKU-A100","quantity":1}' | jq
+```
 
----
+To stop the stack:
 
-## Error Taxonomy
+```bash
+docker compose down
+```
 
-| Error key | HTTP status | Produced by | Meaning |
-|---|---|---|---|
-| `unknown_sku` | 404 | inventory, orders | SKU not in inventory's seed data |
-| `insufficient` | 409 | inventory, orders | Requested quantity exceeds available stock |
-| `invalid_quantity` | 400 | inventory, orders | Quantity is not a positive integer |
-| `upstream_unavailable` | 502 | orders | inventory HTTP call threw or timed out |
-| `orders_unavailable` | 502 | gateway | orders HTTP call threw or timed out |
-| `fault_injected` | configurable | any service | Fault injection fired; `spec` field contains the raw spec string |
-| `internal_error` | 500 | any service | Unhandled exception caught by `errorHandler` middleware |
+### Host mode
 
----
+Three terminals (one per service):
 
-## Observability Stack
+```bash
+# terminal 1
+cd services/inventory && npm run dev
 
-All four services use the same OTel setup:
+# terminal 2
+cd services/orders && INVENTORY_URL=http://localhost:3001 npm run dev
 
-- **SDK:** `@opentelemetry/sdk-node` with `NodeSDK`
-- **Exporter:** `OTLPTraceExporter` → `https://api.honeycomb.io/v1/traces` (configurable via `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`)
-- **Processor:** `BatchSpanProcessor`
-- **Propagators:** `W3CTraceContextPropagator` + `W3CBaggagePropagator` (composite)
-- **Auto-instrumentation:** `getNodeAutoInstrumentations()` with Express middleware/router layers suppressed (to avoid noise spans); route handler spans are emitted
-- **Auth:** `x-honeycomb-team: <HONEYCOMB_API_KEY>` header on every export request
-- **Resource attributes:** `service.name` (`OTEL_SERVICE_NAME` env var) and `service.version` (`SERVICE_VERSION` build arg)
+# terminal 3
+cd services/gateway && ORDERS_URL=http://localhost:3002 npm run dev
+```
 
-Telemetry is initialized as the first import in each `server.ts` / `main.ts` (before Express), ensuring instrumentation is registered before any HTTP listeners are set up.
+Each prints `OTel SDK started for service: <name>` at startup.
 
----
+Smoke test (gateway → orders → inventory):
 
-## Seeded Inventory
+```bash
+curl -s -X POST http://localhost:3000/api/orders \
+  -H 'Content-Type: application/json' \
+  -d '{"sku":"SKU-A100","quantity":1}' | jq
+```
 
-Inventory state is not persistent. On every process start, `seed()` populates the in-memory store with:
-
-| SKU | Warehouse | Initial quantity |
-|---|---|---|
-| `SKU-A100` | `us-east` | 100,000 |
-| `SKU-B200` | `us-west` | 50,000 |
-| `SKU-C300` | `eu-central` | 25,000 |
-
-Any SKU outside this list is `unknown_sku`. Stock decrements on each successful reservation and resets only on process restart.
-
----
-
-## External Integrations
-
-| System | How it's used |
-|---|---|
-| Honeycomb | Receives all OTel traces via OTLP/HTTP. Primary observability backend. |
-
-No other external systems. There is no database, no message queue, no auth provider, no payment processor, and no cache.
-
----
-
-## Deployment
-
-**Local (current):**
-- `docker compose up` — builds and starts all four services
-- Each service is its own Dockerfile under `services/<name>/Dockerfile`
-- Boot order is enforced by `depends_on` + `healthcheck` conditions
-
-**Production:**
-- Terraform deployment is deferred; not currently implemented
-- No CI/CD pipeline in this repository
-
-**Environment configuration:**
-- Each service reads its config from a `.env` file (gitignored)
-- `.env.example` files ship with each service for quickstart
-- Required variables: `HONEYCOMB_API_KEY` (all services), `ORDERS_URL` (gateway), `INVENTORY_URL` (orders), `GATEWAY_URL` (loadgen)
+A single curl produces spans across all three terminals sharing one `traceId`.

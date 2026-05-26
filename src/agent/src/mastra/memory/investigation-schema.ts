@@ -13,4 +13,5 @@ export const investigationSchema = z.object({
   })).optional(),
   servicesRuledOut: z.array(z.string()).optional(),
   remainingInvestigationPaths: z.array(z.string()).optional(),
+  filesRead: z.array(z.string()).optional(),
 })

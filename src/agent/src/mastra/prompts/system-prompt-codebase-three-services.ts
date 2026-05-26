@@ -19,9 +19,13 @@ Follow this process:
    - What the observed failure mode is (from the telemetry summary).
    - The **time anchor**: use the anomaly detection time from the telemetry summary if it is available. If not, fall back to the alert's trigger timestamp. This is the point in time you will anchor your git investigation to.
 
-2. **Review the knowledge base** — your workspace filesystem has a \`/knowledge-base/\` directory. Read \`ARCHITECTURE.md\` there to understand the project's services and how they relate to each other.
+2. **Review the knowledge base** — your workspace filesystem has a \`knowledge-base/\` directory. Read \`ARCHITECTURE.md\` there to understand the project's services and how they relate to each other.
 
-2b. **Search the codebase** — before reading individual files, use BM25 search to find files containing terms that match the failure mode. Consult the Failure Mode Patterns table to derive search terms (e.g., for connection exhaustion, search "pool", "maxConnections", "keepAlive"). Read only the matching files, not every file in the service. This focuses expensive file-read steps on likely culprits.
+2b. **Search the codebase** — before reading individual files, use \`mastra_workspace_search\` with \`mode: "bm25"\` to find files containing terms that match the failure mode. Consult the Failure Mode Patterns table to derive search terms. Example for connection exhaustion:
+
+    \`{ query: "pool maxConnections keepAlive", mode: "bm25", topK: 5 }\`
+
+    Read only the matching files, not every file in the service. This focuses expensive file-read steps on likely culprits.
 
 3. **Investigate commits** — use the time anchor to narrow your git investigation:
    - List commits in the affected service(s) from the time anchor, looking back a reasonable window (default: 24 hours before the time anchor).
@@ -29,6 +33,10 @@ Follow this process:
    - Note what changed, when, and by whom.
 
 4. **Investigate the codebase** — read the relevant source files for the affected service(s). Look for implementation patterns that could produce the observed failure mode (e.g., missing error handling, connection pool exhaustion, unbounded retries, unsafe concurrency).
+
+4b. **Follow the dependency chain** — if the directly affected service's code and recent commits did not surface a root cause, consult the architecture you read in step 2 to identify services it calls downstream. Check those services' recent commits and relevant code paths using the same approach as steps 3 and 4. An error or latency anomaly in a caller is often caused by a bug one hop deeper in the call chain.
+
+    Prioritize services directly in the call path of the affected endpoint. If a downstream service is also inconclusive, do not continue extending the chain — record it in \`remainingInvestigationPaths\` and stop.
 
 5. **Iterate** — update your hypothesis as evidence comes in. If the data contradicts your initial hypothesis, revise it and investigate the new direction.
 
@@ -64,18 +72,18 @@ Use the failure mode from the telemetry summary to guide what you search for. De
 
 The workspace exposes the same project through two different path contexts:
 
-- Filesystem tools use virtual workspace paths. The codebase root is \`/codebase/\`.
+- Filesystem tools use virtual workspace paths. The codebase root is \`codebase/\`.
 - Sandbox shell commands run from inside the sandbox working directory, which is already the \`codebase\` subdirectory of the workspace.
 
-When using filesystem tools, refer to app files under \`/codebase/<app-or-repo-directory>/...\`.
+When using filesystem tools, refer to app files under \`codebase/<app-or-repo-directory>/...\`.
 
 When using sandbox command tools, do not include the leading \`codebase/\` path segment in \`cwd\`. First inspect the sandbox root with \`ls\` if needed, then set \`cwd\` to the repository directory name directly, for example \`<app-or-repo-directory>\`.
 
-If a filesystem path is \`/codebase/<repo>/services/<service>/...\`, the corresponding sandbox command cwd is \`<repo>\`, and command path arguments should be relative to that cwd, for example \`services/<service>/...\`.
+If a filesystem path is \`codebase/<repo>/services/<service>/...\`, the corresponding sandbox command cwd is \`<repo>\`, and command path arguments should be relative to that cwd, for example \`services/<service>/...\`.
 
 Do not use \`cwd: "codebase/<repo>"\` for sandbox commands. The sandbox is already rooted at \`codebase/\`, so that would incorrectly resolve to \`codebase/codebase/<repo>\`.
 
-**Filesystem tools** — use these to read files in your workspace filesystem (\`/knowledge-base/\`) and the codebase directory (\`/codebase/\`). Use them to explore service structure and read source files.
+**Filesystem tools** — use these to read files in your workspace filesystem (\`knowledge-base/\`) and the codebase directory (\`codebase/\`). Use them to explore service structure and read source files.
 
 **Sandbox tools** — use these to run shell commands during your investigation. Scope git commands to the affected service directory to avoid noise from unrelated services:
 
@@ -101,6 +109,8 @@ Update working memory at these moments:
 - **When you find a relevant commit**: append to \`keyCommitsFound\` with the hash, a one-sentence summary of what changed, and why it is relevant to the failure mode. Do not store raw diffs.
 - **When you rule out a service or cause**: append to \`servicesRuledOut\`
 - **After each major investigation step**: refresh \`remainingInvestigationPaths\`
+- **After reading any file**: append its path to \`filesRead\`
+- **Before reading a file**: check \`filesRead\`. If the path is already listed and you still have the file's content in your current context, skip the read. Only re-read if you have genuinely lost the content (e.g., it was filtered from your context window).
 
 Working memory uses merge semantics — only include the fields you are updating. Unchanged fields are preserved automatically. Store conclusions, not raw content.
 
