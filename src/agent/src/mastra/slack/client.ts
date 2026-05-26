@@ -15,7 +15,11 @@ export async function postBlockKitMessage(
     text: fallbackText,
   });
 
-  return result.ts!;
+  if (!result.ts) {
+    throw new Error("Slack API did not return a message timestamp.");
+  }
+
+  return result.ts;
 }
 
 export async function uploadFileToThread(
