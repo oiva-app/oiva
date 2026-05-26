@@ -2,22 +2,22 @@ import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { HoneycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
-  AlertContextSchema,
-  FilteredOutcomeSchema,
-  ScrubbedAlertContextSchema,
+  alertContextSchema,
+  filteredOutcomeSchema,
+  scrubbedAlertContextSchema,
 } from "../types/alert-context";
 import {
-  TelemetryStepOutputSchema,
-  TelemetryFindingsSchema,
+  telemetryStepOutputSchema,
+  telemetryFindingsSchema,
   codebaseInvestigatorOutputSchema,
-  SupervisorAgentOutputSchema,
+  supervisorAgentOutputSchema,
 } from "../types/investigation";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { honeycomb_get_query_results } from "../mcp/mcpClients";
 
 const OivaWorkflowStateSchema = z.object({
-  alertContext: AlertContextSchema.optional(),
+  alertContext: alertContextSchema.optional(),
 });
 
 const verifyStep = createStep({
@@ -26,7 +26,7 @@ const verifyStep = createStep({
     "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
   inputSchema: HoneycombWebhookPayloadSchema,
   // Step output must satisfy bail (filtered) and pass-through (actionable).
-  outputSchema: z.union([HoneycombWebhookPayloadSchema, FilteredOutcomeSchema]),
+  outputSchema: z.union([HoneycombWebhookPayloadSchema, filteredOutcomeSchema]),
   execute: async ({ inputData, bail }) => {
     const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
 
@@ -54,7 +54,7 @@ const normalizeStep = createStep({
   description:
     "Normalize the HC payload into a vendor-neutral AlertContext for downstream steps.",
   inputSchema: HoneycombWebhookPayloadSchema,
-  outputSchema: AlertContextSchema,
+  outputSchema: alertContextSchema,
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
 
@@ -65,8 +65,8 @@ const normalizeStep = createStep({
 const scrubStep = createStep({
   id: "scrub-alert",
   description: "Remove context to keep info from Agent, with goal of improving investigation",
-  inputSchema: AlertContextSchema,
-  outputSchema: ScrubbedAlertContextSchema,
+  inputSchema: alertContextSchema,
+  outputSchema: scrubbedAlertContextSchema,
   execute: async ({ inputData }) => {
     const { triggerUrl, ...scrubbed } = inputData
     return scrubbed
@@ -76,7 +76,7 @@ const scrubStep = createStep({
 // const getQueryResultsStep = createStep({
 //   id: "get-query-results",
 //   description: "Get query results via API",
-//   inputSchema: z.union([AlertContextSchema, ScrubbedAlertContextSchema]),
+//   inputSchema: z.union([alertContextSchema, scrubbedAlertContextSchema]),
 //   outputSchema: z.object(),
 //   execute: async ({ inputData }) => {
 //     const tool = honeycomb_get_query_results
@@ -94,8 +94,8 @@ export const oivaWorkflow2 = createWorkflow({
   stateSchema: OivaWorkflowStateSchema,
   inputSchema: HoneycombWebhookPayloadSchema,
   outputSchema: z.union([
-    FilteredOutcomeSchema,
-    AlertContextSchema, // placeholder: replace with Report schema later
+    filteredOutcomeSchema,
+    alertContextSchema, // placeholder: replace with Report schema later
   ]),
 })
   .then(verifyStep)

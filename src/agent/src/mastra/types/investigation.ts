@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AlertContextSchema } from "./alert-context";
+import { alertContextSchema } from "./alert-context";
 
 // this is a type used within the telemetryFindingsSchema below (produced by the tele agent loop) in order to highlight the main signals pulled from the telemetry data
 
@@ -83,7 +83,7 @@ const telemetryFindingsSchema = z.object({
 // combines the alert and findings from the wrapped tele agent loop
 
 const telemetryStepOutputSchema = z.object({
-  alert: AlertContextSchema,
+  alert: alertContextSchema,
   telemetryFindings: telemetryFindingsSchema, // tele agent’s findings
 });
 

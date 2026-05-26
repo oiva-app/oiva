@@ -73,7 +73,7 @@ https://mastra.ai/docs/agents/structured-output  https://mastra.ai/reference/age
  */
 // const investigateTelemetry = createStep({
 //   id: "telemetry-investigation",
-//   inputSchema: AlertContextSchema,
+//   inputSchema: alertContextSchema,
 //   outputSchema: TelemetryStepOutputSchema,
 //   execute: async ({ inputData, mastra }) => {
 //     const telemetryAgent = mastra.getAgentById("telemetry-agent");

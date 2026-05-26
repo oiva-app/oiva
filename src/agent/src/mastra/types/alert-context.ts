@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const AlertContextSchema = z.object({
+export const alertContextSchema = z.object({
   status: z.enum(["TRIGGERED", "OK"]),
   isTest: z.boolean(),
   triggerName: z.string(),
@@ -22,19 +22,19 @@ export const AlertContextSchema = z.object({
   instanceId: z.string(),
 });
 
-export type AlertContext = z.infer<typeof AlertContextSchema>;
+export type AlertContext = z.infer<typeof alertContextSchema>;
 
 // The "Scrubbed" version is for when you want to omit certain properties
 // from the agent context
-export const ScrubbedAlertContextSchema = AlertContextSchema.omit({
+export const scrubbedAlertContextSchema = alertContextSchema.omit({
   triggerUrl: true,
 });
-export type ScrubbedAlert = z.infer<typeof ScrubbedAlertContextSchema>;
+export type ScrubbedAlert = z.infer<typeof scrubbedAlertContextSchema>;
 
 //The outcome type when the workflow terminates early because the alert wasn't worth an investigation
-export const FilteredOutcomeSchema = z.object({
+export const filteredOutcomeSchema = z.object({
   kind: z.literal("filtered"),
   reason: z.string(), // keep open — each vendor has its own filter reasons
   instanceId: z.string(),
 });
-export type FilteredOutcome = z.infer<typeof FilteredOutcomeSchema>;
+export type FilteredOutcome = z.infer<typeof filteredOutcomeSchema>;
