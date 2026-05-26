@@ -13,6 +13,7 @@ import { graphAgent } from "../agents/graph-agent";
 
 const OivaWorkflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
+  queryResult: z.any().default(null)
 });
 
 const verifyStep = createStep({
@@ -57,28 +58,32 @@ const normalizeStep = createStep({
  * It's possible / likely that this step should be omitted from production runs
  * It is helpful for testing with stale alerts and missing triggers.
  */
-const scrubStep = createStep({
+const redactStep = createStep({
   id: "scrub-alert",
   description: "Remove context to keep info from Agent, with goal of improving investigation",
   inputSchema: alertContextSchema,
-  outputSchema: scrubbedAlertContextSchema,
-  execute: async ({ inputData }) => {
-    const { triggerUrl, ...scrubbed } = inputData
-    return scrubbed
+  outputSchema: alertContextSchema,
+  execute: async ({ inputData, setState }) => {
+    const redacted = { ...inputData }
+    redacted.triggerUrl = ""
+    setState(() => {alertContext: redacted})
+    return redacted
   }
 })
 
 const getQueryResultsStep = createStep({
   id: "get-query-results",
   description: "Get query results via API",
-  inputSchema: z.union([alertContextSchema, scrubbedAlertContextSchema]),
+  inputSchema: alertContextSchema,
   outputSchema: z.object({
     content: z.any(),
   }),
-  execute: async ({ inputData }) => {
+  execute: async ({ inputData, state, setState }) => {
     const tool = honeycomb_get_query_results
     if (!tool.execute) throw new Error("get_query_results has no execute()")
-    return await tool.execute({url: inputData.resultUrl}, {})
+    const result = await tool.execute({url: inputData.resultUrl}, {})
+    setState( (s) => ({...s, queryResult: result}))
+    return result
   }
 })
 
@@ -103,6 +108,6 @@ export const oivaWorkflow2 = createWorkflow({
     return inputData;
   })
   .then(normalizeStep)
-  .then(scrubStep)
+  .then(redactStep)
   .then(getQueryResultsStep)
   .commit();
