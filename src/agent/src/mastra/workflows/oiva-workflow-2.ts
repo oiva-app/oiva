@@ -6,15 +6,10 @@ import {
   filteredOutcomeSchema,
   scrubbedAlertContextSchema,
 } from "../types/alert-context";
-import {
-  telemetryStepOutputSchema,
-  telemetryFindingsSchema,
-  codebaseInvestigatorOutputSchema,
-  supervisorAgentOutputSchema,
-} from "../types/investigation";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { honeycomb_get_query_results } from "../mcp/mcpClients";
+import { graphAgent } from "../agents/graph-agent";
 
 const OivaWorkflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
@@ -73,19 +68,19 @@ const scrubStep = createStep({
   }
 })
 
-// const getQueryResultsStep = createStep({
-//   id: "get-query-results",
-//   description: "Get query results via API",
-//   inputSchema: z.union([alertContextSchema, scrubbedAlertContextSchema]),
-//   outputSchema: z.object(),
-//   execute: async ({ inputData }) => {
-//     const tool = honeycomb_get_query_results
-//     if (!tool.execute) throw new Error("get_query_results has no execute()")
-//     return await tool.execute({
-//       queryUrl: inputData.resultUrl
-//     })
-//   }
-// })
+const getQueryResultsStep = createStep({
+  id: "get-query-results",
+  description: "Get query results via API",
+  inputSchema: z.union([alertContextSchema, scrubbedAlertContextSchema]),
+  outputSchema: z.object({
+    content: z.any(),
+  }),
+  execute: async ({ inputData }) => {
+    const tool = honeycomb_get_query_results
+    if (!tool.execute) throw new Error("get_query_results has no execute()")
+    return await tool.execute({url: inputData.resultUrl}, {})
+  }
+})
 
 
 
@@ -109,5 +104,5 @@ export const oivaWorkflow2 = createWorkflow({
   })
   .then(normalizeStep)
   .then(scrubStep)
-  // .then(getQueryResultsStep)
+  .then(getQueryResultsStep)
   .commit();
