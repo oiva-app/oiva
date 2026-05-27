@@ -10,16 +10,7 @@ import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { graphAgent } from "../agents/graph-agent";
-import {
-  mcpToolResultSchema,
-  type McpResourceLink,
-} from "../types/mcp";
-
-const workflowStateSchema = z.object({
-  alertContext: alertContextSchema.optional(),
-  queryResult: z.any().default(null),
-  queryDetails: z.any().default(null),
-});
+import { mcpToolResultSchema, type McpResourceLink } from "../types/mcp";
 
 // This is a partial model of
 // src/agent/docs/planning/alert_contextualization/query_details.json
@@ -38,19 +29,67 @@ const HCQueryDetailsSchema = z.object({
         }),
       )
       .describe("SELECT: how are spans selected?"),
-    filters: z.array(
-      z.record(z.string(), z.union([z.string(), z.boolean(), z.number()])),
-    ).describe("FILTER: how are spans filtered?"),
+    filters: z
+      .array(
+        z.record(z.string(), z.union([z.string(), z.boolean(), z.number()])),
+      )
+      .describe("FILTER: how are spans filtered?"),
     start_time: z.int(),
     end_time: z.int(),
   }),
   info: z.object({
-    granularity_seconds: z.number()
-  })
+    granularity_seconds: z.number(),
+  }),
 });
 
+/**
+ * TODO: CENTRALIZE THIS TIMEZONE CONFIG (currently hardcoded)
+ */
+function formatTimestamp(ms: number, timeZone = "America/New_York"): string {
+  if (!Number.isFinite(ms)) throw new Error(`formatTimestamp: invalid ms ${ms}`);
+  const date = new Date(ms);
 
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZoneName: "longOffset", // -> "GMT-04:00"
+  }).formatToParts(date);
 
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const offset = get("timeZoneName").replace("GMT", "UTC"); // "UTC-04:00"
+
+  return `${get("month")} ${get("day")} ${get("year")} ${get("hour")}:${get("minute")}:${get("second")} ${offset}`;
+}
+
+const TIME_PLACEHOLDER = "unknown";
+
+const workflowStateSchema = z.object({
+  alertContext: alertContextSchema.optional(),
+  queryResult: z.any().default(null),
+  queryDetails: z.any().default(null),
+  t1: z
+    .string()
+    .default(TIME_PLACEHOLDER)
+    .describe("Beginning of investigation window"),
+  t2: z
+    .string()
+    .default(TIME_PLACEHOLDER)
+    .describe("Approximate time of problem onset"),
+  t3: z
+    .string()
+    .default(TIME_PLACEHOLDER)
+    .describe("Time that alert was fired"),
+  t4: z
+    .string()
+    .default(TIME_PLACEHOLDER)
+    .describe("End of investigation window"),
+});
 
 /*
 SOME OF THESE STEPS WOULD BE BETTER USING THE HONEYCOMB API
@@ -58,8 +97,6 @@ INSTEAD OF THE HONEYCOMB MCP
 
 However, the API requires an Enterprise license
  */
-
-
 
 const verifyStep = createStep({
   id: "verify-alert",
@@ -106,8 +143,8 @@ const redactStep = createStep({
   description:
     "Remove context to keep info from Agent, with goal of improving investigation",
   inputSchema: alertContextSchema,
-  stateSchema: workflowStateSchema,
   outputSchema: alertContextSchema,
+  stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
     const redacted = { ...inputData, triggerUrl: "" };
     await setState({ ...state, alertContext: redacted });
@@ -119,8 +156,8 @@ const getQueryResultsStep = createStep({
   id: "get-query-results",
   description: "Get query results via API",
   inputSchema: alertContextSchema,
-  stateSchema: workflowStateSchema,
   outputSchema: mcpToolResultSchema,
+  stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
     const tool = honeycomb_get_query_results;
     if (!tool.execute) throw new Error("get_query_results has no execute()");
@@ -134,8 +171,8 @@ const getQueryDetailsStep = createStep({
   id: "get-query-details",
   description: "Get more details about the query",
   inputSchema: mcpToolResultSchema,
-  stateSchema: workflowStateSchema,
   outputSchema: HCQueryDetailsSchema,
+  stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
     // The previous step returns the tool's { content: [...] } envelope, which
     // includes a resource_link to the raw query results as JSON.
@@ -151,10 +188,29 @@ const getQueryDetailsStep = createStep({
       throw new Error("query results resource returned non-text content");
     }
     const t = JSON.parse(content.text);
-    const queryDetails = HCQueryDetailsSchema.parse(t)
+    const queryDetails = HCQueryDetailsSchema.parse(t);
 
     await setState({ ...state, queryDetails });
     return queryDetails;
+  },
+});
+
+const extractTimestamps = createStep({
+  id: "extract-timestamps",
+  description: "Extract timestamps from the gathered context",
+  inputSchema: HCQueryDetailsSchema,
+  outputSchema: workflowStateSchema,
+  stateSchema: workflowStateSchema,
+  execute: async ({ state, setState }) => {
+    const t3 = state.alertContext?.alert.timestamp ?? TIME_PLACEHOLDER;
+    const t1 = formatTimestamp(state.queryDetails.template.end_time * 1000);
+    const newState = {
+      ...state,
+      t1,
+      t3,
+    }
+    await setState(newState);
+    return newState
   },
 });
 
@@ -168,6 +224,8 @@ const returnStateStep = createStep({
     return state;
   },
 });
+
+
 
 export const oivaWorkflow2 = createWorkflow({
   id: "oiva-workflow-2",
@@ -191,5 +249,6 @@ export const oivaWorkflow2 = createWorkflow({
   .then(redactStep)
   .then(getQueryResultsStep)
   .then(getQueryDetailsStep)
+  .then(extractTimestamps)
   .then(returnStateStep)
   .commit();
