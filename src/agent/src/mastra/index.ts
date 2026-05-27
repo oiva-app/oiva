@@ -12,7 +12,7 @@ import {
 import { OtelExporter } from "@mastra/otel-exporter";
 
 import { oivaWorkflow } from "./workflows/oiva-workflow";
-import { oivaWorkflow2 } from "./workflows/oiva-workflow-2";
+import { alertIntake } from "./workflows/alert-intake";
 import { inspectMcpWorkflow } from "./workflows/mcp-inspect";
 import { weatherWorkflow } from "./workflows/weather-workflow";
 import { helloWorldAgent } from "./agents/oiva1-agent";
@@ -33,7 +33,7 @@ import { env } from "./config/env";
 export const mastra = new Mastra({
   workflows: {
     oivaWorkflow,
-    oivaWorkflow2,
+    oivaWorkflow2: alertIntake,
     inspectMcpWorkflow,
     weatherWorkflow,
   },
