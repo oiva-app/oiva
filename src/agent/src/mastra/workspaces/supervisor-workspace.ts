@@ -7,9 +7,9 @@ const supervisorFilesystem = new LocalFilesystem({
     readOnly: true,
   });
 
-export const supervisorThreeServicesDemoWorkspace = new Workspace({
+export const supervisorWorkspace = new Workspace({
   filesystem: supervisorFilesystem,
   bm25: true,
 });
 
-supervisorThreeServicesDemoWorkspace.init();
+supervisorWorkspace.init();

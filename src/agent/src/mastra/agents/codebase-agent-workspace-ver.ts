@@ -3,11 +3,11 @@ import type { SubAgent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { ToolCallFilter } from '@mastra/core/processors';
 import { env } from "../config/env";
-import { cbAgentThreeServicesDemoWorkspace } from "../workspaces/codebase-workspace-three-services";
-import { prompt } from "../prompts/system-prompt-codebase-three-services";
+import { cbAgentThreeServicesDemoWorkspace } from "../workspaces/codebase-workspace";
+import { prompt } from "../prompts/system-prompt-codebase-agent-ws-ver";
 import { investigationSchema } from "../memory/investigation-schema";
 
-export const threeServicesCodebaseInvestigator: SubAgent = new Agent({
+export const codebaseInvestigator: SubAgent = new Agent({
   id: "codebase-investigator",
   name: "Codebase Investigator",
   description:
