@@ -40,8 +40,8 @@ const EnvSchema = z.object({
   DATABASE_URL: z
     .string()
     .regex(
-      /^postgresql:\/\//,
-      "DATABASE_URL must be a postgresql:// connection string",
+      /^postgres(ql)?:\/\//,
+      "DATABASE_URL must be a postgres:// or postgresql:// connection string",
     ),
 });
 
