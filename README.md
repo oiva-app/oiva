@@ -1,26 +1,37 @@
-
 ## INSTALLATION
 
 Create and edit your .env file from the example
+
 ```bash
 cp .env.example .env
 ```
 
-Give Oiva access to the Github repo that defines your observed app by including Github PAT(s) in the .env file.  If the repo is public you don't need to grant any permissions.  More info: [Github Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+Give Oiva access to the Github repo that defines your observed app by including Github PAT(s) in the .env file. If the repo is public you don't need to grant any permissions. More info: [Github Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 
 Start the OTel Collector
+
 ```bash
 docker compose up
 ```
 
 ### INSTALL MASTRA OTEL EXPORTER
+
 If you receive errors when installing the `@mastra/otel-exporter`, try the `--legacy-peer-deps` flag:
 
 ```bash
 npm install @mastra/otel-exporter --legacy-peer-deps
 ```
 
+### Database (local dev)
+
+Start the local Postgres container before running the dev server:
+
+```bash
+docker compose up -d postgres
+```
+
 ### ALERT WEBHOOK PAYLOAD FORMAT
+
 For proper functioning, you must use this alert template!
 
 This alert payload shape is a slightly modified version of the "Generic" Honeycomb (HC)Alert Trigger Template that is provided for HC users who don't know or care about their required payload shape.
@@ -70,6 +81,7 @@ This alert includes additional properties that aid our agent in its investigatio
 }
 
 ```
+
 More info in the Honeycomb Docs: https://docs.honeycomb.io/notify/webhooks and in the Go Docs, which defines the templating syntax: https://pkg.go.dev/text/template
 
 ## Sample alerts
@@ -110,6 +122,7 @@ From Astro Shop
 ```
 
 From Valerie's 3-service app
+
 ```go
 {
   "name": "Too many HTTP request errors",

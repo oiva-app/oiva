@@ -29,6 +29,15 @@ const EnvSchema = z.object({
   // for slack integration
   SLACK_BOT_TOKEN: z.string().optional(),
   SLACK_CHANNEL_ID: z.string().optional(),
+
+  // postgres connection string (compose service: postgres).
+  // Format: postgresql://<user>:<password>@<host>:<port>/<database>
+  DATABASE_URL: z
+    .string()
+    .regex(
+      /^postgresql:\/\//,
+      "DATABASE_URL must be a postgresql:// connection string",
+    ),
 });
 
 /**

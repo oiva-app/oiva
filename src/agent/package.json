@@ -28,10 +28,12 @@
     "@mastra/otel-exporter": "^1.0.22",
     "@slack/web-api": "^7.16.0",
     "dotenv": "^17.4.2",
+    "pg": "^8.21.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
+    "@types/pg": "^8.20.0",
     "mastra": "^1.9.1",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
