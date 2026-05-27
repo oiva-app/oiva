@@ -17,6 +17,10 @@ import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { graphAgent } from "../agents/graph-agent";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
 import { stat } from "node:fs";
+import {
+  telemetryFindingsSchema,
+  telemetryStepOutputSchema,
+} from "../types/investigation";
 
 // This is a partial model of
 // src/agent/docs/planning/alert_contextualization/query_details.json
@@ -90,6 +94,7 @@ const workflowStateSchema = z.object({
     .default(null),
   queryDetails: z.any().default(null),
   summaryString: z.string().default(""),
+  report: telemetryFindingsSchema.optional(),
   t1: z
     .string()
     .default(TIME_PLACEHOLDER)
@@ -247,7 +252,7 @@ const createAlertContextualizedAlertString = createStep({
   id: "return-state",
   description: "Return the workflow state.  Discard input",
   inputSchema: workflowStateSchema,
-  outputSchema: z.void(),
+  outputSchema: z.string(),
   stateSchema: workflowStateSchema,
   execute: async ({ state, setState }) => {
     const textResult = state.queryResult?.content.find(
@@ -288,6 +293,33 @@ ${textResult}
 </QUERY_RESULTS>
 `;
     setState({ ...state, summaryString });
+    return summaryString;
+  },
+});
+
+const investigate = createStep({
+  id: "investigate",
+  stateSchema: workflowStateSchema,
+  inputSchema: z.string(),
+  outputSchema: telemetryFindingsSchema,
+  execute: async ({ inputData, mastra, state, setState }) => {
+    if (!state.summaryString?.length) {
+      throw new Error("Invalid workflow state");
+    }
+
+    const telAgent = mastra.getAgentById("telemetry-agent");
+    const response = await telAgent.generate(inputData, {
+      structuredOutput: {
+        schema: telemetryFindingsSchema,
+      },
+    });
+
+    if (!response.object) {
+      throw new Error("generateReport: invalid agent output");
+    }
+    const report = response.object;
+    setState({ ...state, report });
+    return report;
   },
 });
 
@@ -326,5 +358,6 @@ export const alertIntake = createWorkflow({
   .then(getQueryDetails)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
+  .then(investigate)
   .then(returnWorkflowState)
   .commit();
