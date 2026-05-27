@@ -26,6 +26,11 @@ const EnvSchema = z.object({
   // for future use - for implementing development-only logic
   NODE_ENV: z.enum(["development", "production"]).default("production"),
 
+  // absolute paths to workspaces on the machine/container
+  CODEBASE_AGENT_WORKSPACE_PATH: z.string(),
+  CODEBASE_AGENT_SANDBOX_PATH: z.string(),
+  SUPERVISOR_WORKSPACE_PATH: z.string(),
+
   // for slack integration
   SLACK_BOT_TOKEN: z.string().optional(),
   SLACK_CHANNEL_ID: z.string().optional(),

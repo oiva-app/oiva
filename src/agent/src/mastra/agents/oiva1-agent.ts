@@ -1,31 +1,12 @@
-import { MCPClient } from "@mastra/mcp";
 import { Agent } from "@mastra/core/agent";
-import { env } from "../config/env";
-
-// npm install @mastra/mcp@latest
-export const testMcpClient = new MCPClient({
-  id: "test-mcp-client",
-  servers: {
-    honeycomb: {
-      url: new URL("https://mcp.honeycomb.io/mcp"),
-      requestInit: {
-        headers: {
-          Authorization: `Bearer ${env.HC_MCP_KEY}`,
-        },
-      },
-    },
-  },
-});
-
-// https://mastra.ai/docs/mcp/overview#static-tools
-const {
+import {
   honeycomb_get_workspace_context,
   honeycomb_get_dataset,
   honeycomb_run_query,
   honeycomb_run_bubbleup,
   honeycomb_get_query_results,
   honeycomb_get_trace,
-} = await testMcpClient.listTools();
+} from "../mcp/mcpClients";
 
 const honeycombSelectFew = {
   honeycomb_get_workspace_context,
