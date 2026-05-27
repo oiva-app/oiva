@@ -57,7 +57,7 @@ Always start your investigation here. Understand the shape of the problem before
 
 ### Codebase agent
 
-Has access to the codebase in its local fileysystem. It can:
+Has access to the codebase in its local filesystem. It can:
 
 - **Search and read code** — find repositories, explore their structure, search for code patterns or function names across repos, and read specific files. Useful for understanding how the affected code paths work.
 - **Inspect changes around the time the alert was triggered** — list and examine commits, pull requests, and their diffs to see what changed, when, and by whom.
