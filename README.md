@@ -96,69 +96,9 @@ More info: https://en.wikipedia.org/wiki/ISO_8601
 
 ## Sample alerts
 
-From Astro Shop
+From Astro Shop:
+- [lisa](./src/agent/docs/sample_alerts/lisa.json)
 
-```json
-{
-  "name": "error == true",
-  "id": "2XteoXm4S78",
-  "description": "",
-  "links": {
-    "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
-  },
-  "environment": "astro-lisa",
-  "threshold": {
-    "op": "greater than",
-    "value": "1"
-  },
-  "datasets": ["__all__"],
-  "result": {
-    "groupsTriggered": [
-      {
-        "field": "service.name",
-        "value": "product-catalog",
-        "count": 2736
-      },
-      {
-        "field": "service.name",
-        "value": "frontend",
-        "count": 2734
-      },
-      {
-        "field": "service.name",
-        "value": "frontend-proxy",
-        "count": 684
-      },
-      {
-        "field": "service.name",
-        "value": "ad",
-        "count": 9
-      },
-      {
-        "field": "service.name",
-        "value": "fraud-detection",
-        "count": 9
-      },
-      {
-        "field": "service.name",
-        "value": "load-generator",
-        "count": 4
-      }
-    ],
-    "links": {
-      "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
-    }
-  },
-  "alert": {
-    "instanceId": "1015bd0f-99a3-41e7-817e-9c831df21262",
-    "description": "astro-lisa environment:\nCurrent value (6.176 k) greater than threshold value (1)",
-    "status": "TRIGGERED",
-    "summary": "TRIGGER TEST: Triggered: error == true",
-    "timestamp": "13:21:03 UTC-04:00",
-    "isTest": false
-  }
-}
-```
 
 From Valerie's 3-service app
 ```go

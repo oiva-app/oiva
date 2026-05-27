@@ -1,6 +1,6 @@
-import { describe, test, expect } from "vitest";
+import { test, expect } from "vitest";
 
-import alertPayload from "../../../docs/three-services-timeout-alert.json";
+import alertPayload from "../../../docs/sample_alerts/lisa.json";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import { alertIntake } from "./alert-intake";
 
