@@ -5,7 +5,7 @@ const cbAgentTFilesystem = new LocalFilesystem({
     basePath: env.CODEBASE_AGENT_WORKSPACE_PATH,
   });
 
-export const cbAgentThreeServicesDemoWorkspace = new Workspace({
+export const codebaseAgentWorkspace = new Workspace({
   filesystem: cbAgentTFilesystem,
   sandbox: new LocalSandbox({ 
     workingDirectory: env.CODEBASE_AGENT_SANDBOX_PATH, 
@@ -14,4 +14,4 @@ export const cbAgentThreeServicesDemoWorkspace = new Workspace({
   bm25: true
 });
 
-cbAgentThreeServicesDemoWorkspace.init();
+codebaseAgentWorkspace.init();

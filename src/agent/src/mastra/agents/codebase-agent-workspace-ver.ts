@@ -3,7 +3,7 @@ import type { SubAgent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { ToolCallFilter } from '@mastra/core/processors';
 import { env } from "../config/env";
-import { cbAgentThreeServicesDemoWorkspace } from "../workspaces/codebase-workspace";
+import { codebaseAgentWorkspace } from "../workspaces/codebase-workspace";
 import { prompt } from "../prompts/system-prompt-codebase-agent-ws-ver";
 import { investigationSchema } from "../memory/investigation-schema";
 
@@ -33,5 +33,5 @@ export const codebaseInvestigator: SubAgent = new Agent({
     }),
   ],
   model: "openai/gpt-5.4",
-  workspace: cbAgentThreeServicesDemoWorkspace,
+  workspace: codebaseAgentWorkspace,
 });
