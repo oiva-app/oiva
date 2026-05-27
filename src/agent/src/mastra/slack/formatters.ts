@@ -46,7 +46,10 @@ export function buildSummaryBlocks(
     { type: "divider" },
     {
       type: "section",
-      text: { type: "mrkdwn", text: `<${resultUrl}|View in Honeycomb>` },
+      text: {
+        type: "mrkdwn",
+        text: `<${resultUrl}|View Result Query in Honeycomb>`,
+      },
     },
     { type: "divider" },
     {
@@ -96,17 +99,39 @@ export function buildErrorBlocks(
     { type: "divider" },
     {
       type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "Unfortunately, I was unable to generate an incident report for the following alert.",
+      },
+    },
+    { type: "divider" },
+    {
+      type: "section",
       fields: [
-        { type: "mrkdwn", text: `*Alert*\n${alertContext.triggerName}` },
+        {
+          type: "mrkdwn",
+          text: `*Alert Trigger*\n${alertContext.triggerName}`,
+        },
         { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
+        {
+          type: "mrkdwn",
+          text: `*Alert Timestamp*\n${alertContext.alert.timestamp}`,
+        },
       ],
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Alert Description*\n${alertContext.description}`,
+      },
     },
     { type: "divider" },
     {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `<${alertContext.resultUrl}|View in Honeycomb>`,
+        text: `<${alertContext.resultUrl}|View Result Query in Honeycomb>`,
       },
     },
   ];

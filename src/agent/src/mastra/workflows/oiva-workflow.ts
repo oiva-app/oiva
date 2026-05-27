@@ -20,7 +20,6 @@ import { mastra } from "..";
 import {
   postReportSummary,
   uploadFileToThread,
-  postRatingConfirmation,
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
@@ -191,6 +190,7 @@ const generateReport = createStep({
     const id = crypto.randomUUID();
 
     try {
+      // TODO: replace with db insert once set up
       const reportsDir = path.resolve(process.cwd(), "reports");
       await fs.mkdir(reportsDir, { recursive: true });
       await fs.writeFile(
@@ -231,18 +231,11 @@ const sendReportToSlack = createStep({
   },
 });
 
-// Workflow: ingestion only for now.
-// outputSchema is a union of the filtered terminal and the (eventual)
-// investigation result. As contextualize/investigate/report steps land,
-// extend the actionable side of this union (likely with a ReportSchema).
 export const oivaWorkflow = createWorkflow({
   id: "oiva-workflow",
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: honeycombWebhookPayloadSchema,
-  outputSchema: z.union([
-    filteredOutcomeSchema,
-    alertContextSchema, // placeholder: replace with Report schema later
-  ]),
+  outputSchema: z.union([filteredOutcomeSchema, z.string()]),
 })
   .then(verifyStep)
   .map(async ({ inputData }) => {
@@ -260,6 +253,7 @@ export const oivaWorkflow = createWorkflow({
   .then(normalizeStep)
   .then(investigate)
   .then(generateReport)
+  .then(sendReportToSlack)
   .commit();
 
 //***INITIAL SPIKE WITH TEAM ***/
