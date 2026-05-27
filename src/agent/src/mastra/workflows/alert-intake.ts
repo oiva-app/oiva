@@ -80,7 +80,14 @@ const TIME_PLACEHOLDER = "unknown";
 
 const workflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
-  queryResult: z.any().default(null),
+  queryResult: z
+    .object({
+      content: z.array(
+        z.object({ type: z.string(), text: z.string().optional() }),
+      ),
+    })
+    .nullable()
+    .default(null),
   queryDetails: z.any().default(null),
   summaryString: z.string().default(""),
   t1: z
