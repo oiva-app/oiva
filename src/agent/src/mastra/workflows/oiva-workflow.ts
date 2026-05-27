@@ -16,6 +16,14 @@ import {
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
+import { mastra } from "..";
+import {
+  postReportSummary,
+  uploadFileToThread,
+  postRatingConfirmation,
+  postErrorMessage,
+  postErrorToThread,
+} from "../slack/client";
 
 const oivaWorkflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
@@ -156,18 +164,26 @@ const generateReport = createStep({
       findings: inputData,
       alertContext: state.alertContext,
     };
-    const reportAgent = mastra.getAgentById("report-agent");
-    const response = await reportAgent.generate(
-      JSON.stringify(reportInput, null, 2),
-      {
-        structuredOutput: {
-          schema: reportAgentOutputSchema,
-        },
-      },
-    );
 
-    if (!response.object) {
-      throw new Error("generateReport: invalid agent output");
+    const reportAgent = mastra.getAgentById("report-agent");
+    let response;
+    try {
+      response = await reportAgent.generate(
+        JSON.stringify(reportInput, null, 2),
+        {
+          structuredOutput: {
+            schema: reportAgentOutputSchema,
+          },
+        },
+      );
+
+      if (!response.object) {
+        throw new Error("generateReport: invalid agent output");
+      }
+    } catch (e) {
+      console.error(e);
+      await postErrorMessage(state.alertContext);
+      throw e;
     }
 
     const report = response.object;
@@ -187,6 +203,21 @@ const generateReport = createStep({
     }
 
     return { id, ...report };
+  },
+});
+
+const sendReportToSlack = createStep({
+  id: "send-report",
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: incidentReportSchema,
+  outputSchema: incidentReportSchema,
+  execute: async ({ inputData, state }) => {
+    if (!state.alertContext) {
+      throw new Error("sendReportToSlack: alert context unavailable");
+    }
+
+    const resultUrl = state.alertContext.resultUrl;
+    const messageTimestamp = await postReportSummary(inputData, resultUrl);
   },
 });
 
