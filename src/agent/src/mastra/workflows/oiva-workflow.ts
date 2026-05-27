@@ -210,14 +210,24 @@ const sendReportToSlack = createStep({
   id: "send-report",
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: incidentReportSchema,
-  outputSchema: incidentReportSchema,
+  outputSchema: z.string(),
   execute: async ({ inputData, state }) => {
     if (!state.alertContext) {
       throw new Error("sendReportToSlack: alert context unavailable");
     }
 
     const resultUrl = state.alertContext.resultUrl;
-    const messageTimestamp = await postReportSummary(inputData, resultUrl);
+    const threadTs = await postReportSummary(inputData, resultUrl);
+
+    try {
+      await uploadFileToThread(threadTs, inputData);
+      console.log(`Full report uploaded to thread, ts: ${threadTs}`);
+    } catch (e) {
+      console.error(e);
+      await postErrorToThread(threadTs);
+    }
+
+    return threadTs;
   },
 });
 
