@@ -15,6 +15,7 @@ function toMrkdwn(markdown: string | undefined | null): string {
 
 export function buildSummaryBlocks(
   report: IncidentReport,
+  resultUrl: string,
 ): (Block | KnownBlock)[] {
   return [
     {
@@ -41,6 +42,11 @@ export function buildSummaryBlocks(
         type: "mrkdwn",
         text: `*📋 Next Steps*\n${toMrkdwn(report.nextSteps)}`,
       },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: `<${resultUrl}|View in Honeycomb>` },
     },
     { type: "divider" },
     {
@@ -77,17 +83,17 @@ export function renderFullReportMarkdown(report: IncidentReport): string {
 
 export function buildErrorBlocks(
   alertContext: AlertContext,
-  errorMessage: string,
 ): (Block | KnownBlock)[] {
   return [
     {
       type: "header",
       text: {
         type: "plain_text",
-        text: "Oiva could not generate a report",
+        text: "Incident Report Generation Failed",
         emoji: false,
       },
     },
+    { type: "divider" },
     {
       type: "section",
       fields: [
@@ -95,10 +101,7 @@ export function buildErrorBlocks(
         { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
       ],
     },
-    {
-      type: "section",
-      text: { type: "mrkdwn", text: `*Error*\n${errorMessage}` },
-    },
+    { type: "divider" },
     {
       type: "section",
       text: {

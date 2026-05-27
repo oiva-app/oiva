@@ -1,18 +1,25 @@
 import { WebClient } from "@slack/web-api";
-import type { Block, KnownBlock } from "@slack/web-api";
 import { env } from "../config/env";
+import {
+  buildSummaryBlocks,
+  renderFullReportMarkdown,
+  buildErrorBlocks,
+} from "./formatters";
+import type { IncidentReport } from "../types/report";
+import type { AlertContext } from "../types/alert-context";
 
 const client = new WebClient(env.SLACK_BOT_TOKEN);
 
-export async function postBlockKitMessage(
-  channel: string,
-  blocks: (Block | KnownBlock)[],
-  fallbackText: string,
+export async function postReportSummary(
+  report: IncidentReport,
+  resultUrl: string,
 ): Promise<string> {
+  const blocks = buildSummaryBlocks(report, resultUrl);
+
   const result = await client.chat.postMessage({
-    channel,
+    channel: env.SLACK_CHANNEL_ID,
     blocks,
-    text: fallbackText,
+    text: "Oiva Incident Report",
   });
 
   if (!result.ts) {
@@ -23,56 +30,50 @@ export async function postBlockKitMessage(
 }
 
 export async function uploadFileToThread(
-  channel: string,
   threadTs: string,
-  content: string,
-  filename: string,
+  report: IncidentReport,
 ): Promise<void> {
+  const content = renderFullReportMarkdown(report);
+
   await client.filesUploadV2({
-    channel_id: channel,
+    channel_id: env.SLACK_CHANNEL_ID,
     thread_ts: threadTs,
     content,
-    filename,
-    title: filename,
+    filename: `oiva-incident-report-${report.id}.md`,
+    title: report.title,
   });
 }
 
-export async function updateMessage(
-  channel: string,
-  ts: string,
-  blocks: (Block | KnownBlock)[],
-  fallbackText: string,
+export async function postRatingConfirmation(
+  threadTs: string,
+  rating: "positive" | "negative",
+  userName: string,
 ): Promise<void> {
-  await client.chat.update({
-    channel,
-    ts,
-    blocks,
-    text: fallbackText,
+  const emoji = rating === "positive" ? "👍" : "👎";
+
+  await client.chat.postMessage({
+    channel: env.SLACK_CHANNEL_ID,
+    thread_ts: threadTs,
+    text: `The report has been rated ${emoji} by @${userName}`,
   });
 }
 
 export async function postErrorMessage(
-  channel: string,
-  blocks: (Block | KnownBlock)[],
-  fallbackText: string,
+  alertContext: AlertContext,
 ): Promise<void> {
+  const blocks = buildErrorBlocks(alertContext);
+
   await client.chat.postMessage({
-    channel,
+    channel: env.SLACK_CHANNEL_ID,
     blocks,
-    text: fallbackText,
+    text: "Oiva Incident Report Generation Failed",
   });
 }
 
-export async function postErrorToThread(
-  channel: string,
-  threadTs: string,
-  blocks: (Block | KnownBlock)[],
-  fallbackText: string,
-): Promise<void> {
+export async function postErrorToThread(threadTs: string): Promise<void> {
   await client.chat.postMessage({
-    channel,
+    channel: env.SLACK_CHANNEL_ID,
     thread_ts: threadTs,
-    blocks,
-    text: fallbackText,
+    text: "Unfortunately, I was unable to attach the full report. See the summary above to view key insights.",
   });
 }
