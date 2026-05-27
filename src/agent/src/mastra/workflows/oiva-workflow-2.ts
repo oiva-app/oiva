@@ -44,9 +44,12 @@ const HCQueryDetailsSchema = z.object({
 
 /**
  * TODO: CENTRALIZE THIS TIMEZONE CONFIG (currently hardcoded)
+ * Convert all timestamps to GMT to keep things simple? Or maybe this would just complicate things?
+ * What timezone does Honeycomb MCP expect??
  */
 function formatTimestamp(ms: number, timeZone = "America/New_York"): string {
-  if (!Number.isFinite(ms)) throw new Error(`formatTimestamp: invalid ms ${ms}`);
+  if (!Number.isFinite(ms))
+    throw new Error(`formatTimestamp: invalid ms ${ms}`);
   const date = new Date(ms);
 
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -195,6 +198,10 @@ const getQueryDetailsStep = createStep({
   },
 });
 
+/**
+ * TODO: METHOD FOR CALCULATING T1 AND T4 IS VERY ROUGH AND SHOULD BE IMPROVED
+ * PROBABLY WARRANTS A SUBAGENT CALL?
+ */
 const extractTimestamps = createStep({
   id: "extract-timestamps",
   description: "Extract timestamps from the gathered context",
@@ -202,15 +209,23 @@ const extractTimestamps = createStep({
   outputSchema: workflowStateSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ state, setState }) => {
-    const t3 = state.alertContext?.alert.timestamp ?? TIME_PLACEHOLDER;
-    const t1 = formatTimestamp(state.queryDetails.template.end_time * 1000);
+    const queryStart = state.queryDetails.template.start_time;
+    const queryEnd = state.queryDetails.template.end_time;
+    const queryDuration = queryEnd - queryStart;
+    const t3 = formatTimestamp(state.queryDetails.template.end_time * 1000);
+    
+    // TODO - T1 AND T4 NEED IMPROVEMENT
+    const t1 = formatTimestamp((queryStart - queryDuration * 3) * 1000);
+    const t4 = formatTimestamp((queryEnd + queryDuration * 2) * 1000);
+
     const newState = {
       ...state,
       t1,
       t3,
-    }
+      t4,
+    };
     await setState(newState);
-    return newState
+    return newState;
   },
 });
 
@@ -224,8 +239,6 @@ const returnStateStep = createStep({
     return state;
   },
 });
-
-
 
 export const oivaWorkflow2 = createWorkflow({
   id: "oiva-workflow-2",
