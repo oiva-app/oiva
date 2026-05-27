@@ -10,7 +10,7 @@ import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { graphAgent } from "../agents/graph-agent";
-import { mcpToolResultSchema, type McpResourceLink } from "../types/mcp";
+import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
 
 // This is a partial model of
 // src/agent/docs/planning/alert_contextualization/query_details.json
@@ -159,7 +159,7 @@ const getQueryResultsStep = createStep({
   id: "get-query-results",
   description: "Get query results via API",
   inputSchema: alertContextSchema,
-  outputSchema: mcpToolResultSchema,
+  outputSchema: ResourceLinkSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
     const tool = honeycomb_get_query_results;
@@ -173,7 +173,7 @@ const getQueryResultsStep = createStep({
 const getQueryDetailsStep = createStep({
   id: "get-query-details",
   description: "Get more details about the query",
-  inputSchema: mcpToolResultSchema,
+  inputSchema: ResourceLinkSchema,
   outputSchema: HCQueryDetailsSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
@@ -213,7 +213,7 @@ const extractTimestamps = createStep({
     const queryEnd = state.queryDetails.template.end_time;
     const queryDuration = queryEnd - queryStart;
     const t3 = formatTimestamp(state.queryDetails.template.end_time * 1000);
-    
+
     // TODO - T1 AND T4 NEED IMPROVEMENT
     const t1 = formatTimestamp((queryStart - queryDuration * 3) * 1000);
     const t4 = formatTimestamp((queryEnd + queryDuration * 2) * 1000);
