@@ -4,7 +4,7 @@ import alertPayload from "../../../docs/sample_alerts/lisa.json";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import { alertIntake } from "./alert-intake";
 
-test("Expect workflow to run without errors", async () => {
+test("INTEGRATION: Expect workflow to run without errors", async () => {
   const inputData = honeycombWebhookPayloadSchema.parse(alertPayload);
 
   const run = await alertIntake.createRun();

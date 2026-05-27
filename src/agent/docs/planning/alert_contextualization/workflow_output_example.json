@@ -1,0 +1,137 @@
+{
+  "queryResult": {
+    "content": [
+      {
+        "type": "text",
+        "text": "# Results\n\n| COUNT | service.name |\n| --- | --- |\n| 2736 | product-catalog |\n| 2734 | frontend |\n| 684 | frontend-proxy |\n| 9 | ad |\n| 9 | fraud-detection |\n| 4 | load-generator |\n| 0 | OTHER |\n| 6176 | TOTAL |\n\n\n# Time Series\n\n```\nCOUNT - frontend [0.00 - 52.7]\n│                                                                                                                        \n│                                                                                                     ·                  \n│    ·                                                                                                                   \n│                                                                                                                        \n│                                                                                                                        \n│ ·           ·       ·     ·                                            ·   ·  ·        ·   ·                           \n│          ·                    ·      ·  ·     ·       · ··  ·         ·   ·  ·  ·            ··       ·  ·  ·      ·   \n│       ·                 ·        ·       ·                                                    ·                        \n│· ··· ·           ·          ·· ··               ·· ·   ··  ··    ·  · ···             ·   ··    ··      ·· ·   ···· ·· \n│      ·          ·        ·              ··        · ·         ·            ·      ·          · ·  ·          ·         \n│ ··· · ··········· ·········· ··· ·······  ······· · ···  ···  ········   ·· ·· ··· ··· ···· ·   ·· · ···· ··· ·· ···· ·\n│                   ··                   ·   ·       ·         ·                                         ·     ··        \n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:18Z                                  2026-05-18T17:19Z                                  2026-05-18T17:21Z\n```\n\n```\nCOUNT - product-catalog [0.00 - 52.7]\n│                                                                                                                        \n│    ·                                                                                                                   \n│                                                                                                      ·                 \n│                                                                                                                        \n│                                                                               ·                          ·             \n│ ·           ·       ·     ·                                           ·   ·             ·   ·                          \n│       ·  ·              ·     ·      ·  ·     ·      · ··  ·         ·  ·                     ··  ·    ·    ·          \n│                                          ·                             ·    ·   ·                                  ·   \n│· ··· ·           ··         ·· ·· ·     ·      ·····  ·   ···   · ·      ·         ·   ·   ·    ··        ··  · ···  · \n│ ·                          ·     ·        ·           ·             ·          ·       ·· ·          ·             ··  \n│  ·· · ······ ····  ····· ··· · ········· · ······ ····  ··· ·········  ··· ·  ·· ······  ··  ·  · ··· ··· ·········   ·\n│             ·     ··   ·              ·                              ··     ··   ··           ·     ·   ·           ·  \n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:18Z                                  2026-05-18T17:19Z                                  2026-05-18T17:21Z\n```\n\n```\nCOUNT - frontend-proxy [1.00 - 13.0]\n│                                                                                                                        \n│                                                                                                      ·                 \n│                                                                                                                        \n│    ·                                                                                                                   \n│                                                                                                                        \n│ ·           ·            ·                                            ·       ·        ·       ·        ·              \n│                                                                                                                        \n│   ·      ·         ·   ·   · ·  ·   ·  ·     ·  ·    · ··   ·         ·    · ·  ·          · ·         ·    ·      ·   \n│                                                                                                                        \n│· ·  ···         ··       · ·· ··        ·      ·  ·   ··   ·     · · · ····       ·   ·   ·   ·  ··       ··   ···· ·· \n│                                                                                                                        \n│ ··· · ··········· ······· ·  ··· ······· ···· ········  ··· ··········  · · ·········· ···· ·· ·· ··············· ··· ·\n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:18Z                                  2026-05-18T17:19Z                                  2026-05-18T17:21Z\n```\n\n```\nCOUNT - ad [0.90 - 1.10]\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│························································································································\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:18Z                                  2026-05-18T17:19Z                                  2026-05-18T17:20Z\n```\n\n```\nCOUNT - fraud-detection [0.90 - 1.10]\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│························································································································\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:18Z                                  2026-05-18T17:19Z                                  2026-05-18T17:20Z\n```\n\n```\nCOUNT - load-generator [0.90 - 1.10]\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│························································································································\n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n│                                                                                                                        \n└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n 2026-05-18T17:19Z                                  2026-05-18T17:20Z                                  2026-05-18T17:20Z\n```\n\n# Query Spec\n\n```json\n{\"breakdowns\":[\"service.name\"],\"calculations\":[{\"op\":\"COUNT\"}],\"end_time\":1779124863,\"filters\":[{\"column\":\"error\",\"join_column\":\"\",\"op\":\"=\",\"value\":true}],\"limit\":1000,\"orders\":[{\"op\":\"COUNT\",\"order\":\"descending\"}],\"start_time\":1779124683}\n```\n\n---\nMetadata:\n  environment: astro-lisa\n  query_result_image: \"https://ui.honeycomb.io/img/8hBDkhzFa8bo9whdZnzJZr3fxuPxbJ5ZBsJimYqq3WL\"\n  query_result_json: \"https://mcp.honeycomb.io/query_results/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJxdWVyeV9ydW5fcGsiOiI0U1N6bU5vRlQ4ZCIsInRlYW1faWQiOjExNjY0MSwidXNlcl9pZCI6MCwiZXhwIjoxNzc5ODk0NTE2LCJpYXQiOjE3Nzk4OTM2MTZ9.HgFbId0Dc4P-axx2-KbKPpcAtwIsX3_oASPlDEOOWJ4\"\n  query_run_pk: 4SSzmNoFT8d\n  query_url: \"https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d\"\n"
+      },
+      {
+        "name": "Query results (raw JSON)",
+        "uri": "honeycomb://query-run/4SSzmNoFT8d/json",
+        "mimeType": "application/json",
+        "type": "resource_link"
+      },
+      {
+        "name": "Query results (summary)",
+        "uri": "honeycomb://query-run/4SSzmNoFT8d/summary",
+        "mimeType": "text/markdown",
+        "type": "resource_link"
+      }
+    ]
+  },
+  "queryDetails": {
+    "results": [
+      {
+        "data": {
+          "COUNT": 2736,
+          "service.name": "product-catalog"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 2734,
+          "service.name": "frontend"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 684,
+          "service.name": "frontend-proxy"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "ad"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "fraud-detection"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "load-generator"
+        }
+      }
+    ],
+    "template": {
+      "breakdowns": [
+        "service.name"
+      ],
+      "calculations": [
+        {
+          "op": "COUNT"
+        }
+      ],
+      "filters": [
+        {
+          "column": "error",
+          "join_column": "",
+          "op": "=",
+          "value": true
+        }
+      ],
+      "start_time": 1779124683,
+      "end_time": 1779124863
+    },
+    "info": {
+      "granularity_seconds": 0.5
+    }
+  },
+  "t1": "May 18 2026 13:09:03 UTC-04:00",
+  "t2": "unknown",
+  "t3": "May 18 2026 13:21:03 UTC-04:00",
+  "t4": "May 18 2026 13:27:03 UTC-04:00",
+  "alertContext": {
+    "status": "TRIGGERED",
+    "isTest": false,
+    "triggerName": "error == true",
+    "description": "COUNT of error = true >= 1 over the course of 5 minutes",
+    "environment": "astro-lisa",
+    "datasets": [
+      "__all__"
+    ],
+    "groupsTriggered": [
+      {
+        "field": "service.name",
+        "value": "product-catalog",
+        "count": 2736
+      },
+      {
+        "field": "service.name",
+        "value": "frontend",
+        "count": 2734
+      },
+      {
+        "field": "service.name",
+        "value": "frontend-proxy",
+        "count": 684
+      },
+      {
+        "field": "service.name",
+        "value": "ad",
+        "count": 9
+      },
+      {
+        "field": "service.name",
+        "value": "fraud-detection",
+        "count": 9
+      },
+      {
+        "field": "service.name",
+        "value": "load-generator",
+        "count": 4
+      }
+    ],
+    "alert": {
+      "timestamp": "May 18 2026 13:21:03 UTC-04:00"
+    },
+    "resultUrl": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
+    "triggerUrl": "",
+    "instanceId": "1015bd0f-99a3-41e7-817e-9c831df21262"
+  }
+}

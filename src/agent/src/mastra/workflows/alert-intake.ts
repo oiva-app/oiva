@@ -1,3 +1,8 @@
+/*
+TODO: 
+  - Replace z.any() schemas with real schemas
+*/
+
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
@@ -11,6 +16,7 @@ import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { graphAgent } from "../agents/graph-agent";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
+import { stat } from "node:fs";
 
 // This is a partial model of
 // src/agent/docs/planning/alert_contextualization/query_details.json
@@ -76,6 +82,7 @@ const workflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
   queryResult: z.any().default(null),
   queryDetails: z.any().default(null),
+  summaryString: z.string().default(""),
   t1: z
     .string()
     .default(TIME_PLACEHOLDER)
@@ -101,7 +108,7 @@ INSTEAD OF THE HONEYCOMB MCP
 However, the API requires an Enterprise license
  */
 
-const verifyStep = createStep({
+const verify = createStep({
   id: "verify-alert",
   description:
     "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
@@ -141,7 +148,7 @@ const normalizeStep = createStep({
  * It's possible / likely that this step should be omitted from production runs
  * It is helpful for testing with stale alerts and missing triggers.
  */
-const redactStep = createStep({
+const redact = createStep({
   id: "scrub-alert",
   description:
     "Remove context to keep info from Agent, with goal of improving investigation",
@@ -155,7 +162,7 @@ const redactStep = createStep({
   },
 });
 
-const getQueryResultsStep = createStep({
+const getQueryResults = createStep({
   id: "get-query-results",
   description: "Get query results via API",
   inputSchema: alertContextSchema,
@@ -170,7 +177,7 @@ const getQueryResultsStep = createStep({
   },
 });
 
-const getQueryDetailsStep = createStep({
+const getQueryDetails = createStep({
   id: "get-query-details",
   description: "Get more details about the query",
   inputSchema: ResourceLinkSchema,
@@ -229,7 +236,55 @@ const extractTimestamps = createStep({
   },
 });
 
-const returnStateStep = createStep({
+const createAlertContextualizedAlertString = createStep({
+  id: "return-state",
+  description: "Return the workflow state.  Discard input",
+  inputSchema: workflowStateSchema,
+  outputSchema: z.void(),
+  stateSchema: workflowStateSchema,
+  execute: async ({ state, setState }) => {
+    const textResult = state.queryResult?.content.find(
+      (item) => item.type === "text",
+    )?.text;
+
+    const summaryString = `
+# Summary
+Alert timestamp: ${state.t3} 
+Environment name: ${state.alertContext?.environment}
+Trigger name: ${state.alertContext?.triggerName}
+
+## Alert description created by the user:
+<missing></missing>
+
+## An automated description of this specific alert:
+${state.alertContext?.description}
+
+# What datasets were in the scope of this query?
+${JSON.stringify(state.alertContext?.datasets)}
+
+Keep in mind that it may be helpful to examine other datasets.
+
+# Important timestamps
+| Marker | Description | Time (UTC-04:00) |
+|--------|-------------|------------------|
+| T1 | Beginning of investigation window | ${state.t1} |
+| T2 | About when did the problem begin? | ${state.t2} |
+| T3 | When did the alert fire? | ${state.t3} |
+| T4 | End of investigation window | ${state.t4} |
+
+IMPORTANT: T1 and T4 are approximate.  Start your investigation between those timestamps, but feel free to expand your investigation if you deem necessary
+
+# Full query results
+
+<QUERY_RESULTS>
+${textResult}
+</QUERY_RESULTS>
+`;
+    setState({ ...state, summaryString });
+  },
+});
+
+const returnWorkflowState = createStep({
   id: "return-state",
   description: "Return the workflow state.  Discard input",
   inputSchema: z.any(),
@@ -249,7 +304,7 @@ export const alertIntake = createWorkflow({
     alertContextSchema, // placeholder: replace with Report schema later
   ]),
 })
-  .then(verifyStep)
+  .then(verify)
   .map(async ({ inputData }) => {
     if ("kind" in inputData && inputData.kind === "filtered") {
       throw new Error(
@@ -259,9 +314,10 @@ export const alertIntake = createWorkflow({
     return inputData;
   })
   .then(normalizeStep)
-  .then(redactStep)
-  .then(getQueryResultsStep)
-  .then(getQueryDetailsStep)
+  .then(redact)
+  .then(getQueryResults)
+  .then(getQueryDetails)
   .then(extractTimestamps)
-  .then(returnStateStep)
+  .then(createAlertContextualizedAlertString)
+  .then(returnWorkflowState)
   .commit();
