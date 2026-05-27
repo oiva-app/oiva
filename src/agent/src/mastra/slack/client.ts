@@ -74,6 +74,6 @@ export async function postErrorToThread(threadTs: string): Promise<void> {
   await client.chat.postMessage({
     channel: env.SLACK_CHANNEL_ID,
     thread_ts: threadTs,
-    text: "Unfortunately, I was unable to attach the full report. See the summary above to view key insights.",
+    text: "Unfortunately, I was unable to attach the full incident report. See the summary above to view the key insights.",
   });
 }
