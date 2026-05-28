@@ -33,7 +33,7 @@ import { env } from "./config/env";
 export const mastra = new Mastra({
   workflows: {
     oivaWorkflow,
-    oivaWorkflow2: alertIntake,
+    alertIntake,
     inspectMcpWorkflow,
     weatherWorkflow,
   },

@@ -361,6 +361,6 @@ export const alertIntake = createWorkflow({
   .then(getQueryDetails)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
-  .then(investigate)
+  // .then(investigate)
   .then(returnWorkflowState)
   .commit();
