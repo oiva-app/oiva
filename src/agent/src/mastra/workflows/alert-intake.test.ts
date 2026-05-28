@@ -26,12 +26,19 @@ test("INTEGRATION: Expect workflow to run without errors", async () => {
       expect(result.status).toBe("success");
       span.setStatus({ code: SpanStatusCode.OK });
     } catch (err) {
-      span.recordException(err as Error);
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: (err as Error).message,
-      });
-      throw err;
+      if (err instanceof Error) {
+        span.recordException(err);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        });
+        throw err;
+      } else {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: String(err),
+        });
+      }
     } finally {
       span.end();
     }
