@@ -22,34 +22,37 @@ import {
   telemetryStepOutputSchema,
 } from "../types/investigation";
 
-// This is a partial model of
-// src/agent/docs/planning/alert_contextualization/query_details.json
-const HCQueryDetailsSchema = z.object({
+// Shape returned by the Honeycomb MCP `get_query_results` tool's JSON
+// resource_link. This is query *results*, not the query definition — there is
+// no `template` here. Time window must be derived from `series[].time`.
+const HCQueryResultsSchema = z.object({
+  header: z.array(
+    z
+      .object({
+        alias: z.string(),
+        key_name: z.string(),
+        type: z.string(),
+      })
+      .loose(),
+  ),
+  info: z
+    .object({
+      granularity_seconds: z.number(),
+    })
+    .loose(),
   results: z.array(
     z.object({
       data: z.record(z.string(), z.unknown()),
     }),
   ),
-  template: z.object({
-    breakdowns: z.array(z.string()).describe("GROUP: How are spans grouped?"),
-    calculations: z
-      .array(
-        z.object({
-          op: z.string(),
-        }),
-      )
-      .describe("SELECT: how are spans selected?"),
-    filters: z
-      .array(
-        z.record(z.string(), z.union([z.string(), z.boolean(), z.number()])),
-      )
-      .describe("FILTER: how are spans filtered?"),
-    start_time: z.int(),
-    end_time: z.int(),
-  }),
-  info: z.object({
-    granularity_seconds: z.number(),
-  }),
+  series: z
+    .array(
+      z.object({
+        data: z.record(z.string(), z.unknown()),
+        time: z.string().describe("ISO 8601 timestamp of this bucket"),
+      }),
+    )
+    .min(1, "query results contained no series buckets"),
 });
 
 /**
@@ -92,7 +95,7 @@ const workflowStateSchema = z.object({
     })
     .nullable()
     .default(null),
-  queryDetails: z.any().default(null),
+  queryResults: HCQueryResultsSchema.nullable().default(null),
   summaryString: z.string().default(""),
   report: telemetryFindingsSchema.optional(),
   t1: z
@@ -192,11 +195,11 @@ const getQueryResults = createStep({
   },
 });
 
-const getQueryDetails = createStep({
-  id: "get-query-details",
-  description: "Get more details about the query",
+const getQueryResultsJson = createStep({
+  id: "get-query-results-json",
+  description: "Read and validate the JSON resource_link from query results",
   inputSchema: ResourceLinkSchema,
-  outputSchema: HCQueryDetailsSchema,
+  outputSchema: HCQueryResultsSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState, tracingContext }) => {
     const span = tracingContext?.currentSpan;
@@ -217,10 +220,10 @@ const getQueryDetails = createStep({
       throw new Error("query results resource returned non-text content");
     }
     const t = JSON.parse(content.text);
-    const queryDetails = HCQueryDetailsSchema.parse(t);
+    const queryResults = HCQueryResultsSchema.parse(t);
 
-    await setState({ ...state, queryDetails });
-    return queryDetails;
+    await setState({ ...state, queryResults });
+    return queryResults;
   },
 });
 
@@ -231,18 +234,27 @@ const getQueryDetails = createStep({
 const extractTimestamps = createStep({
   id: "extract-timestamps",
   description: "Extract timestamps from the gathered context",
-  inputSchema: HCQueryDetailsSchema,
+  inputSchema: HCQueryResultsSchema,
   outputSchema: workflowStateSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ state, setState }) => {
-    const queryStart = state.queryDetails.template.start_time;
-    const queryEnd = state.queryDetails.template.end_time;
-    const queryDuration = queryEnd - queryStart;
-    const t3 = formatTimestamp(state.queryDetails.template.end_time * 1000);
+    const series = state.queryResults?.series;
+    if (!series?.length) {
+      throw new Error("extractTimestamps: queryResults.series is empty");
+    }
+    const firstMs = Date.parse(series[0].time);
+    const lastMs = Date.parse(series[series.length - 1].time);
+    if (!Number.isFinite(firstMs) || !Number.isFinite(lastMs)) {
+      throw new Error(
+        `extractTimestamps: invalid series timestamps (${series[0].time} / ${series[series.length - 1].time})`,
+      );
+    }
+    const queryDuration = lastMs - firstMs;
+    const t3 = formatTimestamp(lastMs);
 
     // TODO - T1 AND T4 NEED IMPROVEMENT
-    const t1 = formatTimestamp((queryStart - queryDuration * 3) * 1000);
-    const t4 = formatTimestamp((queryEnd + queryDuration * 2) * 1000);
+    const t1 = formatTimestamp(firstMs - queryDuration * 3);
+    const t4 = formatTimestamp(lastMs + queryDuration * 2);
 
     const newState = {
       ...state,
@@ -362,7 +374,7 @@ export const alertIntake = createWorkflow({
   .then(normalizeStep)
   .then(redact)
   .then(getQueryResults)
-  .then(getQueryDetails)
+  .then(getQueryResultsJson)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
   // .then(investigate)
