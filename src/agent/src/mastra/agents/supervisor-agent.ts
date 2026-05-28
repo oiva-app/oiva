@@ -6,6 +6,12 @@ import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
 import { supervisorWorkspace } from "../workspaces/supervisor-workspace";
 
+// i feel like this method of getting agent instance is a little ugly
+const SUBAGENTS = {
+  "codebase-investigator": codebaseInvestigator,
+  "telemetry-agent": telemetryAgent,
+} as const;
+
 export const supervisorAgent = new Agent({
   id: "supervisor-agent",
   name: "Supervisor Agent",
@@ -17,9 +23,16 @@ export const supervisorAgent = new Agent({
     maxSteps: env.SUPERVISOR_MAX_STEPS,
     disableBackgroundTasks: true,
     delegation: {
-      onDelegationStart: ({ primitiveId }) => {
+      onDelegationStart: () => {
         return { modifiedMaxSteps: 15 };
       },
+      // this is used to clean up local storage after an investigation
+      onDelegationComplete: async ({ primitiveId, result }) => {
+        if (!result.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
+        const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];
+        const memory = await subAgent.getMemory({});
+        await memory?.deleteThread(result.subAgentThreadId);
+      }
     },
   },
   workspace: supervisorWorkspace,

@@ -9,6 +9,7 @@ import path from "node:path";
 import * as z from "zod";
 
 const EnvSchema = z.object({
+  OBSERVED_APP_NAME: z.string(),
   OPENAI_API_KEY: z.string(),
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
