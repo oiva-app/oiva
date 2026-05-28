@@ -1,10 +1,7 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
-import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
-import {
-  alertContextSchema,
-  filteredOutcomeSchema,
-} from "../types/alert-context";
+
+import { alertContextSchema } from "../types/alert-context";
 import {
   telemetryStepOutputSchema,
   telemetryFindingsSchema,
@@ -12,8 +9,6 @@ import {
   supervisorAgentOutputSchema,
 } from "../types/investigation";
 import { incidentReportSchema } from "../types/report";
-import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
-import { env } from "../config/env";
 
 const oivaWorkflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
@@ -26,43 +21,43 @@ const oivaWorkflowStateSchema = z.object({
   - filtered => bail({kind:"filtered", ...}) => workflow ends successfully with a FilteredOutcome as its final output
   - actionable => return inputData unchanged => passes to normalizeStep
  */
-const verifyStep = createStep({
-  id: "verify-alert",
-  description:
-    "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
-  inputSchema: honeycombWebhookPayloadSchema,
-  // Step output must satisfy bail (filtered) and pass-through (actionable).
-  outputSchema: z.union([honeycombWebhookPayloadSchema, filteredOutcomeSchema]),
-  execute: async ({ inputData, bail }) => {
-    const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
+// const verifyStep = createStep({
+//   id: "verify-alert",
+//   description:
+//     "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
+//   inputSchema: honeycombWebhookPayloadSchema,
+//   // Step output must satisfy bail (filtered) and pass-through (actionable).
+//   outputSchema: z.union([honeycombWebhookPayloadSchema, filteredOutcomeSchema]),
+//   execute: async ({ inputData, bail }) => {
+//     const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
 
-    switch (result.kind) {
-      case "invalid":
-        throw new Error(`Honeycomb webhook rejected: ${result.reason}`);
+//     switch (result.kind) {
+//       case "invalid":
+//         throw new Error(`Honeycomb webhook rejected: ${result.reason}`);
 
-      case "filtered":
-        return bail({
-          kind: "filtered" as const,
-          reason: result.reason,
-          instanceId: inputData.alert.instanceId,
-        });
+//       case "filtered":
+//         return bail({
+//           kind: "filtered" as const,
+//           reason: result.reason,
+//           instanceId: inputData.alert.instanceId,
+//         });
 
-      case "actionable":
-        return inputData;
-    }
-  },
-});
+//       case "actionable":
+//         return inputData;
+//     }
+//   },
+// });
 
 // Step 2 — normalize
 // Only reached when verify returns actionable. Pure transform: HC payload => AlertContext.
-const normalizeStep = createStep({
-  id: "normalize-alert",
-  description:
-    "Reshapes the HC payload into a vendor-neutral AlertContext for downstream steps.",
-  inputSchema: honeycombWebhookPayloadSchema,
-  outputSchema: alertContextSchema,
-  execute: async ({ inputData }) => normalizeAlert(inputData),
-});
+// const normalizeStep = createStep({
+//   id: "normalize-alert",
+//   description:
+//     "Reshapes the HC payload into a vendor-neutral AlertContext for downstream steps.",
+//   inputSchema: honeycombWebhookPayloadSchema,
+//   outputSchema: alertContextSchema,
+//   execute: async ({ inputData }) => normalizeAlert(inputData),
+// });
 
 // step 4.1: telemetry agent investigation
 /**
@@ -173,33 +168,16 @@ const generateReport = createStep({
   },
 });
 
-// Workflow: ingestion only for now.
-// outputSchema is a union of the filtered terminal and the (eventual)
-// investigation result. As contextualize/investigate/report steps land,
-// extend the actionable side of this union (likely with a ReportSchema).
+// Workflow: pure investigation engine, vendor-neutral.
+// Verify + normalize moved to the HTTP boundary; the workflow now starts
+// with an AlertContext and produces an IncidentReport. Filtered and invalid
+// alerts never reach this workflow — they're handled in the boundary.
 export const oivaWorkflow = createWorkflow({
   id: "oiva-workflow",
   stateSchema: oivaWorkflowStateSchema,
-  inputSchema: honeycombWebhookPayloadSchema,
-  outputSchema: z.union([
-    filteredOutcomeSchema,
-    alertContextSchema, // placeholder: replace with Report schema later
-  ]),
+  inputSchema: alertContextSchema,
+  outputSchema: incidentReportSchema,
 })
-  .then(verifyStep)
-  .map(async ({ inputData }) => {
-    // verifyStep.bail() short-circuits the filtered case; only the
-    // actionable HoneycombWebhookPayload shape can reach this point.
-    // Runtime guard is defense-in-depth: if bail's semantics ever change,
-    // we fail loudly here rather than passing a wrong shape into normalize.
-    if ("kind" in inputData && inputData.kind === "filtered") {
-      throw new Error(
-        "unreachable: filtered payload reached normalize boundary",
-      );
-    }
-    return inputData;
-  })
-  .then(normalizeStep)
   .then(investigate)
   .then(generateReport)
   .commit();
