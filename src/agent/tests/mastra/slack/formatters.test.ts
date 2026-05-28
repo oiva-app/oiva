@@ -79,6 +79,16 @@ describe("buildSummaryBlocks", () => {
     const summaryBlock = blocks[2] as { type: string; text: { text: string } };
     expect(summaryBlock.text.text).toContain("<https://ui.honeycomb.io/test|Honeycomb>");
   });
+
+  it("escapes Slack control characters in report content", () => {
+    const reportWithSpecialChars: IncidentReport = {
+      ...mockReport,
+      summary: "latency < 200ms & errors > threshold",
+    };
+    const blocks = buildSummaryBlocks(reportWithSpecialChars, mockAlertContext.resultUrl);
+    const summaryBlock = blocks[2] as { type: string; text: { text: string } };
+    expect(summaryBlock.text.text).toContain("latency &lt; 200ms &amp; errors &gt; threshold");
+  });
 });
 
 describe("buildErrorBlocks", () => {

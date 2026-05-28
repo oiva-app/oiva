@@ -5,8 +5,13 @@ import type { AlertContext } from "../types/alert-context";
 function toMrkdwn(markdown: string | undefined | null): string {
   if (!markdown) return "";
 
+  const escaped = markdown
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
   // Placeholder prevents bold markers from being re-matched as italic in a second pass
-  return markdown
+  return escaped
     .replace(/\*\*(.*?)\*\*/g, "\u0001$1\u0001")
     .replace(/\*(.*?)\*/g, "_$1_")
     .replace(/\u0001(.*?)\u0001/g, "*$1*")
