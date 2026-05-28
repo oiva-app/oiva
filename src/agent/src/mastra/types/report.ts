@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const incidentReportSchema = z.object({
+export const reportAgentOutputSchema = z.object({
   title: z.string().max(60).describe("Plain text incident title. No markdown."),
   summary: z.string().describe("Markdown string. No section heading."),
   alertOverview: z.string().describe("Markdown string. No section heading."),
@@ -10,6 +10,12 @@ export const incidentReportSchema = z.object({
   investigationSteps: z
     .string()
     .describe("Markdown string. No section heading."),
+});
+
+export type ReportAgentOutput = z.infer<typeof reportAgentOutputSchema>;
+
+export const incidentReportSchema = reportAgentOutputSchema.extend({
+  id: z.string(),
 });
 
 export type IncidentReport = z.infer<typeof incidentReportSchema>;

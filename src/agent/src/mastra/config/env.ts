@@ -32,8 +32,8 @@ const EnvSchema = z.object({
   SUPERVISOR_WORKSPACE_PATH: z.string(),
 
   // for slack integration
-  SLACK_BOT_TOKEN: z.string().optional(),
-  SLACK_CHANNEL_ID: z.string().optional(),
+  SLACK_BOT_TOKEN: z.string(),
+  SLACK_CHANNEL_ID: z.string(),
 
   // postgres connection string (compose service: postgres).
   // Format: postgresql://<user>:<password>@<host>:<port>/<database>
