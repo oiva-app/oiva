@@ -1,9 +1,10 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { supervisorPrompt } from "../prompts/supervisor-prompt";
-import { codebaseInvestigator } from "./codebase-agent";
+import { codebaseInvestigator } from "./codebase-agent-workspace-ver"
 import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
+import { supervisorWorkspace } from "../workspaces/supervisor-workspace";
 
 export const supervisorAgent = new Agent({
   id: "supervisor-agent",
@@ -21,4 +22,5 @@ export const supervisorAgent = new Agent({
       },
     },
   },
+  workspace: supervisorWorkspace,
 });

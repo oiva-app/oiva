@@ -1,7 +1,6 @@
 name: oiva-experiment1
 
 services:
-  
   # https://opentelemetry.io/docs/collector/install/docker/
   otel-collector:
     image: otel/opentelemetry-collector
@@ -16,3 +15,27 @@ services:
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: oiva-postgres
+    restart: unless-stopped
+    # Dev password committed intentionally — Postgres listens on localhost
+    # only. Production credentials never live here; they come from a secret
+    # manager (or RDS IAM auth) when AWS deployment lands.
+    environment:
+      POSTGRES_USER: oiva
+      POSTGRES_PASSWORD: oiva_dev
+      POSTGRES_DB: oiva
+    ports:
+      - "5433:5432"
+    volumes:
+      - oiva_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oiva -d oiva"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  oiva_pgdata:

@@ -16,7 +16,7 @@ import {
 } from "../mcp/mcpClients";
 import { Agent } from "@mastra/core/agent";
 import type { SubAgent } from "@mastra/core/agent";
-import { prompt } from "../prompts/system-prompt-codebase-investigator";
+import { prompt } from "../prompts/system-prompt-codebase-investigator-gh-ver";
 import { ObservationalMemory } from "@mastra/memory/processors";
 import { Memory } from "@mastra/memory";
 import { env } from "../config/env"

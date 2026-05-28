@@ -26,9 +26,23 @@ const EnvSchema = z.object({
   // for future use - for implementing development-only logic
   NODE_ENV: z.enum(["development", "production"]).default("production"),
 
+  // absolute paths to workspaces on the machine/container
+  CODEBASE_AGENT_WORKSPACE_PATH: z.string(),
+  CODEBASE_AGENT_SANDBOX_PATH: z.string(),
+  SUPERVISOR_WORKSPACE_PATH: z.string(),
+
   // for slack integration
   SLACK_BOT_TOKEN: z.string(),
   SLACK_CHANNEL_ID: z.string(),
+
+  // postgres connection string (compose service: postgres).
+  // Format: postgresql://<user>:<password>@<host>:<port>/<database>
+  DATABASE_URL: z
+    .string()
+    .regex(
+      /^postgres(ql)?:\/\//,
+      "DATABASE_URL must be a postgres:// or postgresql:// connection string",
+    ),
 });
 
 /**
