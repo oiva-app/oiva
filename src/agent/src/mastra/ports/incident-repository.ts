@@ -10,10 +10,12 @@ import * as z from "zod";
 export const IncidentStatusSchema = z.enum([
   "triggered",
   "investigating",
-  "report_generating",
-  "reported",
+  "report_in_process",
+  "report_generated",
+  "report_delivered",
   "closed",
 ]);
+
 export type IncidentStatus = z.infer<typeof IncidentStatusSchema>;
 
 export const IncidentSchema = z.object({

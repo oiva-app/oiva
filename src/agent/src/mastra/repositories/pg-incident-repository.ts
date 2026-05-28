@@ -1,8 +1,3 @@
-/**
- * Postgres adapter for IncidentRepository.
- * Method bodies land in Phase 3 alongside the correlation step that use them; this PR establishes the shape so workflow code can be wired against a typed interface.
- */
-
 import type { Pool } from "pg";
 import type {
   CorrelationLookup,
