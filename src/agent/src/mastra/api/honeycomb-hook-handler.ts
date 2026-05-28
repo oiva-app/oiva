@@ -166,12 +166,16 @@ export async function alertHookHandler(c: Context) {
   const workflow = mastra.getWorkflow("oivaWorkflow");
   const run = await workflow.createRun();
 
-  void run.start({ inputData: alertContext }).catch((err: unknown) => {
-    mastra.getLogger().error("workflow run failed", {
-      runId: run.runId,
-      err,
+  void run
+    .start({
+      inputData: { incidentId: incident.id, alertContext },
+    })
+    .catch((err: unknown) => {
+      mastra.getLogger().error("workflow run failed", {
+        runId: run.runId,
+        err,
+      });
     });
-  });
 
   return c.json(
     {
