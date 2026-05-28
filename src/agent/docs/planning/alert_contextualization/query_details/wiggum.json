@@ -1,0 +1,460 @@
+{
+  "contents": [
+    {
+      "uri": "honeycomb://query-run/5CYtgUbpdT/json",
+      "mimeType": "application/json",
+      "text": {
+        "header": [
+          {
+            "alias": "service.name",
+            "derived": false,
+            "key_name": "service.name",
+            "per_time": 0,
+            "type": "string"
+          },
+          {
+            "alias": "COUNT",
+            "derived": false,
+            "key_name": "COUNT",
+            "per_time": 0,
+            "type": ""
+          }
+        ],
+        "info": {
+          "granularity_seconds": 1,
+          "mean_sample_rate": 1,
+          "rows_examined": 2230171
+        },
+        "results": [
+          {
+            "data": {
+              "COUNT": 65,
+              "service.name": "frontend"
+            }
+          },
+          {
+            "data": {
+              "COUNT": 62,
+              "service.name": "frontend-proxy"
+            }
+          }
+        ],
+        "series": [
+          {
+            "data": {
+              "COUNT": 1,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:23:05Z"
+          },
+          {
+            "data": {
+              "COUNT": 1,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:24:05Z"
+          },
+          {
+            "data": {
+              "COUNT": 1,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:25:05Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:25:54Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:25:54Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:07Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:07Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:13Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:13Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:19Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:19Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:22Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:22Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:25Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:25Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:28Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:28Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:35Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:35Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:39Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:39Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:46Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:46Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:51Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:26:51Z"
+          },
+          {
+            "data": {
+              "COUNT": 1,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:26:52Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:00Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:00Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:03Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:03Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:08Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:08Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:11Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:11Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:16Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:16Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:19Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:19Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:20Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:20Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:24Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:24Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:28Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:28Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:38Z"
+          },
+          {
+            "data": {
+              "COUNT": 4,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:38Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:41Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:41Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:44Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:44Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:45Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:45Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:47Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:47Z"
+          },
+          {
+            "data": {
+              "COUNT": 1,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:52Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:53Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:53Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend"
+            },
+            "time": "2026-05-28T16:27:58Z"
+          },
+          {
+            "data": {
+              "COUNT": 2,
+              "service.name": "frontend-proxy"
+            },
+            "time": "2026-05-28T16:27:58Z"
+          }
+        ]
+      }
+    }
+  ]
+}

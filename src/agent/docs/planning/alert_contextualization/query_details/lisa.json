@@ -1,0 +1,63 @@
+{
+    "results": [
+      {
+        "data": {
+          "COUNT": 2736,
+          "service.name": "product-catalog"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 2734,
+          "service.name": "frontend"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 684,
+          "service.name": "frontend-proxy"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "ad"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 9,
+          "service.name": "fraud-detection"
+        }
+      },
+      {
+        "data": {
+          "COUNT": 4,
+          "service.name": "load-generator"
+        }
+      }
+    ],
+    "template": {
+      "breakdowns": [
+        "service.name"
+      ],
+      "calculations": [
+        {
+          "op": "COUNT"
+        }
+      ],
+      "filters": [
+        {
+          "column": "error",
+          "join_column": "",
+          "op": "=",
+          "value": true
+        }
+      ],
+      "start_time": 1779124683,
+      "end_time": 1779124863
+    },
+    "info": {
+      "granularity_seconds": 0.5
+    }
+  }

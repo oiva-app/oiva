@@ -4,7 +4,6 @@ TODO:
 */
 
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { trace } from "@opentelemetry/api"
 import { z } from "zod";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
@@ -199,8 +198,8 @@ const getQueryDetails = createStep({
   inputSchema: ResourceLinkSchema,
   outputSchema: HCQueryDetailsSchema,
   stateSchema: workflowStateSchema,
-  execute: async ({ inputData, state, setState }) => {
-    const span = trace.getActiveSpan()
+  execute: async ({ inputData, state, setState, tracingContext }) => {
+    const span = tracingContext?.currentSpan;
     // The previous step returns the tool's { content: [...] } envelope, which
     // includes a resource_link to the raw query results as JSON.
     const link = inputData.content.find(
@@ -208,10 +207,10 @@ const getQueryDetails = createStep({
         c.type === "resource_link" && c.mimeType === "application/json",
     );
     if (!link?.uri) throw new Error("no JSON resource_link in query results");
-    
+
     const res = await mvpMcpClient.resources.read("honeycomb", link.uri);
 
-    span?.setAttribute("workflow_step.tktk", JSON.stringify(res))
+    span?.update({ metadata: { "workflow_step.tktk": JSON.stringify(res) } });
 
     const content = res.contents[0];
     if (!("text" in content)) {
