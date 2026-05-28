@@ -8,7 +8,7 @@ import { z } from "zod";
 /**
  * POST /hook/alert
  *
- * Boundary responsibilities (Khoriko rule: validate at the edge):
+ * Boundary responsibilities (Khorikov rule: validate at the edge):
  *   1. JSON parse                         -> 400 if the body isn't JSON
  *   2. Schema parse (HC wire shape)       -> 400 if it isn't a Honeycomb webhook
  *   3. Auth (shared-secret field check)   -> 401 if missing/wrong
@@ -16,13 +16,8 @@ import { z } from "zod";
  *   5. Normalize HC payload -> AlertContext
  *   6. Hand off to oivaWorkflow            -> 202 with runId
  *
- * Span enrichment: every alert - invalid, filtered, or actionable - gets
- * key atrributes on the request span.
- *
- * Fire-and-forget: investigation can run for minutes. Holding the HTTP
- * connection open would invite Honeycomb's webhook retry timer. We start
- * the run, capture its id, and respond 202 immediately. Run progress is
- * observable in Studio and via OTel spans.
+ * Fire-and-forget:  We start the run, capture its id, and respond 202 immediately.
+ * Run progress is observable in Studio and via OTel spans.
  */
 export async function alertHookHandler(c: Context) {
   // 1. JSON parse
@@ -33,7 +28,7 @@ export async function alertHookHandler(c: Context) {
     return c.json({ error: "invalid-json" }, 400);
   }
 
-  // 2. Schema parse — is this even shaped like a Honeycomb webhook?
+  // 2. Schema parse
   const parsed = honeycombWebhookPayloadSchema.safeParse(rawBody);
   if (!parsed.success) {
     return c.json(
@@ -45,9 +40,6 @@ export async function alertHookHandler(c: Context) {
     );
   }
 
-  // Span enrichment: attributes set here ride on Mastra's per-request span
-  // and are visible to Honeycomb regardless of whether the alert is
-  // filtered, rejected, or accepted into a workflow run.
   const span = trace.getActiveSpan();
   span?.setAttribute("alert.instance_id", parsed.data.alert.instanceId);
   span?.setAttribute("alert.trigger_name", parsed.data.name);
@@ -55,9 +47,7 @@ export async function alertHookHandler(c: Context) {
   span?.setAttribute("alert.is_test", parsed.data.alert.isTest);
   span?.setAttribute("alert.status", parsed.data.alert.status);
 
-  // 3 + 4. Verify at the boundary. All three branches handled here so the
-  // workflow never sees filtered or invalid alerts.
-  // The workflow becomes the pure investigation engine (vendor-neutral).
+  // 3 + 4. Verify
   const verdict = verifyAlert(parsed.data, env.HC_SHARED_SECRET);
   span?.setAttribute("alert.verdict_kind", verdict.kind);
   if ("reason" in verdict) {
@@ -80,7 +70,7 @@ export async function alertHookHandler(c: Context) {
   }
   // verdict.kind === "actionable" — only path that continues.
 
-  // 5. Normalize at the boundary: HC payload -> vendor-neutral AlertContext.
+  // 5. Normalize
   const alertContext = normalizeAlert(parsed.data);
 
   // 6. Start the workflow run. Do not await completion.

@@ -6,6 +6,10 @@
 
 ALTER TABLE incidents DROP CONSTRAINT incidents_status_check;
 
+UPDATE incidents SET status = 'report_in_process' WHERE status = 'report_generating';
+UPDATE incidents SET status = 'report_generated' WHERE status = 'reported';
+
+
 ALTER TABLE incidents ADD CONSTRAINT incidents_status_check
   CHECK (status IN (
     'triggered',
@@ -15,3 +19,5 @@ ALTER TABLE incidents ADD CONSTRAINT incidents_status_check
     'report_delivered',
     'closed'
   ));
+
+
