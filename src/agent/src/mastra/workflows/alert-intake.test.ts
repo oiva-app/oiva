@@ -1,14 +1,15 @@
 import { test, expect, afterAll } from "vitest";
 import { trace, SpanStatusCode } from "@opentelemetry/api";
 
-import alertPayload from "../../../docs/sample_alerts/lisa.json";
-import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
+import alertPayloadLisa from "../../../docs/sample_alerts/lisa.json";
+import alertPayloadWiggum from "../../../docs/sample_alerts/wiggum.json";
+import { HoneycombWebhookPayload, honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import { mastra } from "../index";
 
 const tracer = trace.getTracer("alert-intake-test");
 
-test("INTEGRATION: Expect workflow to run without errors", async () => {
-  const inputData = honeycombWebhookPayloadSchema.parse(alertPayload);
+async function workflowTest(payload: HoneycombWebhookPayload) {
+  const inputData = honeycombWebhookPayloadSchema.parse(payload);
 
   await tracer.startActiveSpan("alert-intake.integration-test", async (span) => {
     try {
@@ -43,6 +44,14 @@ test("INTEGRATION: Expect workflow to run without errors", async () => {
       span.end();
     }
   });
+}
+
+test("INTEGRATION: Expect workflow to run without errors", async () => {
+  workflowTest(alertPayloadLisa)
+}, 20000);
+
+test("INTEGRATION: Expect workflow to run without errors", async () => {
+  workflowTest(alertPayloadWiggum)
 }, 20000);
 
 // Flush spans before the process exits — the batch span processor buffers
