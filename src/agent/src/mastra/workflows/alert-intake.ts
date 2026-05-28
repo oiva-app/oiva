@@ -168,9 +168,12 @@ const redact = createStep({
   outputSchema: alertContextSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
-    const redacted = { ...inputData, triggerUrl: "" };
-    await setState({ ...state, alertContext: redacted });
-    return redacted;
+    if (env.NODE_ENV === "development") {
+      const redacted = { ...inputData, triggerUrl: "" };
+      await setState({ ...state, alertContext: redacted });
+      return redacted;
+    }
+    return inputData;
   },
 });
 
