@@ -14,7 +14,7 @@ test("INTEGRATION: Expect workflow to run without errors", async () => {
     try {
       span.setAttribute(
         "test.alert.triggerName",
-        inputData.alert?.trigger_name ?? "",
+        inputData.alert?.description ?? "",
       );
       const workflow = mastra.getWorkflow("alertIntake");
       const run = await workflow.createRun();
