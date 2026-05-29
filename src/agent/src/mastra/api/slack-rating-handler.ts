@@ -14,19 +14,16 @@ function isVerifiedSlackSignature(
   signature: string,
 ): boolean {
   const requestAge = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (requestAge > 300) return false;
+  if (Number.isNaN(requestAge) || requestAge > 300) return false;
 
   const signatureBase = `v0:${timestamp}:${rawBody}`;
   const expectedSignature = `v0=${createHmac("sha256", env.SLACK_SIGNING_SECRET).update(signatureBase).digest("hex")}`;
 
-  try {
-    return timingSafeEqual(
-      Buffer.from(expectedSignature),
-      Buffer.from(signature),
-    );
-  } catch {
-    return false;
-  }
+  const expectedBuffer = Buffer.from(expectedSignature);
+  const signatureBuffer = Buffer.from(signature);
+  if (expectedBuffer.length !== signatureBuffer.length) return false;
+
+  return timingSafeEqual(expectedBuffer, signatureBuffer);
 }
 
 async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
