@@ -27,7 +27,7 @@ function isVerifiedSlackSignature(
 }
 
 async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
-  const { actions, user, message } = payload;
+  const { actions, user, message, channel } = payload;
   const actionId = actions[0].action_id;
 
   if (actionId !== "positive_rating" && actionId !== "negative_rating") {
@@ -43,6 +43,7 @@ async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
 
   await postRatingConfirmation(
     message.ts,
+    channel.id,
     message.blocks as (Block | KnownBlock)[],
     rating,
     user.id,

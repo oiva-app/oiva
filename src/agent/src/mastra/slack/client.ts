@@ -47,6 +47,7 @@ export async function uploadFileToThread(
 
 export async function postRatingConfirmation(
   messageTs: string,
+  channelId: string,
   originalBlocks: (Block | KnownBlock)[],
   rating: "positive" | "negative",
   userId: string,
@@ -59,7 +60,7 @@ export async function postRatingConfirmation(
   updatedBlocks.push(userRatedBlock);
 
   await client.chat.update({
-    channel: env.SLACK_CHANNEL_ID,
+    channel: channelId,
     ts: messageTs,
     blocks: updatedBlocks,
   });
