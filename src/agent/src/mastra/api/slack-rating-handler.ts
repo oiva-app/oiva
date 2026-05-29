@@ -41,7 +41,7 @@ async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
   const rating = actionId === "positive_rating" ? "positive" : "negative";
   const reportId = actions[0].value;
 
-  // TODO: save rating to DB by reportId
+  // TODO: update reports row (id = reportId) set feedback = $rating
   console.log(`Report ${reportId} rated ${rating}ly by ${user.id}`);
 
   await postRatingConfirmation(

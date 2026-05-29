@@ -77,11 +77,15 @@ const generateReport = createStep({
     } catch (e) {
       console.error(e);
       await postErrorMessage(state.alertContext);
+      // TODO: mark incident row as failed (no report row will be created)? how to handle?
       throw e;
     }
 
     const report = response.object;
-    // TODO: replace with DB insert once DB is set up — id will come from there
+    // TODO: replace file write with db insert into reports table
+    // id, incident_id, generated_at, report_json
+    // incident_id from workflow state?
+
     const id = crypto.randomUUID();
 
     try {
@@ -112,7 +116,10 @@ const sendReportToSlack = createStep({
     }
 
     const resultUrl = state.alertContext.resultUrl;
+    // TODO: if this throws, report row stays with null slack fields, how to handle?
     const threadTs = await postReportSummary(inputData, resultUrl);
+    // TODO: update reports row (id = inputData.id)
+    // set slack_message_id = threadTs, slack_channel_id = env.SLACK_CHANNEL_ID
 
     try {
       await uploadFileToThread(threadTs, inputData);
