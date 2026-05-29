@@ -279,7 +279,7 @@ ${JSON.stringify(state.alertContext?.datasets)}
 Keep in mind that it may be helpful to examine other datasets.
 
 # Important timestamps
-| Marker | Description | Time (UTC-04:00) |
+| Marker | Description | Time             |
 |--------|-------------|------------------|
 | T1 | Beginning of investigation window | ${state.t1} |
 | T2 | About when did the problem begin? | ${state.t2} |
@@ -360,6 +360,6 @@ export const alertIntake = createWorkflow({
   .then(getQueryResultsJson)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
-  // .then(investigate)
+  .then(investigate)
   .then(returnWorkflowState)
   .commit();
