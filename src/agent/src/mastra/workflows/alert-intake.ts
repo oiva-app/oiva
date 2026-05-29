@@ -55,36 +55,15 @@ const HCQueryResultsSchema = z.object({
     .min(1, "query results contained no series buckets"),
 });
 
-function unixSeconds(milliseconds: number) {
-  return Math.floor (milliseconds / 1000)
-}
-
 /**
  * TODO: CENTRALIZE THIS TIMEZONE CONFIG (currently hardcoded)
  * Convert all timestamps to GMT to keep things simple? Or maybe this would just complicate things?
  * What timezone does Honeycomb MCP expect??
  */
-function formatTimestamp(ms: number, timeZone = "America/New_York"): string {
+function formatTimestamp(ms: number): string {
   if (!Number.isFinite(ms))
     throw new Error(`formatTimestamp: invalid ms ${ms}`);
-  const date = new Date(ms);
-
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZoneName: "longOffset", // -> "GMT-04:00"
-  }).formatToParts(date);
-
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  const offset = get("timeZoneName").replace("GMT", "UTC"); // "UTC-04:00"
-
-  return `${get("month")} ${get("day")} ${get("year")} ${get("hour")}:${get("minute")}:${get("second")} ${offset}`;
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
 const TIME_PLACEHOLDER = "unknown";
@@ -254,11 +233,11 @@ const extractTimestamps = createStep({
       );
     }
     const queryDuration = lastMs - firstMs;
-    const t3 = String(unixSeconds(lastMs));
+    const t3 = formatTimestamp(lastMs);
 
     // TODO - T1 AND T4 NEED IMPROVEMENT
-    const t1 = String(unixSeconds(firstMs - queryDuration * 3));
-    const t4 = String(unixSeconds(lastMs + queryDuration * 2));
+    const t1 = formatTimestamp(firstMs - queryDuration * 3);
+    const t4 = formatTimestamp(lastMs + queryDuration * 2);
 
     const newState = {
       ...state,
@@ -300,8 +279,8 @@ ${JSON.stringify(state.alertContext?.datasets)}
 Keep in mind that it may be helpful to examine other datasets.
 
 # Important timestamps
-| Marker | Description | Time (unixSeconds) |
-|--------|-------------|--------------------|
+| Marker | Description | Time (UTC-04:00) |
+|--------|-------------|------------------|
 | T1 | Beginning of investigation window | ${state.t1} |
 | T2 | About when did the problem begin? | ${state.t2} |
 | T3 | When did the alert fire? | ${state.t3} |
@@ -381,6 +360,6 @@ export const alertIntake = createWorkflow({
   .then(getQueryResultsJson)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
-  .then(investigate)
+  // .then(investigate)
   .then(returnWorkflowState)
   .commit();
