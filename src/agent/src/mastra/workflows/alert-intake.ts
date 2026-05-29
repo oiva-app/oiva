@@ -55,6 +55,10 @@ const HCQueryResultsSchema = z.object({
     .min(1, "query results contained no series buckets"),
 });
 
+function unixSeconds(milliseconds: number) {
+  return Math.floor (milliseconds / 1000)
+}
+
 /**
  * TODO: CENTRALIZE THIS TIMEZONE CONFIG (currently hardcoded)
  * Convert all timestamps to GMT to keep things simple? Or maybe this would just complicate things?
@@ -250,11 +254,11 @@ const extractTimestamps = createStep({
       );
     }
     const queryDuration = lastMs - firstMs;
-    const t3 = formatTimestamp(lastMs);
+    const t3 = String(unixSeconds(lastMs));
 
     // TODO - T1 AND T4 NEED IMPROVEMENT
-    const t1 = formatTimestamp(firstMs - queryDuration * 3);
-    const t4 = formatTimestamp(lastMs + queryDuration * 2);
+    const t1 = String(unixSeconds(firstMs - queryDuration * 3));
+    const t4 = String(unixSeconds(lastMs + queryDuration * 2));
 
     const newState = {
       ...state,
@@ -296,8 +300,8 @@ ${JSON.stringify(state.alertContext?.datasets)}
 Keep in mind that it may be helpful to examine other datasets.
 
 # Important timestamps
-| Marker | Description | Time (UTC-04:00) |
-|--------|-------------|------------------|
+| Marker | Description | Time (unixSeconds) |
+|--------|-------------|--------------------|
 | T1 | Beginning of investigation window | ${state.t1} |
 | T2 | About when did the problem begin? | ${state.t2} |
 | T3 | When did the alert fire? | ${state.t3} |
@@ -377,6 +381,6 @@ export const alertIntake = createWorkflow({
   .then(getQueryResultsJson)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)
-  // .then(investigate)
+  .then(investigate)
   .then(returnWorkflowState)
   .commit();
