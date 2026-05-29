@@ -196,7 +196,7 @@ const getQueryResultsJson = createStep({
 
     const res = await mvpMcpClient.resources.read("honeycomb", link.uri);
 
-    span?.update({ metadata: { "workflow_step.tktk": JSON.stringify(res) } });
+    span?.update({ metadata: { "workflow_step.resource_link": JSON.stringify(res) } });
 
     const content = res.contents[0];
     if (!("text" in content)) {
