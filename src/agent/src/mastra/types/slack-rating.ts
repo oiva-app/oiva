@@ -9,6 +9,9 @@ export const slackRatingPayloadSchema = z.object({
     ts: z.string(),
     blocks: z.array(z.unknown()),
   }),
+  channel: z.object({
+    id: z.string(),
+  }),
   actions: z
     .array(
       z.object({
