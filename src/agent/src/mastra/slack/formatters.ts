@@ -5,22 +5,22 @@ import type { AlertContext } from "../types/alert-context";
 function toMrkdwn(markdown: string | undefined | null): string {
   if (!markdown) return "";
 
-  return (
-    markdown
-      // Convert bold to a temporary placeholder to avoid double-processing
-      .replace(/\*\*(.*?)\*\*/g, "\u0001$1\u0001")
-      // Convert italic
-      .replace(/\*(.*?)\*/g, "_$1_")
-      // Restore bold as Slack mrkdwn '*'
-      .replace(/\u0001(.*?)\u0001/g, "*$1*")
-      // Convert links, supporting URLs with nested parentheses
-      .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>")
-  );
+  const escaped = markdown
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Placeholder prevents bold markers from being re-matched as italic in a second pass
+  return escaped
+    .replace(/\*\*(.*?)\*\*/g, "\u0001$1\u0001")
+    .replace(/\*(.*?)\*/g, "_$1_")
+    .replace(/\u0001(.*?)\u0001/g, "*$1*")
+    .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>");
 }
 
 export function buildSummaryBlocks(
   report: IncidentReport,
-  reportId: string,
+  resultUrl: string,
 ): (Block | KnownBlock)[] {
   return [
     {
@@ -37,7 +37,7 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
+        text: `*🔍 Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
       },
     },
     { type: "divider" },
@@ -45,7 +45,15 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*Next Steps*\n${toMrkdwn(report.nextSteps)}`,
+        text: `*📋 Next Steps*\n${toMrkdwn(report.nextSteps)}`,
+      },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${resultUrl}|View Result Query in Honeycomb>`,
       },
     },
     { type: "divider" },
@@ -56,13 +64,13 @@ export function buildSummaryBlocks(
           type: "button",
           text: { type: "plain_text", text: "👍", emoji: true },
           action_id: "positive_rating",
-          value: reportId,
+          value: report.id,
         },
         {
           type: "button",
           text: { type: "plain_text", text: "👎", emoji: true },
           action_id: "negative_rating",
-          value: reportId,
+          value: report.id,
         },
       ],
     },
@@ -83,34 +91,68 @@ export function renderFullReportMarkdown(report: IncidentReport): string {
 
 export function buildErrorBlocks(
   alertContext: AlertContext,
-  errorMessage: string,
 ): (Block | KnownBlock)[] {
   return [
     {
       type: "header",
       text: {
         type: "plain_text",
-        text: "Oiva could not generate a report",
+        text: "Incident Report Generation Failed",
         emoji: false,
       },
     },
+    { type: "divider" },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "Unfortunately, I was unable to generate an incident report for the following alert.",
+      },
+    },
+    { type: "divider" },
     {
       type: "section",
       fields: [
-        { type: "mrkdwn", text: `*Alert*\n${alertContext.triggerName}` },
+        {
+          type: "mrkdwn",
+          text: `*Alert Trigger*\n${alertContext.triggerName}`,
+        },
         { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
+        {
+          type: "mrkdwn",
+          text: `*Alert Timestamp*\n${alertContext.alert.timestamp}`,
+        },
       ],
-    },
-    {
-      type: "section",
-      text: { type: "mrkdwn", text: `*Error*\n${errorMessage}` },
     },
     {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `<${alertContext.resultUrl}|View in Honeycomb>`,
+        text: `*Alert Description*\n${alertContext.description}`,
+      },
+    },
+    { type: "divider" },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${alertContext.resultUrl}|View Result Query in Honeycomb>`,
       },
     },
   ];
+}
+
+export function buildRatingConfirmationBlock(
+  rating: "positive" | "negative",
+  userId: string,
+): Block | KnownBlock {
+  return {
+    type: "context",
+    elements: [
+      {
+        type: "mrkdwn",
+        text: `Rated ${rating === "positive" ? "👍" : "👎"} by <@${userId}>`,
+      },
+    ],
+  };
 }

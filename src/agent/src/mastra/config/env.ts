@@ -34,8 +34,9 @@ const EnvSchema = z.object({
   SANDBOX_BASE_PATH: z.string(),
 
   // for slack integration
-  SLACK_BOT_TOKEN: z.string().optional(),
-  SLACK_CHANNEL_ID: z.string().optional(),
+  SLACK_BOT_TOKEN: z.string(),
+  SLACK_CHANNEL_ID: z.string(),
+  SLACK_SIGNING_SECRET: z.string(),
 
   // postgres connection string (compose service: postgres).
   // Format: postgresql://<user>:<password>@<host>:<port>/<database>
@@ -45,6 +46,7 @@ const EnvSchema = z.object({
       /^postgres(ql)?:\/\//,
       "DATABASE_URL must be a postgres:// or postgresql:// connection string",
     ),
+  CORRELATION_WINDOW_MINUTES: z.coerce.number().default(30),
 });
 
 /**

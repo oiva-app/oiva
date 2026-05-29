@@ -27,6 +27,7 @@ import { codebaseInvestigator } from "./agents/codebase-agent-workspace-ver";
 // } from "./scorers/weather-scorer";
 import { registerApiRoute } from "@mastra/core/server";
 import { alertHookHandler } from "./api/honeycomb-hook-handler";
+import { slackRatingHandler } from "./api/slack-rating-handler";
 import { env } from "./config/env";
 
 export const mastra = new Mastra({
@@ -46,6 +47,10 @@ export const mastra = new Mastra({
       registerApiRoute("/hook/honeycomb/alert", {
         method: "POST",
         handler: alertHookHandler,
+      }),
+      registerApiRoute("/hook/slack/rating", {
+        method: "POST",
+        handler: slackRatingHandler,
       }),
     ],
   },
