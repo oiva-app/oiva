@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import type { Mastra } from "@mastra/core/mastra";
-import { trace } from "@opentelemetry/api";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
   verifyAlert,
@@ -49,20 +48,8 @@ export async function alertHookHandler(c: Context) {
       400,
     );
   }
-
-  const span = trace.getActiveSpan();
-  span?.setAttribute("alert.instance_id", parsed.data.alert.instanceId);
-  span?.setAttribute("alert.trigger_name", parsed.data.name);
-  span?.setAttribute("alert.environment", parsed.data.environment);
-  span?.setAttribute("alert.is_test", parsed.data.alert.isTest);
-  span?.setAttribute("alert.status", parsed.data.alert.status);
-
   // 3. Verify (auth + filter)
   const verdict = verifyAlert(parsed.data, env.HC_SHARED_SECRET);
-  span?.setAttribute("alert.verdict_kind", verdict.kind);
-  if ("reason" in verdict) {
-    span?.setAttribute("alert.verdict_reason", verdict.reason);
-  }
 
   if (verdict.kind === "invalid") {
     return c.json({ error: "unauthorized", reason: verdict.reason }, 401);
@@ -95,11 +82,6 @@ export async function alertHookHandler(c: Context) {
     vendorInstanceId,
   );
   if (existing) {
-    span?.setAttribute("alert.dedup_hit", true);
-    span?.setAttribute("alert.alert_id", existing.id);
-    if (existing.incidentId) {
-      span?.setAttribute("alert.incident_id", existing.incidentId);
-    }
     return c.json(
       {
         status: "already-accepted",
@@ -120,9 +102,8 @@ export async function alertHookHandler(c: Context) {
     dataset: dataset ?? undefined,
     queryId: queryId ?? undefined,
   });
-  span?.setAttribute("alert.alert_id", alert.id);
 
-  // 7. Correlation. Skip if we couldn't extract a queryId — correlation
+  // 7. Correlation. Skip if we couldn't extract a queryId correlation
   // needs all three keys, so a missing queryId falls through to "new
   // incident" rather than risking a wrong match.
   const candidates =
@@ -136,12 +117,8 @@ export async function alertHookHandler(c: Context) {
       : [];
 
   const result = correlate(candidates);
-  span?.setAttribute("alert.correlation_outcome", result.kind);
-  span?.setAttribute("alert.candidate_count", result.candidateCount);
-
   if (result.kind === "match") {
     await alertRepository.attachToIncident(alert.id, result.incidentId);
-    span?.setAttribute("alert.incident_id", result.incidentId);
     return c.json(
       {
         status: "attached",
@@ -157,11 +134,7 @@ export async function alertHookHandler(c: Context) {
   // result.kind === "new" — create incident, attach alert, dispatch.
   const incident = await incidentRepository.create();
   await alertRepository.attachToIncident(alert.id, incident.id);
-  span?.setAttribute("alert.incident_id", incident.id);
 
-  // Dispatch workflow. NOTE: passing alertContext only for now; step 6
-  // updates this to `{ incidentId, alertContext }` along with the workflow
-  // inputSchema (both must change together).
   const mastra = c.get("mastra") as Mastra;
   const workflow = mastra.getWorkflow("oivaWorkflow");
   const run = await workflow.createRun();
