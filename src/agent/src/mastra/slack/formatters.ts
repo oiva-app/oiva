@@ -141,3 +141,18 @@ export function buildErrorBlocks(
     },
   ];
 }
+
+export function buildRatingConfirmationBlock(
+  rating: "positive" | "negative",
+  userId: string,
+): Block | KnownBlock {
+  return {
+    type: "context",
+    elements: [
+      {
+        type: "mrkdwn",
+        text: `Rated ${rating === "positive" ? "👍" : "👎"} by <@${userId}>`,
+      },
+    ],
+  };
+}

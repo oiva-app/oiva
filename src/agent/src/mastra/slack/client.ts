@@ -1,9 +1,10 @@
-import { WebClient } from "@slack/web-api";
+import { WebClient, Block, KnownBlock } from "@slack/web-api";
 import { env } from "../config/env";
 import {
   buildSummaryBlocks,
   renderFullReportMarkdown,
   buildErrorBlocks,
+  buildRatingConfirmationBlock,
 } from "./formatters";
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
@@ -45,16 +46,23 @@ export async function uploadFileToThread(
 }
 
 export async function postRatingConfirmation(
-  threadTs: string,
+  messageTs: string,
+  channelId: string,
+  originalBlocks: (Block | KnownBlock)[],
   rating: "positive" | "negative",
-  userName: string,
+  userId: string,
 ): Promise<void> {
-  const emoji = rating === "positive" ? "👍" : "👎";
+  const updatedBlocks = originalBlocks.filter(
+    (block) => block.type !== "actions",
+  );
+  const userRatedBlock = buildRatingConfirmationBlock(rating, userId);
 
-  await client.chat.postMessage({
-    channel: env.SLACK_CHANNEL_ID,
-    thread_ts: threadTs,
-    text: `The report has been rated ${emoji} by @${userName}`,
+  updatedBlocks.push(userRatedBlock);
+
+  await client.chat.update({
+    channel: channelId,
+    ts: messageTs,
+    blocks: updatedBlocks,
   });
 }
 

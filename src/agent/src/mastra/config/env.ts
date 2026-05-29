@@ -34,6 +34,7 @@ const EnvSchema = z.object({
   // for slack integration
   SLACK_BOT_TOKEN: z.string(),
   SLACK_CHANNEL_ID: z.string(),
+  SLACK_SIGNING_SECRET: z.string(),
 
   // postgres connection string (compose service: postgres).
   // Format: postgresql://<user>:<password>@<host>:<port>/<database>
