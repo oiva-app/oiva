@@ -24,13 +24,6 @@ export const alertContextSchema = z.object({
 
 export type AlertContext = z.infer<typeof alertContextSchema>;
 
-// The "Scrubbed" version is for when you want to omit certain properties
-// from the agent context
-export const scrubbedAlertContextSchema = alertContextSchema.omit({
-  triggerUrl: true,
-});
-export type ScrubbedAlert = z.infer<typeof scrubbedAlertContextSchema>;
-
 //The outcome type when the workflow terminates early because the alert wasn't worth an investigation
 export const filteredOutcomeSchema = z.object({
   kind: z.literal("filtered"),
