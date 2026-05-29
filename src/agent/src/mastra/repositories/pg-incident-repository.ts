@@ -4,7 +4,7 @@
  * Row-to-domain translation lives here (snake_case → camelCase).
  */
 import type { Pool } from "pg";
-import { IncidentRow } from "../db/types";
+import type { IncidentRow } from "../db/types";
 import type {
   CorrelationLookup,
   Incident,
@@ -37,10 +37,25 @@ export class PgIncidentRepository implements IncidentRepository {
     return this.toIncident(rows[0]);
   }
 
+  /**
+   * Updates the incident's status. Sets `resolved_at = NOW()` when the
+   * status transitions to a terminal state (`report_delivered` or `closed`)
+   * AND `resolved_at` is currently NULL — so the first arrival at terminal
+   * is recorded, and any pre-existing value is preserved.
+   *
+   * State-machine validity (`canTransition`) is enforced by the caller
+   * via `assertTransition` in domain/incident-state.ts, not here. This
+   * method trusts its input and just performs the write.
+   */
   async updateStatus(id: string, next: IncidentStatus): Promise<Incident> {
     const { rows } = await this.pool.query<IncidentRow>(
       `UPDATE incidents
-         SET status = $2
+         SET status = $2,
+             resolved_at = CASE
+               WHEN $2 IN ('report_delivered', 'closed') AND resolved_at IS NULL
+                 THEN NOW()
+               ELSE resolved_at
+             END
          WHERE id = $1
          RETURNING id, status, created_at, resolved_at`,
       [id, next],
@@ -53,6 +68,12 @@ export class PgIncidentRepository implements IncidentRepository {
     return this.toIncident(rows[0]);
   }
 
+  /**
+   * Returns incidents whose alerts match the correlation tuple
+   * (triggerName, dataset, queryId) AND whose status is non-terminal
+   * (NOT in 'report_delivered' or 'closed'). The alert time window
+   * is enforced via the `since` cutoff against alerts.received_at.
+   */
   async findActiveCandidates(opts: CorrelationLookup): Promise<Incident[]> {
     const { rows } = await this.pool.query<IncidentRow>(
       `SELECT DISTINCT i.id, i.status, i.created_at, i.resolved_at
