@@ -63,3 +63,8 @@ export function normalizeAlert(payload: HoneycombWebhookPayload): AlertContext {
     instanceId: payload.alert.instanceId,
   };
 }
+
+export function extractQueryId(resultUrl: string): string | null {
+  const match = resultUrl.match(/\/result\/([^/?]+)/);
+  return match ? match[1] : null;
+}
