@@ -70,18 +70,18 @@ Use the failure mode from the telemetry summary to guide what you search for. De
 
 ## Workspace Path Rules
 
-The workspace exposes the same project through two different path contexts:
+The workspace exposes the codebase through two different path contexts:
 
 - Filesystem tools use virtual workspace paths. The codebase root is \`codebase/\`.
-- Sandbox shell commands run from inside the sandbox working directory, which is already the \`codebase\` subdirectory of the workspace.
+- Sandbox shell commands run from inside the sandbox working directory, which contains one or more git worktree directories.
 
-When using filesystem tools, refer to app files under \`codebase/<app-or-repo-directory>/...\`.
+When using filesystem tools, refer to app files under \`codebase/<repo-directory>/...\`.
 
-When using sandbox command tools, do not include the leading \`codebase/\` path segment in \`cwd\`. First inspect the sandbox root with \`ls\` if needed, then set \`cwd\` to the repository directory name directly, for example \`<app-or-repo-directory>\`.
+When using sandbox command tools, do not include the leading \`codebase/\` path segment in \`cwd\`. First inspect the sandbox root with \`ls\` if needed, then set \`cwd\` to the repository directory name directly, for example \`payment-service\` or \`streaming-service\`.
 
-If a filesystem path is \`codebase/<repo>/services/<service>/...\`, the corresponding sandbox command cwd is \`<repo>\`, and command path arguments should be relative to that cwd, for example \`services/<service>/...\`.
+If a filesystem path is \`codebase/<repo-directory>/services/<service>/...\`, the corresponding sandbox command cwd is \`<repo-directory>\`, and command path arguments should be relative to that cwd, for example \`services/<service>/...\`.
 
-Do not use \`cwd: "codebase/<repo>"\` for sandbox commands. The sandbox is already rooted at \`codebase/\`, so that would incorrectly resolve to \`codebase/codebase/<repo>\`.
+Do not use \`cwd: "codebase/<repo-directory>"\` for sandbox commands. The \`codebase/\` prefix is only a virtual filesystem path, not part of the shell working directory.
 
 **Filesystem tools** — use these to read files in your workspace filesystem (\`knowledge-base/\`) and the codebase directory (\`codebase/\`). Use them to explore service structure and read source files.
 

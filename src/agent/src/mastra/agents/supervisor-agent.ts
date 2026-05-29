@@ -26,7 +26,7 @@ export const supervisorAgent = new Agent({
       onDelegationStart: () => {
         return { modifiedMaxSteps: 15 };
       },
-      // this is used to clean up local storage after an investigation
+      // this is used to clean up subagent memory in local storage after an investigation
       onDelegationComplete: async ({ primitiveId, result }) => {
         if (!result.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
         const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];

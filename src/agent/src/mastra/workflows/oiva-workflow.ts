@@ -1,10 +1,16 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
+import { RequestContext } from "@mastra/core/request-context";
+import { randomUUID } from "node:crypto";
 
 import { alertContextSchema } from "../types/alert-context";
-import { supervisorAgentOutputSchema,} from "../types/investigation";
+import { supervisorAgentOutputSchema } from "../types/investigation";
 import { incidentReportSchema } from "../types/report";
-import { env } from "../config/env"
+import { env } from "../config/env";
+import {
+  cleanupCodebaseAgentWorkspace,
+  prepareCodebaseAgentWorkspace,
+} from "../workspaces/codebase-workspace";
 
 const oivaWorkflowStateSchema = z.object({
   alertContext: alertContextSchema.optional(),
@@ -18,28 +24,36 @@ const investigate = createStep({
   inputSchema: alertContextSchema,
   outputSchema: supervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
-    // placeholder for real incident id
-    const incidentId = Math.floor(Math.random() * (10000000000000000000)) + 1;
+    const incidentId = randomUUID();
     const threadId = `incident:${incidentId}`;
+    const requestContext = new RequestContext();
+    requestContext.set("incidentId", incidentId);
 
-    const supervisorAgent = mastra.getAgentById("supervisor-agent");
-    const response = await supervisorAgent.generate(
-      JSON.stringify(inputData, null, 2),
-      {
-        structuredOutput: {
-          schema: supervisorAgentOutputSchema,
+    try {
+      await prepareCodebaseAgentWorkspace(incidentId);
+
+      const supervisorAgent = mastra.getAgentById("supervisor-agent");
+      const response = await supervisorAgent.generate(
+        JSON.stringify(inputData, null, 2),
+        {
+          structuredOutput: {
+            schema: supervisorAgentOutputSchema,
+          },
+          memory: {
+            thread: threadId,
+            resource: RESOURCE_ID,
+          },
+          requestContext,
         },
-        memory: {
-          thread: threadId,
-          resource: RESOURCE_ID,
-        }
-      },
-    );
-    await setState({ alertContext: inputData });
-    // release thread from local storage
-    const memory = await supervisorAgent.getMemory();
-    await memory?.deleteThread(threadId);
-    return response.object;
+      );
+      await setState({ alertContext: inputData });
+      return response.object;
+    } finally {
+      const supervisorAgent = mastra.getAgentById("supervisor-agent");
+      const memory = await supervisorAgent.getMemory();
+      await memory?.deleteThread(threadId);
+      await cleanupCodebaseAgentWorkspace(incidentId);
+    }
   }
 });
 
