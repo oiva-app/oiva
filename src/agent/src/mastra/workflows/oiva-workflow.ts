@@ -17,20 +17,54 @@ import {
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
+import { incidentRepository } from "../repositories";
+import { assertTransition } from "../domain/incident-state";
+import type { IncidentStatus } from "../ports/incident-repository";
+
+const oivaWorkflowInputSchema = z.object({
+  incidentId: z.string().uuid(),
+  alertContext: alertContextSchema,
+});
 
 const oivaWorkflowStateSchema = z.object({
+  incidentId: z.string().uuid().optional(),
   alertContext: alertContextSchema.optional(),
 });
+
+/**
+ * To move an incident to a new status, first assert the transition is legal
+ * per the domain state function.
+ * Reads current status from the DB rather than trusting workflow state.
+ */
+async function transitionIncident(
+  incidentId: string,
+  to: IncidentStatus,
+): Promise<void> {
+  const incident = await incidentRepository.findById(incidentId);
+  if (!incident) {
+    throw new Error(`transitionIncident: incident ${incidentId} not found`);
+  }
+  if (incident.status === to) {
+    return;
+  }
+  assertTransition(incident.status, to);
+  await incidentRepository.updateStatus(incident.id, to);
+}
 
 const investigate = createStep({
   id: "investigate",
   stateSchema: oivaWorkflowStateSchema,
-  inputSchema: alertContextSchema,
+  inputSchema: oivaWorkflowInputSchema,
   outputSchema: supervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
+    const { incidentId, alertContext } = inputData;
+
+    await transitionIncident(incidentId, "investigating");
+    await setState({ incidentId, alertContext });
+
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
     const response = await supervisorAgent.generate(
-      JSON.stringify(inputData, null, 2),
+      JSON.stringify(alertContext, null, 2),
       {
         structuredOutput: {
           schema: supervisorAgentOutputSchema,
@@ -38,9 +72,7 @@ const investigate = createStep({
       },
     );
 
-    const findings = response.object;
-    await setState({ alertContext: inputData });
-    return findings;
+    return response.object;
   },
 });
 
@@ -50,9 +82,13 @@ const generateReport = createStep({
   inputSchema: supervisorAgentOutputSchema,
   outputSchema: incidentReportSchema,
   execute: async ({ inputData, mastra, state }) => {
-    if (!state.alertContext) {
-      throw new Error("generateReport: alert context unavailable");
+    if (!state.alertContext || !state.incidentId) {
+      throw new Error(
+        "generateReport: alert context or incident id unavailable",
+      );
     }
+
+    await transitionIncident(state.incidentId, "report_in_process");
 
     const reportInput = {
       findings: inputData,
@@ -101,6 +137,8 @@ const generateReport = createStep({
       console.error("generateReport: failed to write report to file", err);
     }
 
+    await transitionIncident(state.incidentId, "report_generated");
+
     return { id, ...report };
   },
 });
@@ -111,8 +149,10 @@ const sendReportToSlack = createStep({
   inputSchema: incidentReportSchema,
   outputSchema: z.string(),
   execute: async ({ inputData, state }) => {
-    if (!state.alertContext) {
-      throw new Error("sendReportToSlack: alert context unavailable");
+    if (!state.alertContext || !state.incidentId) {
+      throw new Error(
+        "sendReportToSlack: alert context or incident id unavailable",
+      );
     }
 
     const resultUrl = state.alertContext.resultUrl;
@@ -129,6 +169,8 @@ const sendReportToSlack = createStep({
       await postErrorToThread(threadTs);
     }
 
+    await transitionIncident(state.incidentId, "report_delivered");
+
     return threadTs;
   },
 });
@@ -136,7 +178,7 @@ const sendReportToSlack = createStep({
 export const oivaWorkflow = createWorkflow({
   id: "oiva-workflow",
   stateSchema: oivaWorkflowStateSchema,
-  inputSchema: alertContextSchema,
+  inputSchema: oivaWorkflowInputSchema,
   outputSchema: z.string(),
 })
   .then(investigate)

@@ -44,6 +44,7 @@ const EnvSchema = z.object({
       /^postgres(ql)?:\/\//,
       "DATABASE_URL must be a postgres:// or postgresql:// connection string",
     ),
+  CORRELATION_WINDOW_MINUTES: z.coerce.number().default(30),
 });
 
 /**
