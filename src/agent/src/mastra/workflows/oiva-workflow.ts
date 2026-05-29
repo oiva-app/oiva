@@ -44,6 +44,9 @@ async function transitionIncident(
   if (!incident) {
     throw new Error(`transitionIncident: incident ${incidentId} not found`);
   }
+  if (incident.status === to) {
+    return;
+  }
   assertTransition(incident.status, to);
   await incidentRepository.updateStatus(incident.id, to);
 }
