@@ -5,26 +5,26 @@ TODO:
 
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
+
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
   alertContextSchema,
   filteredOutcomeSchema,
-  scrubbedAlertContextSchema,
 } from "../types/alert-context";
 import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
-import { graphAgent } from "../agents/graph-agent";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
-import { stat } from "node:fs";
 import {
   telemetryFindingsSchema,
-  telemetryStepOutputSchema,
 } from "../types/investigation";
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// SCHEMAS
+
 // Shape returned by the Honeycomb MCP `get_query_results` tool's JSON
-// resource_link. This is query *results*, not the query definition — there is
-// no `template` here. Time window must be derived from `series[].time`.
+// resource_link.
 const HCQueryResultsSchema = z.object({
   header: z.array(
     z
@@ -54,6 +54,10 @@ const HCQueryResultsSchema = z.object({
     )
     .min(1, "query results contained no series buckets"),
 });
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// HELPER FUNCTIONS
 
 /**
  * TODO: CENTRALIZE THIS TIMEZONE CONFIG (currently hardcoded)
@@ -99,12 +103,12 @@ const workflowStateSchema = z.object({
     .describe("End of investigation window"),
 });
 
-/*
-SOME OF THESE STEPS WOULD BE BETTER USING THE HONEYCOMB API
-INSTEAD OF THE HONEYCOMB MCP
 
-However, the API requires an Enterprise license
- */
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// PLACEHOLDER
+// These steps have been extracted out of the workflow
+// However, they are kept here for this prototype
 
 const verify = createStep({
   id: "verify-alert",
@@ -142,9 +146,23 @@ const normalizeStep = createStep({
   execute: async ({ inputData }) => normalizeAlert(inputData),
 });
 
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/*
+WORKFLOW STEPS
+
+SOME OF THESE STEPS WOULD BE BETTER IMPLEMENTED USING THE HONEYCOMB API
+INSTEAD OF THE HONEYCOMB MCP
+
+However, the API requires an Enterprise license
+*/
+
+
 /**
  * It's possible / likely that this step should be omitted from production runs
- * It is helpful for testing with stale alerts and missing triggers.
+ * It is helpful for testing with canned (stale alerts) and missing triggers
+ * (triggers have been deleted to stay in free tier).
  */
 const redact = createStep({
   id: "scrub-alert",
@@ -163,6 +181,10 @@ const redact = createStep({
   },
 });
 
+/**
+ * What: Manually get_query_results from Honeycomb
+ * Why: Agents seems to have a lot of trouble with this tool call
+ */
 const getQueryResults = createStep({
   id: "get-query-results",
   description: "Get query results via API",
@@ -178,6 +200,10 @@ const getQueryResults = createStep({
   },
 });
 
+/**
+ * What: Get JSON from previous MCP call
+ * Why: Previous MCP call doesn't include query `start` or `end` timestamps
+ */
 const getQueryResultsJson = createStep({
   id: "get-query-results-json",
   description: "Read and validate the JSON resource_link from query results",
@@ -211,6 +237,12 @@ const getQueryResultsJson = createStep({
 });
 
 /**
+ * What: Extract timestamps from MCP Query Results
+ * Why: LLM telemetry queries work better when ISO-formatted timestamps are provided
+ *
+ * Caution: Claude will claim that HC prefers unix seconds.  He is lying.
+ *    Want to confirm?  Use .listTools() and examine the payload yourself.
+ * 
  * TODO: METHOD FOR CALCULATING T1 AND T4 IS VERY ROUGH AND SHOULD BE IMPROVED
  * PROBABLY WARRANTS A SUBAGENT CALL?
  */
@@ -250,6 +282,10 @@ const extractTimestamps = createStep({
   },
 });
 
+/**
+ * What: Creates an LLM-friendly version of the Alert
+ * Why: better investigation outcomes than passing a raw alert JSON
+ */
 const createAlertContextualizedAlertString = createStep({
   id: "return-state",
   description: "Return the workflow state.  Discard input",
@@ -299,6 +335,14 @@ ${textResult}
   },
 });
 
+
+/**
+ * TODO - replace with investigation step from `main` branch?
+ * This step is for testing only
+ *
+ * I believe this is simply adapted from an earlier version of our workflow
+ * I wanted to test the telAgent by itself without getting the Supervisor or codeAgent involved
+ */
 const investigate = createStep({
   id: "investigate",
   stateSchema: workflowStateSchema,
@@ -325,6 +369,9 @@ const investigate = createStep({
   },
 });
 
+/**
+ * A 'helper step' that dumps the workflowStateSchema to `output`
+ */
 const returnWorkflowState = createStep({
   id: "return-state",
   description: "Return the workflow state.  Discard input",
@@ -335,6 +382,11 @@ const returnWorkflowState = createStep({
     return state;
   },
 });
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// WORKFLOW
 
 export const alertIntake = createWorkflow({
   id: "alert-intake",
@@ -355,11 +407,11 @@ export const alertIntake = createWorkflow({
     return inputData;
   })
   .then(normalizeStep)
-  .then(redact)
-  .then(getQueryResults)
+  .then(redact)                                // todo: add conditional to run only when env.NODE_ENV=='development'
+  .then(getQueryResults)                       // START OF CONTEXTUALIZATION
   .then(getQueryResultsJson)
   .then(extractTimestamps)
-  .then(createAlertContextualizedAlertString)
+  .then(createAlertContextualizedAlertString)  // END OF CONTEXTUALIZATION
   .then(investigate)
   .then(returnWorkflowState)
   .commit();
