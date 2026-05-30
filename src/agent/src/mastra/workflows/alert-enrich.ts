@@ -15,9 +15,7 @@ import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
-import {
-  telemetryFindingsSchema,
-} from "../types/investigation";
+import { telemetryFindingsSchema } from "../types/investigation";
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -103,7 +101,6 @@ const workflowStateSchema = z.object({
     .describe("End of investigation window"),
 });
 
-
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 /*
@@ -114,7 +111,6 @@ INSTEAD OF THE HONEYCOMB MCP
 
 However, the API requires an Enterprise license
 */
-
 
 /**
  * It's possible / likely that this step should be omitted from production runs
@@ -179,7 +175,9 @@ const getQueryResultsJson = createStep({
 
     const res = await mvpMcpClient.resources.read("honeycomb", link.uri);
 
-    span?.update({ metadata: { "workflow_step.resource_link": JSON.stringify(res) } });
+    span?.update({
+      metadata: { "workflow_step.resource_link": JSON.stringify(res) },
+    });
 
     const content = res.contents[0];
     if (!("text" in content)) {
@@ -199,7 +197,7 @@ const getQueryResultsJson = createStep({
  *
  * Caution: Claude will claim that HC prefers unix seconds.  He is lying.
  *    Want to confirm?  Use .listTools() and examine the payload yourself.
- * 
+ *
  * TODO: METHOD FOR CALCULATING T1 AND T4 IS VERY ROUGH AND SHOULD BE IMPROVED
  * PROBABLY WARRANTS A SUBAGENT CALL?
  */
@@ -306,7 +304,6 @@ const returnWorkflowState = createStep({
   },
 });
 
-
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // WORKFLOW
@@ -315,15 +312,12 @@ export const alertEnrich = createWorkflow({
   id: "alert-enrich",
   stateSchema: workflowStateSchema,
   inputSchema: workflowStateSchema,
-  outputSchema: z.union([
-    filteredOutcomeSchema,
-    alertContextSchema, // placeholder: replace with Report schema later
-  ]),
+  outputSchema: z.string(),
 })
-  .then(redact)                                // todo: add conditional to run only when env.NODE_ENV=='development'
-  .then(getQueryResults)                       // START OF CONTEXTUALIZATION
+  .then(redact)
+  .then(getQueryResults) // START OF CONTEXTUALIZATION
   .then(getQueryResultsJson)
   .then(extractTimestamps)
-  .then(createAlertContextualizedAlertString)  // END OF CONTEXTUALIZATION
-  .then(returnWorkflowState)
+  .then(createAlertContextualizedAlertString) // END OF CONTEXTUALIZATION
+  // .then(returnWorkflowState)
   .commit();
