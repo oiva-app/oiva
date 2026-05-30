@@ -301,6 +301,18 @@ const returnWorkflowState = createStep({
   },
 });
 
+const generateFallbackString = createStep({
+  id: "create-fallback-string",
+  description: "Return the workflow state.  Discard input",
+  inputSchema: alertContextSchema,
+  outputSchema: z.string(),
+  stateSchema: workflowStateSchema,
+  execute: async ({ inputData }) => {
+    return "PLACEHOLDER"
+  },
+})
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // WORKFLOW
