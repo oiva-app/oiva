@@ -73,7 +73,7 @@ function formatTimestamp(ms: number): string {
 const TIME_PLACEHOLDER = "unknown";
 
 const workflowStateSchema = z.object({
-  alertContext: alertContextSchema.optional(),
+  alertContext: alertContextSchema,
   queryResultOverview: z
     .object({
       content: z.array(
@@ -106,49 +106,6 @@ const workflowStateSchema = z.object({
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-// PLACEHOLDER
-// These steps have been extracted out of the workflow
-// However, they are kept here for this prototype
-
-const verify = createStep({
-  id: "verify-alert",
-  description:
-    "Verifies the webhook payload: shared-secret integrity (if configured) and actionability (test/status filters).",
-  inputSchema: honeycombWebhookPayloadSchema,
-  // Step output must satisfy bail (filtered) and pass-through (actionable).
-  outputSchema: z.union([honeycombWebhookPayloadSchema, filteredOutcomeSchema]),
-  execute: async ({ inputData, bail }) => {
-    const result = verifyAlert(inputData, env.HC_SHARED_SECRET);
-
-    switch (result.kind) {
-      case "invalid":
-        throw new Error(`Honeycomb webhook rejected: ${result.reason}`);
-
-      case "filtered":
-        return bail({
-          kind: "filtered" as const,
-          reason: result.reason,
-          instanceId: inputData.alert.instanceId,
-        });
-
-      case "actionable":
-        return inputData;
-    }
-  },
-});
-
-const normalizeStep = createStep({
-  id: "normalize-alert",
-  description:
-    "Normalize the HC payload into a vendor-neutral AlertContext for downstream steps.",
-  inputSchema: honeycombWebhookPayloadSchema,
-  outputSchema: alertContextSchema,
-  execute: async ({ inputData }) => normalizeAlert(inputData),
-});
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 /*
 WORKFLOW STEPS
 
@@ -168,16 +125,16 @@ const redact = createStep({
   id: "scrub-alert",
   description:
     "Remove context to keep info from Agent, with goal of improving investigation",
-  inputSchema: alertContextSchema,
+  inputSchema: workflowStateSchema,
   outputSchema: alertContextSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state, setState }) => {
     if (env.NODE_ENV === "development") {
-      const redacted = { ...inputData, triggerUrl: "" };
+      const redacted = { ...inputData.alertContext, triggerUrl: "" };
       await setState({ ...state, alertContext: redacted });
       return redacted;
     }
-    return inputData;
+    return inputData.alertContext;
   },
 });
 
@@ -335,40 +292,6 @@ ${textResult}
   },
 });
 
-
-/**
- * TODO - replace with investigation step from `main` branch?
- * This step is for testing only
- *
- * I believe this is simply adapted from an earlier version of our workflow
- * I wanted to test the telAgent by itself without getting the Supervisor or codeAgent involved
- */
-const investigate = createStep({
-  id: "investigate",
-  stateSchema: workflowStateSchema,
-  inputSchema: z.string(),
-  outputSchema: telemetryFindingsSchema,
-  execute: async ({ inputData, mastra, state, setState }) => {
-    if (!state.summaryString?.length) {
-      throw new Error("Invalid workflow state");
-    }
-
-    const telAgent = mastra.getAgentById("telemetry-agent");
-    const response = await telAgent.generate(inputData, {
-      structuredOutput: {
-        schema: telemetryFindingsSchema,
-      },
-    });
-
-    if (!response.object) {
-      throw new Error("generateReport: invalid agent output");
-    }
-    const report = response.object;
-    setState({ ...state, report });
-    return report;
-  },
-});
-
 /**
  * A 'helper step' that dumps the workflowStateSchema to `output`
  */
@@ -388,30 +311,19 @@ const returnWorkflowState = createStep({
 //////////////////////////////////////////////////////////////////////////////
 // WORKFLOW
 
-export const alertIntake = createWorkflow({
-  id: "alert-intake",
+export const alertEnrich = createWorkflow({
+  id: "alert-enrich",
   stateSchema: workflowStateSchema,
-  inputSchema: honeycombWebhookPayloadSchema,
+  inputSchema: workflowStateSchema,
   outputSchema: z.union([
     filteredOutcomeSchema,
     alertContextSchema, // placeholder: replace with Report schema later
   ]),
 })
-  .then(verify)
-  .map(async ({ inputData }) => {
-    if ("kind" in inputData && inputData.kind === "filtered") {
-      throw new Error(
-        "This error should never throw.  Looks like bail() didn't work?",
-      );
-    }
-    return inputData;
-  })
-  .then(normalizeStep)
   .then(redact)                                // todo: add conditional to run only when env.NODE_ENV=='development'
   .then(getQueryResults)                       // START OF CONTEXTUALIZATION
   .then(getQueryResultsJson)
   .then(extractTimestamps)
   .then(createAlertContextualizedAlertString)  // END OF CONTEXTUALIZATION
-  .then(investigate)
   .then(returnWorkflowState)
   .commit();
