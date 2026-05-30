@@ -191,6 +191,7 @@ const sendReportToSlack = createStep({
         slackChannelId: channel,
       });
     } catch (err) {
+      // TODO - convert ALL console.log and console.error IN ALL FILES to OTel instrumentation?
       console.error("sendReportToSlack: failed to persist slack ids", {
         reportId: inputData.id,
         ts,
