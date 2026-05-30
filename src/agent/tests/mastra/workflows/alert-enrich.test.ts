@@ -17,13 +17,13 @@ test("workflowState (mock) validates against Workflow schema", () => {
   expect(result.success).toBe(true);
 });
 
-test("INTEGRATION TEST: workflow runs without error", async () => {
-  
-  
-  const run = await workflow.createRun();
-  const result = await run.start({
-    inputData: workflowState,
-    initialState: workflowState,
+describe("Integration tests", () => {
+  test("Workflow runs without error", async () => {
+    const run = await workflow.createRun();
+    const result = await run.start({
+      inputData: workflowState,
+      initialState: workflowState,
+    });
+    expect(result.status).toBe("success");
   });
-  expect(result.status).toBe("success");
-});
+})

@@ -135,7 +135,7 @@ const redact = createStep({
  * What: Manually get_query_results from Honeycomb
  * Why: Agents seems to have a lot of trouble with this tool call
  */
-const getQueryResults = createStep({
+export const getQueryResults = createStep({
   id: "get-query-results",
   description: "Get query results via API",
   inputSchema: alertContextSchema,
