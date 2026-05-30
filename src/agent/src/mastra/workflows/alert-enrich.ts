@@ -6,12 +6,9 @@ TODO:
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 
-import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import {
   alertContextSchema,
-  filteredOutcomeSchema,
 } from "../types/alert-context";
-import { verifyAlert, normalizeAlert } from "../adapters/honeycomb-adapter";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
@@ -71,7 +68,7 @@ function formatTimestamp(ms: number): string {
 const TIME_PLACEHOLDER = "unknown";
 
 const workflowStateSchema = z.object({
-  alertContext: alertContextSchema,
+  alertContext: alertContextSchema,  // This is the only required property
   queryResultOverview: z
     .object({
       content: z.array(
