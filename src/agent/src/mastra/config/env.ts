@@ -105,5 +105,5 @@ export const env = {
   ...parsed,
 };
 
-console.log("Loaded environment using dotenv.");
+// console.log("Loaded environment using dotenv.");
 // console.log(env)

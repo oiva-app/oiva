@@ -67,7 +67,7 @@ function formatTimestamp(ms: number): string {
 
 const TIME_PLACEHOLDER = "unknown";
 
-const workflowStateSchema = z.object({
+export const workflowStateSchema = z.object({
   alertContext: alertContextSchema,  // This is the only required property
   queryResultOverview: z
     .object({
