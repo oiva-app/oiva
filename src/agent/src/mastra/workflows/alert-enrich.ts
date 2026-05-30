@@ -305,9 +305,13 @@ const returnWorkflowState = createStep({
 
 function buildFallbackString(alertContext: AlertContext): string {
   return `
-# Summary (fallback — contextualization unavailable)
+# Summary
+Alert timestamp: ${alertContext.alert.timestamp} 
 Environment name: ${alertContext.environment}
 Trigger name: ${alertContext.triggerName}
+
+## Alert description created by the user:
+<missing></missing>
 
 ## An automated description of this specific alert:
 ${alertContext.description}
@@ -315,8 +319,23 @@ ${alertContext.description}
 # What datasets were in the scope of this query?
 ${JSON.stringify(alertContext.datasets)}
 
-NOTE: Honeycomb query results could not be retrieved, so timestamps and full
-query results are unavailable. Investigate from the alert description above.
+Keep in mind that it may be helpful to examine other datasets.
+
+# Important timestamps
+| Marker | Description | Time             |
+|--------|-------------|------------------|
+| T1 | Beginning of investigation window | unknown |
+| T2 | About when did the problem begin? | unknown |
+| T3 | When did the alert fire? | ${alertContext.alert.timestamp} |
+| T4 | End of investigation window | unknown |
+
+IMPORTANT: T1 and T4 are approximate.  Start your investigation between those timestamps, but feel free to expand your investigation if you deem necessary
+
+# Full query results
+
+<QUERY_RESULTS>
+  Failed to retrieve query results.  Please retry as a first step in your investigation.
+</QUERY_RESULTS>
 `;
 }
 
@@ -351,7 +370,7 @@ const contextualizeOrFallback = createStep({
       const result = await run.start({ inputData });
       if (result.status === "success") return result.result;
     } catch (e) {
-      
+
       return buildFallbackString(inputData);
     }
   },
