@@ -9,6 +9,7 @@ import type { AlertContext } from "../../../src/mastra/types/alert-context";
 
 const mockReport: IncidentReport = {
   id: "d5f259b7-a84e-4ece-9659-8dec496c03af",
+  durationMs: null,
   title: "Intermittent HTTP Errors on Orders API · homelab-env",
   summary:
     "Over a 24-hour period, the gateway in the homelab environment experienced repeated HTTP errors for POST /api/orders, indicating a potential issue with the upstream service rather than a gateway internal fault.",
@@ -26,13 +27,16 @@ const mockAlertContext: AlertContext = {
   status: "TRIGGERED",
   isTest: false,
   triggerName: "Too many HTTP request errors",
-  description: "This trigger notifies us if there are any 400 or 500 level HTTP status requests",
+  description:
+    "This trigger notifies us if there are any 400 or 500 level HTTP status requests",
   environment: "homelab-env",
   datasets: ["gateway"],
   groupsTriggered: [{ field: "http.route", value: "/api/orders", count: 1 }],
   alert: { timestamp: "2026-05-22T00:00:00Z" },
-  resultUrl: "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/result/4cyiskbS8py/a/Aox3eDb6T5i?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
-  triggerUrl: "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/triggers/sbLy6gwM56r?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook",
+  resultUrl:
+    "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/result/4cyiskbS8py/a/Aox3eDb6T5i?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
+  triggerUrl:
+    "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/triggers/sbLy6gwM56r?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook",
   instanceId: "534bcf91-8070-41ec-808b-abe472a239e7",
 };
 
@@ -47,7 +51,10 @@ describe("buildSummaryBlocks", () => {
 
   it("uses report.id as the value for both rating buttons", () => {
     const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const actions = blocks[10] as { type: string; elements: { value: string }[] };
+    const actions = blocks[10] as {
+      type: string;
+      elements: { value: string }[];
+    };
     expect(actions.elements[0].value).toBe(mockReport.id);
     expect(actions.elements[1].value).toBe(mockReport.id);
   });
@@ -60,14 +67,22 @@ describe("buildSummaryBlocks", () => {
 
   it("converts markdown bold to mrkdwn in the next steps section", () => {
     const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const nextStepsBlock = blocks[6] as { type: string; text: { text: string } };
+    const nextStepsBlock = blocks[6] as {
+      type: string;
+      text: { text: string };
+    };
     expect(nextStepsBlock.text.text).toContain("*Immediate*");
   });
 
   it("converts markdown italic to mrkdwn in the hypothesis section", () => {
     const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const hypothesisBlock = blocks[4] as { type: string; text: { text: string } };
-    expect(hypothesisBlock.text.text).toContain("_Note: no recent deployments found._");
+    const hypothesisBlock = blocks[4] as {
+      type: string;
+      text: { text: string };
+    };
+    expect(hypothesisBlock.text.text).toContain(
+      "_Note: no recent deployments found._",
+    );
   });
 
   it("converts markdown links to mrkdwn format in the summary section", () => {
@@ -75,9 +90,14 @@ describe("buildSummaryBlocks", () => {
       ...mockReport,
       summary: "See [Honeycomb](https://ui.honeycomb.io/test) for details.",
     };
-    const blocks = buildSummaryBlocks(reportWithLink, mockAlertContext.resultUrl);
+    const blocks = buildSummaryBlocks(
+      reportWithLink,
+      mockAlertContext.resultUrl,
+    );
     const summaryBlock = blocks[2] as { type: string; text: { text: string } };
-    expect(summaryBlock.text.text).toContain("<https://ui.honeycomb.io/test|Honeycomb>");
+    expect(summaryBlock.text.text).toContain(
+      "<https://ui.honeycomb.io/test|Honeycomb>",
+    );
   });
 
   it("escapes Slack control characters in report content", () => {
@@ -85,9 +105,14 @@ describe("buildSummaryBlocks", () => {
       ...mockReport,
       summary: "latency < 200ms & errors > threshold",
     };
-    const blocks = buildSummaryBlocks(reportWithSpecialChars, mockAlertContext.resultUrl);
+    const blocks = buildSummaryBlocks(
+      reportWithSpecialChars,
+      mockAlertContext.resultUrl,
+    );
     const summaryBlock = blocks[2] as { type: string; text: { text: string } };
-    expect(summaryBlock.text.text).toContain("latency &lt; 200ms &amp; errors &gt; threshold");
+    expect(summaryBlock.text.text).toContain(
+      "latency &lt; 200ms &amp; errors &gt; threshold",
+    );
   });
 });
 
@@ -96,7 +121,11 @@ describe("buildErrorBlocks", () => {
     const blocks = buildErrorBlocks(mockAlertContext);
     expect(blocks[0]).toEqual({
       type: "header",
-      text: { type: "plain_text", text: "Incident Report Generation Failed", emoji: false },
+      text: {
+        type: "plain_text",
+        text: "Incident Report Generation Failed",
+        emoji: false,
+      },
     });
   });
 

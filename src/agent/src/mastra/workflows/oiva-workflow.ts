@@ -14,8 +14,13 @@ import {
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
-import { incidentRepository, reportRepository } from "../repositories";
+import {
+  alertRepository,
+  incidentRepository,
+  reportRepository,
+} from "../repositories";
 import { assertTransition } from "../domain/incident-state";
+import { incidentDurationMs } from "../domain/incident-duration";
 import type { IncidentStatus } from "../ports/incident-repository";
 
 const oivaWorkflowInputSchema = z.object({
@@ -128,9 +133,14 @@ const generateReport = createStep({
       throw err;
     }
 
+    const startedAt = await alertRepository.firstReceivedAt(state.incidentId);
+    const durationMs = startedAt
+      ? incidentDurationMs(startedAt, persistedReport.generatedAt)
+      : null;
+
     await transitionIncident(state.incidentId, "report_generated");
 
-    return { id: persistedReport.id, ...report };
+    return { id: persistedReport.id, durationMs, ...report };
   },
 });
 
