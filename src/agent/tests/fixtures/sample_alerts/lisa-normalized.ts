@@ -1,3 +1,5 @@
+import type { AlertContext } from "@/types/alert-context";
+
 export const lisaExpected = {
   status: "TRIGGERED",
   isTest: false,
@@ -19,4 +21,4 @@ export const lisaExpected = {
   triggerUrl:
     "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook",
   instanceId: "1015bd0f-99a3-41e7-817e-9c831df21262",
-};
+} satisfies AlertContext;
