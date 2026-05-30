@@ -25,6 +25,10 @@ import {
   prepareCodebaseAgentWorkspace,
 } from "../workspaces/codebase-workspace";
 
+/*
+z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
+Use `z.uuid()` instead
+*/
 const oivaWorkflowInputSchema = z.object({
   incidentId: z.uuid(),
   alertContext: alertContextSchema,
