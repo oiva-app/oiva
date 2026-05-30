@@ -17,7 +17,7 @@ export const lisaExpected = {
   ],
   alert: { timestamp: "May 18 2026 13:21:03 UTC-04:00" },
   resultUrl:
-    "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
+    "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
   triggerUrl:
     "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook",
   instanceId: "1015bd0f-99a3-41e7-817e-9c831df21262",
