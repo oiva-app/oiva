@@ -2,47 +2,19 @@ import { describe, it, expect } from "vitest";
 import { normalizeAlert } from "../../../src/mastra/adapters/honeycomb-adapter";
 import { honeycombWebhookPayloadSchema } from "../../../src/mastra/types/honeycomb-alert";
 import { alertContextSchema } from "../../../src/mastra/types/alert-context";
-import lisaPayload from "../../fixtures/sample_alerts/lisa.json"
+import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
+import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
 
-const validatedLisaPayload = honeycombWebhookPayloadSchema.parse(lisaPayload)
+const validatedLisaPayload = honeycombWebhookPayloadSchema.parse(lisaPayload);
 
 describe("normalizeAlert (honeycomb-adapter)", () => {
   it("maps the lisa.json payload to an AlertContext", () => {
     const ctx = normalizeAlert(validatedLisaPayload);
-
-    // Output conforms to the AlertContext schema.
     expect(() => alertContextSchema.parse(ctx)).not.toThrow();
-
-      const expected = {
-        status: "TRIGGERED",
-        isTest: false,
-        triggerName: "error == true",
-        description: "COUNT of error = true >= 1 over the course of 5 minutes",
-        environment: "astro-lisa",
-        datasets: ["__all__"],
-        groupsTriggered: [
-          { field: "service.name", value: "product-catalog", count: 2736 },
-          { field: "service.name", value: "frontend", count: 2734 },
-          { field: "service.name", value: "frontend-proxy", count: 684 },
-          { field: "service.name", value: "ad", count: 9 },
-          { field: "service.name", value: "fraud-detection", count: 9 },
-          { field: "service.name", value: "load-generator", count: 4 },
-        ],
-        alert: { timestamp: "May 18 2026 13:21:03 UTC-04:00" },
-        resultUrl:
-          "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/4SSzmNoFT8d?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook",
-        triggerUrl:
-          "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook",
-        instanceId: "1015bd0f-99a3-41e7-817e-9c831df21262",
-      }
-
-    expect(ctx).toEqual(expected);
+    expect(ctx).toEqual(lisaExpected);
   });
 
   it("keeps the explicit datasets array rather than parsing the URL", () => {
-    // lisa.json has datasets: ["__all__"] — its trigger URL has no
-    // /datasets/<name>/ segment, so a URL fallback would yield []. Asserting
-    // ["__all__"] proves the explicit array wins.
     expect(normalizeAlert(validatedLisaPayload).datasets).toEqual(["__all__"]);
   });
 });
