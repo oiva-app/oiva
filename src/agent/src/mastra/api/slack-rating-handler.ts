@@ -5,8 +5,9 @@ import { postRatingConfirmation } from "../slack/client";
 import {
   slackRatingPayloadSchema,
   type SlackRatingPayload,
-} from "../types/slack-rating";
+} from "../types/slack";
 import type { Block, KnownBlock } from "@slack/web-api";
+import { reportRepository } from "../repositories";
 
 function isVerifiedSlackSignature(
   rawBody: string,
@@ -30,16 +31,20 @@ async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
   const { actions, user, message, channel } = payload;
   const actionId = actions[0].action_id;
 
-  if (actionId !== "positive_rating" && actionId !== "negative_rating") {
-    console.warn(`Unexpected action_id: ${actionId}`);
-    return;
-  }
-
   const rating = actionId === "positive_rating" ? "positive" : "negative";
   const reportId = actions[0].value;
 
-  // TODO: update reports row (id = reportId) set feedback = $rating
-  console.log(`Report ${reportId} rated ${rating}ly by ${user.id}`);
+  try {
+    await reportRepository.recordFeedback(reportId, rating);
+  } catch (err) {
+    console.error("recordFeedback failed", {
+      reportId,
+      userId: user.id,
+      rating,
+      err,
+    });
+    return;
+  }
 
   await postRatingConfirmation(
     message.ts,

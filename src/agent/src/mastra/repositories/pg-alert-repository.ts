@@ -33,6 +33,16 @@ export class PgAlertRepository implements AlertRepository {
     return this.toAlert(rows[0]);
   }
 
+  async firstReceivedAt(incidentId: string): Promise<Date | null> {
+    const { rows } = await this.pool.query<{ first_received_at: Date | null }>(
+      `SELECT MIN(received_at) AS first_received_at
+          FROM alerts
+          WHERE incident_id = $1`,
+      [incidentId],
+    );
+    return rows[0]?.first_received_at ?? null;
+  }
+
   async findByVendorInstanceId(
     source: string,
     vendorInstanceId: string,

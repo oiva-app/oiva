@@ -1,6 +1,7 @@
 import type { Block, KnownBlock } from "@slack/web-api";
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
+import { formatDuration } from "../domain/incident-duration";
 
 function toMrkdwn(markdown: string | undefined | null): string {
   if (!markdown) return "";
@@ -27,6 +28,25 @@ export function buildSummaryBlocks(
       type: "header",
       text: { type: "plain_text", text: report.title, emoji: false },
     },
+    { type: "divider" },
+    ...(report.durationMs != null
+      ? [
+          {
+            type: "context" as const,
+            elements: [
+              {
+                type: "mrkdwn" as const,
+                text: `⏱️ Time to report: ${formatDuration(report.durationMs)}`,
+              },
+            ],
+          },
+        ]
+      : []),
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: toMrkdwn(report.summary) },
+    },
+
     { type: "divider" },
     {
       type: "section",

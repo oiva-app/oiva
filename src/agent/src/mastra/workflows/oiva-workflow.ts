@@ -1,8 +1,5 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import { alertContextSchema } from "../types/alert-context";
 import {
   telemetryStepOutputSchema,
@@ -17,8 +14,13 @@ import {
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
-import { incidentRepository } from "../repositories";
+import {
+  alertRepository,
+  incidentRepository,
+  reportRepository,
+} from "../repositories";
 import { assertTransition } from "../domain/incident-state";
+import { incidentDurationMs } from "../domain/incident-duration";
 import type { IncidentStatus } from "../ports/incident-repository";
 
 const oivaWorkflowInputSchema = z.object({
@@ -118,28 +120,27 @@ const generateReport = createStep({
     }
 
     const report = response.object;
-    // TODO: replace file write with db insert into reports table
-    // id, incident_id, generated_at, report_json
-    // incident_id from workflow state?
 
-    const id = crypto.randomUUID();
-
+    let persistedReport;
     try {
-      // TODO: replace with db insert once set up
-      const reportsDir = path.resolve(process.cwd(), "reports");
-      await fs.mkdir(reportsDir, { recursive: true });
-      await fs.writeFile(
-        path.join(reportsDir, `${id}.json`),
-        JSON.stringify({ id, ...report }, null, 2),
-        "utf-8",
-      );
+      persistedReport = await reportRepository.insert({
+        incidentId: state.incidentId,
+        reportJson: report,
+      });
     } catch (err) {
-      console.error("generateReport: failed to write report to file", err);
+      console.error("generateReport: failed to insert report", err);
+      await postErrorMessage(state.alertContext);
+      throw err;
     }
+
+    const startedAt = await alertRepository.firstReceivedAt(state.incidentId);
+    const durationMs = startedAt
+      ? incidentDurationMs(startedAt, persistedReport.generatedAt)
+      : null;
 
     await transitionIncident(state.incidentId, "report_generated");
 
-    return { id, ...report };
+    return { id: persistedReport.id, durationMs, ...report };
   },
 });
 
@@ -156,22 +157,33 @@ const sendReportToSlack = createStep({
     }
 
     const resultUrl = state.alertContext.resultUrl;
-    // TODO: if this throws, report row stays with null slack fields, how to handle?
-    const threadTs = await postReportSummary(inputData, resultUrl);
-    // TODO: update reports row (id = inputData.id)
-    // set slack_message_id = threadTs, slack_channel_id = env.SLACK_CHANNEL_ID
+    const threadData = await postReportSummary(inputData, resultUrl);
+    const { ts, channel } = threadData;
 
     try {
-      await uploadFileToThread(threadTs, inputData);
-      console.log(`Full report uploaded to thread, ts: ${threadTs}`);
+      await reportRepository.attachSlackMessage(inputData.id, {
+        slackMessageId: ts,
+        slackChannelId: channel,
+      });
+    } catch (err) {
+      console.error("sendReportToSlack: failed to persist slack ids", {
+        reportId: inputData.id,
+        ts,
+        err,
+      });
+    }
+
+    try {
+      await uploadFileToThread(ts, inputData);
+      console.log(`Full report uploaded to thread, ts: ${ts}`);
     } catch (e) {
       console.error(e);
-      await postErrorToThread(threadTs);
+      await postErrorToThread(ts);
     }
 
     await transitionIncident(state.incidentId, "report_delivered");
 
-    return threadTs;
+    return ts;
   },
 });
 

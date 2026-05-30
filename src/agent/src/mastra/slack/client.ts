@@ -1,4 +1,9 @@
-import { WebClient, Block, KnownBlock } from "@slack/web-api";
+import {
+  WebClient,
+  Block,
+  KnownBlock,
+  ChatPostMessageResponse,
+} from "@slack/web-api";
 import { env } from "../config/env";
 import {
   buildSummaryBlocks,
@@ -8,13 +13,14 @@ import {
 } from "./formatters";
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
+import type { SlackThreadData } from "../types/slack";
 
 const client = new WebClient(env.SLACK_BOT_TOKEN);
 
 export async function postReportSummary(
   report: IncidentReport,
   resultUrl: string,
-): Promise<string> {
+): Promise<SlackThreadData> {
   const blocks = buildSummaryBlocks(report, resultUrl);
 
   const result = await client.chat.postMessage({
@@ -27,7 +33,11 @@ export async function postReportSummary(
     throw new Error("Slack API did not return a message timestamp.");
   }
 
-  return result.ts;
+  if (!result.channel) {
+    throw new Error("Slack API did not return a channel.");
+  }
+
+  return { ts: result.ts, channel: result.channel };
 }
 
 export async function uploadFileToThread(
