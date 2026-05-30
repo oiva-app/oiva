@@ -1,22 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { normalizeAlert } from "../../../src/mastra/adapters/honeycomb-adapter";
 import { honeycombWebhookPayloadSchema } from "../../../src/mastra/types/honeycomb-alert";
 import { alertContextSchema } from "../../../src/mastra/types/alert-context";
+import lisaPayload from "../../fixtures/sample_alerts/lisa.json"
 
-function loadFixture(name: string) {
-  const url = new URL(`../../fixtures/sample_alerts/${name}`, import.meta.url);
-  const raw = JSON.parse(readFileSync(fileURLToPath(url), "utf-8"));
-  // Parse through the wire schema so the fixture is validated as a real
-  // Honeycomb webhook payload before we hand it to normalizeAlert.
-  return honeycombWebhookPayloadSchema.parse(raw);
-}
+const validatedLisaPayload = honeycombWebhookPayloadSchema.parse(lisaPayload)
 
 describe("normalizeAlert (honeycomb-adapter)", () => {
   it("maps the lisa.json payload to an AlertContext", () => {
-    const payload = loadFixture("lisa.json");
-    const ctx = normalizeAlert(payload);
+    const ctx = normalizeAlert(validatedLisaPayload);
 
     // Output conforms to the AlertContext schema.
     expect(() => alertContextSchema.parse(ctx)).not.toThrow();
@@ -46,11 +38,10 @@ describe("normalizeAlert (honeycomb-adapter)", () => {
   });
 
   it("keeps the explicit datasets array rather than parsing the URL", () => {
-    const payload = loadFixture("lisa.json");
     // lisa.json has datasets: ["__all__"] — its trigger URL has no
     // /datasets/<name>/ segment, so a URL fallback would yield []. Asserting
     // ["__all__"] proves the explicit array wins.
-    expect(normalizeAlert(payload).datasets).toEqual(["__all__"]);
+    expect(normalizeAlert(validatedLisaPayload).datasets).toEqual(["__all__"]);
   });
 });
 
