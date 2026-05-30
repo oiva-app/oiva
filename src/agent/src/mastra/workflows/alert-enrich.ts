@@ -6,9 +6,7 @@ TODO:
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 
-import {
-  alertContextSchema,
-} from "../types/alert-context";
+import { alertContextSchema, type AlertContext } from "../types/alert-context";
 import { env } from "../config/env";
 import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
@@ -68,7 +66,7 @@ function formatTimestamp(ms: number): string {
 const TIME_PLACEHOLDER = "unknown";
 
 export const workflowStateSchema = z.object({
-  alertContext: alertContextSchema,  // This is the only required property
+  alertContext: alertContextSchema, // This is the only required property
   queryResultOverview: z
     .object({
       content: z.array(
@@ -145,7 +143,11 @@ export const getQueryResults = createStep({
     const tool = honeycomb_get_query_results;
     if (!tool.execute) throw new Error("get_query_results has no execute()");
     const queryResult = await tool.execute({ url: inputData.resultUrl }, {});
-    await setState({ ...state, queryResultOverview: queryResult });
+    await setState({
+      ...state,
+      alertContext: inputData,
+      queryResultOverview: queryResult,
+    });
     return queryResult;
   },
 });
@@ -301,21 +303,59 @@ const returnWorkflowState = createStep({
   },
 });
 
-const generateFallbackString = createStep({
-  id: "create-fallback-string",
-  description: "Return the workflow state.  Discard input",
-  inputSchema: alertContextSchema,
-  outputSchema: z.string(),
-  stateSchema: workflowStateSchema,
-  execute: async ({ inputData }) => {
-    return "PLACEHOLDER"
-  },
-})
+function buildFallbackString(alertContext: AlertContext): string {
+  return `
+# Summary (fallback — contextualization unavailable)
+Environment name: ${alertContext.environment}
+Trigger name: ${alertContext.triggerName}
 
+## An automated description of this specific alert:
+${alertContext.description}
+
+# What datasets were in the scope of this query?
+${JSON.stringify(alertContext.datasets)}
+
+NOTE: Honeycomb query results could not be retrieved, so timestamps and full
+query results are unavailable. Investigate from the alert description above.
+`;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // WORKFLOW
+
+
+export const contextualizeUsingHoneycombMCP = createWorkflow({
+  id: "contextualize",
+  inputSchema: alertContextSchema,
+  outputSchema: z.string(),
+  stateSchema: workflowStateSchema,
+})
+  .then(getQueryResults)
+  .then(getQueryResultsJson)
+  .then(extractTimestamps)
+  .then(createAlertContextualizedAlertString)
+  .commit();
+
+
+const contextualizeOrFallback = createStep({
+  id: "contextualize-or-fallback",
+  description:
+    "Contextualize the alert; fall back to a degraded summary on failure",
+  inputSchema: alertContextSchema,
+  outputSchema: z.string(),
+  stateSchema: workflowStateSchema,
+  execute: async ({ inputData, mastra }) => {
+    try {
+      const run = await mastra.getWorkflow("contextualize").createRun();
+      const result = await run.start({ inputData });
+      if (result.status === "success") return result.result;
+    } catch (e) {
+      
+      return buildFallbackString(inputData);
+    }
+  },
+});
 
 export const alertEnrich = createWorkflow({
   id: "alert-enrich",
@@ -324,9 +364,5 @@ export const alertEnrich = createWorkflow({
   outputSchema: z.string(),
 })
   .then(redact)
-  .then(getQueryResults) // START OF CONTEXTUALIZATION
-  .then(getQueryResultsJson)
-  .then(extractTimestamps)
-  .then(createAlertContextualizedAlertString) // END OF CONTEXTUALIZATION
-  // .then(returnWorkflowState)
+  .then(contextualizeOrFallback)
   .commit();
