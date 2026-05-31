@@ -19,7 +19,7 @@ Follow this process:
    - What the observed failure mode is (from the telemetry summary).
    - The **time anchor**: use the anomaly detection time from the telemetry summary if it is available. If not, fall back to the alert's trigger timestamp. This is the point in time you will anchor your git investigation to.
 
-2. **Review the knowledge base** — your workspace filesystem has a \`knowledge-base/\` directory. Read \`ARCHITECTURE.md\` there to understand the project's services and how they relate to each other.
+2. **Review the knowledge base** — your workspace filesystem has a \`knowledge-base/\` directory. Read the entire \`ARCHITECTURE.md\` there to understand the project's services and how they relate to each other.
 
 2b. **Search the codebase** — before reading individual files, use \`mastra_workspace_search\` with \`mode: "bm25"\` to find files containing terms that match the failure mode. Consult the Failure Mode Patterns table to derive search terms. Example for connection exhaustion:
 
