@@ -29,9 +29,19 @@ export const supervisorAgent = new Agent({
       // this is used to clean up subagent memory in local storage after an investigation
       onDelegationComplete: async ({ primitiveId, result }) => {
         if (!result?.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
-        const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];
-        const memory = await subAgent.getMemory({});
-        await memory?.deleteThread(result.subAgentThreadId);
+        try {
+          const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];
+          const memory = await subAgent.getMemory({});
+          await memory?.deleteThread(result.subAgentThreadId);
+        } catch (err) {
+          const logContext = {
+            primitiveId,
+            subAgentThreadId: result.subAgentThreadId,
+            err,
+          };
+          const logger = supervisorAgent.getMastraInstance()?.getLogger();
+          logger?.error("subagent memory cleanup failed", logContext);
+        }
       }
     },
   },

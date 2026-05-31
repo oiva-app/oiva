@@ -14,7 +14,7 @@ const EnvSchema = z.object({
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
   GITHUB_PAT: z.string(),
-  APP_GITHUB_HTTPS_URL: z.string(),
+  APP_GITHUB_HTTPS_URL: z.url(),
 
   //  Unset = no secret enforcement on incoming webhooks.  Only for development.
   HC_SHARED_SECRET: z.string().optional(),
