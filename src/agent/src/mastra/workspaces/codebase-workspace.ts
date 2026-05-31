@@ -168,5 +168,3 @@ export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: 
 
   return workspace;
 }
-
-export const codebaseAgentWorkspace = getCodebaseAgentWorkspace;

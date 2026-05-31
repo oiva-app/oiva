@@ -67,11 +67,11 @@ const investigate = createStep({
 
     await transitionIncident(incidentId, "investigating");
     await setState({ incidentId, alertContext });
+    const supervisorAgent = mastra.getAgentById("supervisor-agent");
 
     try {
       await prepareCodebaseAgentWorkspace(incidentId);
 
-      const supervisorAgent = mastra.getAgentById("supervisor-agent");
       const response = await supervisorAgent.generate(
         JSON.stringify(alertContext, null, 2),
         {
@@ -88,10 +88,14 @@ const investigate = createStep({
 
       return response.object;
     } finally {
-      const supervisorAgent = mastra.getAgentById("supervisor-agent");
-      const memory = await supervisorAgent.getMemory();
-      await memory?.deleteThread(threadId);
-      await cleanupCodebaseAgentWorkspace(incidentId);
+      try {
+        const memory = await supervisorAgent.getMemory();
+        await memory?.deleteThread(threadId);
+      } catch (err) {
+        mastra.getLogger().error("supervisor memory cleanup failed", { incidentId, err });
+      } finally {
+        await cleanupCodebaseAgentWorkspace(incidentId);
+      }
     }
   }
 });
