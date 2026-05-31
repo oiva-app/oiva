@@ -20,8 +20,42 @@ function getSandboxRoot(incidentId: string) {
   return path.join(env.SANDBOX_BASE_PATH, incidentId);
 }
 
-function getCodebaseWorktreePath(incidentId: string) {
-  return path.join(getSandboxRoot(incidentId), path.basename(env.CODEBASE_PATH));
+function getCodebaseClonePath(incidentId: string) {
+  return path.join(
+    getSandboxRoot(incidentId),
+    getRepoName(env.APP_GITHUB_HTTPS_URL),
+  );
+}
+
+function getRepoName(remoteUrl: string) {
+  const pathname = new URL(remoteUrl).pathname;
+  const repoName = path.basename(pathname).replace(/\.git$/, "");
+  if (repoName.length === 0) {
+    throw new Error(
+      `Unable to derive repository name from APP_GITHUB_HTTPS_URL: ${remoteUrl}`,
+    );
+  }
+  return repoName;
+}
+
+function getSixMonthsAgoDate() {
+  const now = new Date();
+  const targetMonth = now.getMonth() - 6;
+  const lastDayOfTargetMonth = new Date(
+    now.getFullYear(),
+    targetMonth + 1,
+    0,
+  ).getDate();
+  const date = new Date(
+    now.getFullYear(),
+    targetMonth,
+    Math.min(now.getDate(), lastDayOfTargetMonth),
+  );
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 async function pathExists(targetPath: string) {
@@ -112,7 +146,7 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
   }
 
   const sandboxRoot = getSandboxRoot(incidentId);
-  const worktreePath = getCodebaseWorktreePath(incidentId);
+  const clonePath = getCodebaseClonePath(incidentId);
 
   try {
     await fs.mkdir(env.SANDBOX_BASE_PATH, { recursive: true });
@@ -120,9 +154,14 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
     await fs.mkdir(sandboxRoot, { recursive: true });
 
     await withGitAskpass(async (gitEnv) => {
-      await runGit(["-C", env.CODEBASE_PATH, "pull", "--ff-only"], { env: gitEnv });
+      await runGit([
+        "clone",
+        "--shallow-since",
+        getSixMonthsAgoDate(),
+        env.APP_GITHUB_HTTPS_URL,
+        clonePath,
+      ], { env: gitEnv });
     });
-    await runGit(["-C", env.CODEBASE_PATH, "worktree", "add", "--detach", worktreePath, "HEAD"]);
 
     const workspace = createWorkspace(incidentId);
     await workspace.init();
@@ -136,20 +175,13 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
 
 export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
   const sandboxRoot = getSandboxRoot(incidentId);
-  const worktreePath = getCodebaseWorktreePath(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
 
   try {
     await workspace?.destroy();
   } catch {
-    // Continue tearing down the worktree even if workspace provider cleanup fails.
-  }
-
-  try {
-    await runGit(["-C", env.CODEBASE_PATH, "worktree", "remove", "--force", worktreePath]);
-  } catch {
-    // The worktree may not exist if setup failed before git worktree creation.
+    // Continue tearing down the sandbox even if workspace provider cleanup fails.
   }
 
   await fs.rm(sandboxRoot, { recursive: true, force: true });

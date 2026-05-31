@@ -30,7 +30,6 @@ const EnvSchema = z.object({
 
   // absolute paths to workspaces on the machine/container
   KNOWLEDGE_BASE_PATH: z.string(),
-  CODEBASE_PATH: z.string(),
   SANDBOX_BASE_PATH: z.string(),
 
   // for slack integration
