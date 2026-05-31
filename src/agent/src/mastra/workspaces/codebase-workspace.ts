@@ -58,24 +58,9 @@ function getSixMonthsAgoDate() {
   ].join("-");
 }
 
-async function pathExists(targetPath: string) {
-  try {
-    await fs.access(targetPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function assertSandboxRootAvailable(sandboxRoot: string) {
-  if (!(await pathExists(sandboxRoot))) return;
-
-  const entries = await fs.readdir(sandboxRoot);
-  if (entries.length > 0) {
-    throw new Error(`Sandbox root already exists and is not empty: ${sandboxRoot}`);
-  }
-
-  await fs.rmdir(sandboxRoot);
+async function resetSandboxRoot(sandboxRoot: string) {
+  await fs.rm(sandboxRoot, { recursive: true, force: true });
+  await fs.mkdir(sandboxRoot, { recursive: true });
 }
 
 async function withGitAskpass<T>(fn: (env: NodeJS.ProcessEnv) => Promise<T>) {
@@ -150,8 +135,7 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
 
   try {
     await fs.mkdir(env.SANDBOX_BASE_PATH, { recursive: true });
-    await assertSandboxRootAvailable(sandboxRoot);
-    await fs.mkdir(sandboxRoot, { recursive: true });
+    await resetSandboxRoot(sandboxRoot);
 
     await withGitAskpass(async (gitEnv) => {
       await runGit([
