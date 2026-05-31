@@ -28,7 +28,7 @@ export const supervisorAgent = new Agent({
       },
       // this is used to clean up subagent memory in local storage after an investigation
       onDelegationComplete: async ({ primitiveId, result }) => {
-        if (!result.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
+        if (!result?.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
         const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];
         const memory = await subAgent.getMemory({});
         await memory?.deleteThread(result.subAgentThreadId);
