@@ -92,6 +92,16 @@ describe("slack client", () => {
         postReportSummary(mockReport, mockAlertContext.resultUrl),
       ).rejects.toThrow("Slack API did not return a message timestamp.");
     });
+
+    it("throws if the Slack API does not return a channel", async () => {
+      mockFns.postMessage.mockResolvedValue({
+        ts: "mock-ts-123",
+        channel: undefined,
+      });
+      await expect(
+        postReportSummary(mockReport, mockAlertContext.resultUrl),
+      ).rejects.toThrow("Slack API did not return a channel");
+    });
   });
 
   describe("uploadFileToThread", () => {
@@ -102,6 +112,8 @@ describe("slack client", () => {
         expect.objectContaining({
           channel_id: "mock-channel-id",
           thread_ts: "mock-ts-123",
+          content: expect.any(String),
+          title: mockReport.title,
           filename: `oiva-incident-report-${mockReport.id}.md`,
         }),
       );
@@ -120,15 +132,22 @@ describe("slack client", () => {
         "mock-channel-123",
         originalBlocks,
         "positive",
-        "jane",
+        "U07ABCDE",
       );
 
       const { blocks } = mockFns.update.mock.calls[0][0];
       expect(blocks.some((b: { type: string }) => b.type === "actions")).toBe(
         false,
       );
+
+      expect(mockFns.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: "mock-channel-123",
+          ts: "mock-ts-123",
+        }),
+      );
       expect(JSON.stringify(blocks)).toContain("👍");
-      expect(JSON.stringify(blocks)).toContain("jane");
+      expect(JSON.stringify(blocks)).toContain("<@U07ABCDE>");
     });
 
     it("updates the report summary with a negative rating", async () => {
@@ -138,14 +157,21 @@ describe("slack client", () => {
         "mock-channel-123",
         originalBlocks,
         "negative",
-        "jane",
+        "U07ABCDE",
       );
       const { blocks } = mockFns.update.mock.calls[0][0];
       expect(blocks.some((b: { type: string }) => b.type === "actions")).toBe(
         false,
       );
+
+      expect(mockFns.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: "mock-channel-123",
+          ts: "mock-ts-123",
+        }),
+      );
       expect(JSON.stringify(blocks)).toContain("👎");
-      expect(JSON.stringify(blocks)).toContain("jane");
+      expect(JSON.stringify(blocks)).toContain("<@U07ABCDE>");
     });
   });
 
