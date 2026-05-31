@@ -16,6 +16,7 @@ export type ReportAgentOutput = z.infer<typeof reportAgentOutputSchema>;
 
 export const incidentReportSchema = reportAgentOutputSchema.extend({
   id: z.string(),
+  durationMs: z.number().nullable(),
 });
 
 export type IncidentReport = z.infer<typeof incidentReportSchema>;

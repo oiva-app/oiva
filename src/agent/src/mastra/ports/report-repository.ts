@@ -26,4 +26,8 @@ export interface ReportRepository {
   findById(id: string): Promise<Report | null>;
   findByIncidentId(incidentId: string): Promise<Report[]>;
   recordFeedback(id: string, feedback: Feedback): Promise<void>;
+  attachSlackMessage(
+    id: string,
+    slack: { slackMessageId: string; slackChannelId: string },
+  ): Promise<void>;
 }

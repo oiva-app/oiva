@@ -23,3 +23,10 @@ export const slackRatingPayloadSchema = z.object({
 });
 
 export type SlackRatingPayload = z.infer<typeof slackRatingPayloadSchema>;
+
+export const slackThreadDataSchema = z.object({
+  ts: z.string(),
+  channel: z.string(),
+});
+
+export type SlackThreadData = z.infer<typeof slackThreadDataSchema>;

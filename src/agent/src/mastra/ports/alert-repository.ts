@@ -27,6 +27,7 @@ export interface AlertRepository {
     Insert a new alert. If a row with the same (source, vendor_instance_id) already exists, returns the existing row — webhook retries are idempotent at this layer (the UNIQUE constraint enforces it at the DB).
   */
   insert(input: InsertAlertInput): Promise<Alert>;
+  firstReceivedAt(incidentId: string): Promise<Date | null>;
   findByVendorInstanceId(
     source: string,
     vendorInstanceId: string,
