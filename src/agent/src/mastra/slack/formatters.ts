@@ -46,12 +46,6 @@ export function buildSummaryBlocks(
       type: "section",
       text: { type: "mrkdwn", text: toMrkdwn(report.summary) },
     },
-
-    { type: "divider" },
-    {
-      type: "section",
-      text: { type: "mrkdwn", text: toMrkdwn(report.summary) },
-    },
     { type: "divider" },
     {
       type: "section",
