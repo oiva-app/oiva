@@ -3,7 +3,10 @@ import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
 import { alertContextSchema } from "../types/alert-context";
-import { supervisorAgentOutputSchema } from "../types/investigation";
+import {
+  supervisorAgentOutputSchema,
+  telemetryFindingsSchema,
+} from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
   postReportSummary,
@@ -106,6 +109,49 @@ const investigate = createStep({
       }
     }
   }
+});
+
+const investigateTelemetryOnly = createStep({
+  id: "investigate-telemetry-only",
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: oivaWorkflowInputSchema,
+  outputSchema: telemetryFindingsSchema,
+  execute: async ({ inputData, mastra, setState }) => {
+    const { incidentId, alertContext } = inputData;
+    const threadId = `incident:${incidentId}`;
+    const requestContext = new RequestContext();
+    requestContext.set("incidentId", incidentId);
+    requestContext.set("alertContext", alertContext);
+
+    await transitionIncident(incidentId, "investigating");
+    await setState({ incidentId, alertContext });
+    const telemetryAgent = mastra.getAgentById("telemetry-agent");
+
+    try {
+      const response = await telemetryAgent.generate(
+        "Please investigate this alert using the 'enrich-alert-tool'",
+        {
+          structuredOutput: {
+            schema: telemetryFindingsSchema,
+          },
+          memory: {
+            thread: threadId,
+            resource: RESOURCE_ID,
+          },
+          requestContext,
+        },
+      );
+
+      return response.object;
+    } finally {
+      try {
+        const memory = await telemetryAgent.getMemory();
+        await memory?.deleteThread(threadId);
+      } catch (err) {
+        mastra.getLogger().error("telemetry memory cleanup failed", { incidentId, err });
+      }
+    }
+  },
 });
 
 const generateReport = createStep({
@@ -224,7 +270,8 @@ export const oivaWorkflow = createWorkflow({
   inputSchema: oivaWorkflowInputSchema,
   outputSchema: z.string(),
 })
-  .then(investigate)
+  .then(investigateTelemetryOnly)
+  // .then(investigate)
   // .then(generateReport)  // SV_TESTING
   // .then(sendReportToSlack)  // SV_TESTING
   .commit();

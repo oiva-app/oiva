@@ -6,7 +6,7 @@ import { z } from "zod"
 export const enrichAlertTool = createTool({
   id: "enrich-alert-tool",
   description: "Retrieve an enriched alert including description, key timestamps, alert query results",
-  inputSchema: z.undefined().describe("No input required"),
+  inputSchema: undefined,
   outputSchema: z.string(),
   requestContextSchema: z.object({
     alertContext: alertContextSchema,
