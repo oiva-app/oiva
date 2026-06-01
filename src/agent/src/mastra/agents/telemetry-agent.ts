@@ -2,6 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import type { SubAgent } from "@mastra/core/agent";
 import { env } from "../config/env"
+import { enrichAlertTool } from "@/tools/alert-enrich";
 import {
   honeycomb_get_workspace_context,
   honeycomb_get_dataset,
@@ -25,6 +26,7 @@ export const telemetryAgent: SubAgent = new Agent({
     maxSteps: env.TELEMETRY_MAX_STEPS,
   },
   tools: {
+    enrichAlertTool,
     honeycomb_get_workspace_context,
     honeycomb_get_dataset,
     honeycomb_run_query,

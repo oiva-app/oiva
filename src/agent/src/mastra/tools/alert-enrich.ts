@@ -15,14 +15,20 @@ export const enrichAlertTool = createTool({
   })
   execute: async (inputData, context) => {
 
-    
     const alertContext = context.requestContext?.get("alertContext")
-    if (alertContext) {
+    try {
+      if (!alertContext) throw new Error("Missing alertContext")
       const workflow = mastra.getWorkflow("alertEnrich")
-
       const run = await workflow.createRun()
       const result = await run.start( {inputData: { alertContext }})
       return result
+    } catch (e) {
+      context?.tracingContext?.currentSpan?.update({
+        metadata: {
+          error: true,
+          "app.alertContext": JSON.stringify(alertContext),
+        }
+      })
     }
     return "ERROR"
   }
