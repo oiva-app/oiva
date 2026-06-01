@@ -225,6 +225,6 @@ export const oivaWorkflow = createWorkflow({
   outputSchema: z.string(),
 })
   .then(investigate)
-  .then(generateReport)
-  .then(sendReportToSlack)
+  // .then(generateReport)  // SV_TESTING
+  // .then(sendReportToSlack)  // SV_TESTING
   .commit();
