@@ -6,7 +6,6 @@ import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
 import { supervisorWorkspace } from "../workspaces/supervisor-workspace";
 
-// i feel like this method of getting agent instance is a little ugly
 const SUBAGENTS = {
   "codebase-investigator": codebaseInvestigator,
   "telemetry-agent": telemetryAgent,
