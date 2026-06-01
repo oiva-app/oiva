@@ -35,6 +35,10 @@ describe("formatDuration", () => {
     expect(formatDuration(0)).toBe("0s");
     expect(formatDuration(400)).toBe("0s");
   });
+
+  it("handles negative durations gracefully by clamping to 0s", () => {
+    expect(formatDuration(-1500)).toBe("0s");
+  });
   it("rounds to the nearest second", () => {
     expect(formatDuration(1500)).toBe("2s");
   });

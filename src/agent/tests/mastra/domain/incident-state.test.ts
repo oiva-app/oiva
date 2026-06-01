@@ -42,6 +42,9 @@ describe("incident-state", () => {
       expect(canTransition("report_delivered", "closed")).toBe(false);
       expect(canTransition("closed", "investigating")).toBe(false);
     });
+    it("rejects same-state transitions (triggered → triggered)", () => {
+      expect(canTransition("triggered", "triggered")).toBe(false);
+    });
   });
 
   describe("assertTransition", () => {

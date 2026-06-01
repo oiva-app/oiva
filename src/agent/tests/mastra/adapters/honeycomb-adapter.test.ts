@@ -10,6 +10,8 @@ function payload(
   overrides: Partial<HoneycombWebhookPayload> = {},
   alertOverrides: Partial<HoneycombWebhookPayload["alert"]> = {},
 ): HoneycombWebhookPayload {
+  const { alert: overrideAlert, ...restOverrides } = overrides;
+
   return {
     secret: "s3cr3t",
     name: "Too many HTTP request errors",
@@ -37,8 +39,9 @@ function payload(
       timestamp: "2026-05-22T00:00:00Z",
       isTest: false,
       ...alertOverrides,
+      ...overrideAlert,
     },
-    ...overrides,
+    ...restOverrides,
   };
 }
 
