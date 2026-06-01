@@ -3,6 +3,7 @@ import {
   buildSummaryBlocks,
   buildErrorBlocks,
   renderFullReportMarkdown,
+  buildRatingConfirmationBlock,
 } from "../../../src/mastra/slack/formatters";
 import type { IncidentReport } from "../../../src/mastra/types/report";
 import type { AlertContext } from "../../../src/mastra/types/alert-context";
@@ -114,6 +115,46 @@ describe("buildSummaryBlocks", () => {
       "latency &lt; 200ms &amp; errors &gt; threshold",
     );
   });
+
+  it("converts both bold and italic in the same string successfully", () => {
+    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
+    const hypothesisBlock = blocks[4] as {
+      type: string;
+      text: { text: string };
+    };
+    // ** -> * (bold) and * -> _ (italic), both preserved in one pass
+    expect(hypothesisBlock.text.text).toContain("*Key finding:*");
+    expect(hypothesisBlock.text.text).toContain(
+      "_Note: no recent deployments found._",
+    );
+  });
+
+  it("renders empty string for an empty report field", () => {
+    const blocks = buildSummaryBlocks(
+      { ...mockReport, summary: "" },
+      mockAlertContext.resultUrl,
+    );
+    const summaryBlock = blocks[2] as { type: string; text: { text: string } };
+    expect(summaryBlock.text.text).toBe("");
+  });
+
+  it("omits the duration context block when durationMs is null", () => {
+    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
+    expect(JSON.stringify(blocks)).not.toContain("Time to report");
+  });
+
+  it("includes the duration context block when durationMs is set", () => {
+    const blocks = buildSummaryBlocks(
+      { ...mockReport, durationMs: 65000 },
+      mockAlertContext.resultUrl,
+    );
+    const contextBlock = blocks[2] as {
+      type: string;
+      elements: { text: string }[];
+    };
+    expect(contextBlock.type).toBe("context");
+    expect(contextBlock.elements[0].text).toContain("Time to report");
+  });
 });
 
 describe("buildErrorBlocks", () => {
@@ -179,7 +220,27 @@ describe("renderFullReportMarkdown", () => {
   it("includes the report field content under each section", () => {
     const markdown = renderFullReportMarkdown(mockReport);
     expect(markdown).toContain(mockReport.summary);
+    expect(markdown).toContain(mockReport.alertOverview);
     expect(markdown).toContain(mockReport.hypothesis);
+    expect(markdown).toContain(mockReport.findings);
     expect(markdown).toContain(mockReport.nextSteps);
+    expect(markdown).toContain(mockReport.investigationSteps);
   });
+});
+
+describe("buildRatingConfirmationBlock", () => {
+  it.each([
+    ["positive", "👍"],
+    ["negative", "👎"],
+  ] as const)(
+    "renders a %s rating as a context block with the user mention",
+    (rating, emoji) => {
+      const block = buildRatingConfirmationBlock(rating, "U07ABCDE") as {
+        type: string;
+        elements: { text: string }[];
+      };
+      expect(block.type).toBe("context");
+      expect(block.elements[0].text).toBe(`Rated ${emoji} by <@U07ABCDE>`);
+    },
+  );
 });
