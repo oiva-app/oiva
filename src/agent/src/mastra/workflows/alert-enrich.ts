@@ -364,13 +364,28 @@ const contextualizeOrFallback = createStep({
   inputSchema: alertContextSchema,
   outputSchema: z.string(),
   stateSchema: workflowStateSchema,
-  execute: async ({ inputData, mastra }) => {
+  execute: async ({ inputData, mastra, tracingContext }) => {
     try {
       const run = await mastra.getWorkflow("contextualize").createRun();
-      const result = await run.start({ inputData });
+      const result = await run.start({
+        inputData,
+        initialState: { alertContext: inputData },
+      });
       if (result.status === "success") return result.result;
+      tracingContext?.currentSpan?.update({
+        metadata: {
+          "app.contextualize.fallback": true,
+          "app.contextualize.status": result.status,
+        },
+      });
+      return buildFallbackString(inputData);
     } catch (e) {
-
+      tracingContext?.currentSpan?.update({
+        metadata: {
+          "app.contextualize.fallback": true,
+          "app.error": e instanceof Error ? e.message : String(e),
+        },
+      });
       return buildFallbackString(inputData);
     }
   },
