@@ -6,7 +6,7 @@ import { z } from "zod"
 export const enrichAlertTool = createTool({
   id: "enrich-alert-tool",
   description: "Retrieve an enriched alert including description, key timestamps, alert query results",
-  inputSchema: undefined,
+  inputSchema: z.object({}),
   outputSchema: z.string(),
   requestContextSchema: z.object({
     alertContext: alertContextSchema,
@@ -16,9 +16,13 @@ export const enrichAlertTool = createTool({
     const alertContext = context.requestContext?.get("alertContext")
     try {
       if (!alertContext) throw new Error("Missing alertContext")
+
       const workflow = context.mastra!.getWorkflow("alertEnrich")
       const run = await workflow.createRun()
-      result = await run.start( {inputData: { alertContext }})
+      result = await run.start({
+        inputData: { alertContext },
+        initialState: { alertContext },
+      })
 
       if (result.status !== "success") {
         throw new Error(`alertEnrich run ${result.status}`);
