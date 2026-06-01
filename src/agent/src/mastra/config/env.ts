@@ -9,10 +9,12 @@ import path from "node:path";
 import * as z from "zod";
 
 const EnvSchema = z.object({
+  OBSERVED_APP_NAME: z.string(),
   OPENAI_API_KEY: z.string(),
   HC_MCP_KEY: z.string(),
   COLLECTOR_ENDPOINT: z.string(),
   GITHUB_PAT: z.string(),
+  APP_GITHUB_HTTPS_URL: z.url(),
 
   //  Unset = no secret enforcement on incoming webhooks.  Only for development.
   HC_SHARED_SECRET: z.string().optional(),
@@ -27,9 +29,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("production"),
 
   // absolute paths to workspaces on the machine/container
-  CODEBASE_AGENT_WORKSPACE_PATH: z.string(),
-  CODEBASE_AGENT_SANDBOX_PATH: z.string(),
-  SUPERVISOR_WORKSPACE_PATH: z.string(),
+  KNOWLEDGE_BASE_PATH: z.string(),
+  SANDBOX_BASE_PATH: z.string(),
 
   // for slack integration
   SLACK_BOT_TOKEN: z.string(),

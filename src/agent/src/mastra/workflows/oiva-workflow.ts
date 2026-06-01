@@ -1,12 +1,9 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
+import { RequestContext } from "@mastra/core/request-context";
+
 import { alertContextSchema } from "../types/alert-context";
-import {
-  telemetryStepOutputSchema,
-  telemetryFindingsSchema,
-  codebaseInvestigatorOutputSchema,
-  supervisorAgentOutputSchema,
-} from "../types/investigation";
+import { supervisorAgentOutputSchema } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
   postReportSummary,
@@ -22,16 +19,23 @@ import {
 import { assertTransition } from "../domain/incident-state";
 import { incidentDurationMs } from "../domain/incident-duration";
 import type { IncidentStatus } from "../ports/incident-repository";
+import { env } from "../config/env";
+import {
+  cleanupCodebaseAgentWorkspace,
+  prepareCodebaseAgentWorkspace,
+} from "../workspaces/codebase-workspace";
 
 const oivaWorkflowInputSchema = z.object({
-  incidentId: z.string().uuid(),
+  incidentId: z.uuid(),
   alertContext: alertContextSchema,
 });
 
 const oivaWorkflowStateSchema = z.object({
-  incidentId: z.string().uuid().optional(),
+  incidentId: z.uuid().optional(),
   alertContext: alertContextSchema.optional(),
 });
+
+const RESOURCE_ID = `${env.OBSERVED_APP_NAME}:investigation`;
 
 /**
  * To move an incident to a new status, first assert the transition is legal
@@ -60,22 +64,43 @@ const investigate = createStep({
   outputSchema: supervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
     const { incidentId, alertContext } = inputData;
+    const threadId = `incident:${incidentId}`;
+    const requestContext = new RequestContext();
+    requestContext.set("incidentId", incidentId);
 
     await transitionIncident(incidentId, "investigating");
     await setState({ incidentId, alertContext });
-
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
-    const response = await supervisorAgent.generate(
-      JSON.stringify(alertContext, null, 2),
-      {
-        structuredOutput: {
-          schema: supervisorAgentOutputSchema,
-        },
-      },
-    );
 
-    return response.object;
-  },
+    try {
+      await prepareCodebaseAgentWorkspace(incidentId);
+
+      const response = await supervisorAgent.generate(
+        JSON.stringify(alertContext, null, 2),
+        {
+          structuredOutput: {
+            schema: supervisorAgentOutputSchema,
+          },
+          memory: {
+            thread: threadId,
+            resource: RESOURCE_ID,
+          },
+          requestContext,
+        },
+      );
+
+      return response.object;
+    } finally {
+      try {
+        const memory = await supervisorAgent.getMemory();
+        await memory?.deleteThread(threadId);
+      } catch (err) {
+        mastra.getLogger().error("supervisor memory cleanup failed", { incidentId, err });
+      } finally {
+        await cleanupCodebaseAgentWorkspace(incidentId);
+      }
+    }
+  }
 });
 
 const generateReport = createStep({
