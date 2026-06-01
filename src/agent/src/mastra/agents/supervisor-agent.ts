@@ -23,7 +23,7 @@ export const supervisorAgent = new Agent({
     disableBackgroundTasks: true,
     delegation: {
       onDelegationStart: () => {
-        return { modifiedMaxSteps: 15 };
+        return { modifiedMaxSteps: env.TELEMETRY_MAX_STEPS };  // maxSteps controls BOTH telAgent and codebaseAgent
       },
       // this is used to clean up subagent memory in local storage after an investigation
       onDelegationComplete: async ({ primitiveId, result }) => {

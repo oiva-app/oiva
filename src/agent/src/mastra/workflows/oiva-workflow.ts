@@ -70,7 +70,8 @@ const investigate = createStep({
     const { incidentId, alertContext } = inputData;
     const threadId = `incident:${incidentId}`;
     const requestContext = new RequestContext();
-    requestContext.set("incidentId", incidentId);
+    requestContext.set("incidentId", incidentId,);
+    requestContext.set("alertContext", alertContext);
 
     await transitionIncident(incidentId, "investigating");
     await setState({ incidentId, alertContext });
