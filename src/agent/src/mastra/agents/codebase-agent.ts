@@ -7,9 +7,9 @@ import { getCodebaseAgentWorkspace } from "../workspaces/codebase-workspace";
 import { prompt } from "../prompts/system-prompt-codebase-agent-ws-ver";
 import { investigationSchema } from "../memory/investigation-schema";
 
-export const codebaseInvestigator: SubAgent = new Agent({
-  id: "codebase-investigator",
-  name: "Codebase Investigator",
+export const codebaseAgent: SubAgent = new Agent({
+  id: "codebase-agent",
+  name: "Codebase Agent",
   description:
     "Investigates the codebase by looking for bugs in relevant services and checking deployment history.",
   instructions: prompt,

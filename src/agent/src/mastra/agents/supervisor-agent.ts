@@ -1,13 +1,13 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { supervisorPrompt } from "../prompts/supervisor-prompt";
-import { codebaseInvestigator } from "./codebase-agent-workspace-ver"
+import { codebaseAgent } from "./codebase-agent"
 import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
 import { supervisorWorkspace } from "../workspaces/supervisor-workspace";
 
 const SUBAGENTS = {
-  "codebase-investigator": codebaseInvestigator,
+  "codebase-agent": codebaseAgent,
   "telemetry-agent": telemetryAgent,
 } as const;
 
@@ -16,7 +16,7 @@ export const supervisorAgent = new Agent({
   name: "Supervisor Agent",
   instructions: supervisorPrompt,
   model: "openai/gpt-5.4",
-  agents: { codebaseInvestigator, telemetryAgent },
+  agents: { codebaseAgent, telemetryAgent },
   memory: new Memory(),
   defaultOptions: {
     maxSteps: env.SUPERVISOR_MAX_STEPS,
