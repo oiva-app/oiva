@@ -3,7 +3,7 @@ export function incidentDurationMs(startedAt: Date, endedAt: Date): number {
 }
 
 export function formatDuration(ms: number): string {
-  const totalSeconds = Math.round(ms / 1000);
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
