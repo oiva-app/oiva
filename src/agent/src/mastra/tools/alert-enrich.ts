@@ -1,8 +1,6 @@
 import { alertContextSchema } from "@/types/alert-context";
 import { createTool } from "@mastra/core/tools";
-import { TracingContext } from "@mastra/core/observability";
 import { z } from "zod"
-import { mastra } from "..";
 
 
 export const enrichAlertTool = createTool({
@@ -12,24 +10,31 @@ export const enrichAlertTool = createTool({
   outputSchema: z.string(),
   requestContextSchema: z.object({
     alertContext: alertContextSchema,
-  })
-  execute: async (inputData, context) => {
-
+  }),
+  execute: async (_inputData, context) => {
+    let result;
     const alertContext = context.requestContext?.get("alertContext")
     try {
       if (!alertContext) throw new Error("Missing alertContext")
-      const workflow = mastra.getWorkflow("alertEnrich")
+      const workflow = context.mastra!.getWorkflow("alertEnrich")
       const run = await workflow.createRun()
-      const result = await run.start( {inputData: { alertContext }})
-      return result
+      result = await run.start( {inputData: { alertContext }})
+
+      if (result.status !== "success") {
+        throw new Error(`alertEnrich run ${result.status}`);
+      }
+
+      return result.result;
     } catch (e) {
       context?.tracingContext?.currentSpan?.update({
         metadata: {
           error: true,
+          "app.error": e instanceof Error ? e.message : String(e),
           "app.alertContext": JSON.stringify(alertContext),
+          "app.workflowResult": JSON.stringify(result)
         }
       })
+      return "ERROR"
     }
-    return "ERROR"
   }
 })

@@ -1,3 +1,5 @@
+
+
 ## INSTALLATION
 
 Create and edit your .env file from the example
@@ -11,6 +13,15 @@ Give Oiva access to the Github repo that defines your observed app by including 
 Start the OTel Collector
 
 ```bash
+docker compose up
+```
+
+## TROUBLESHOOTING
+500 error from webhook endpoint?
+
+```bash
+docker compose down -v
+npm run db:migrate  # sets up Postgres database
 docker compose up
 ```
 
