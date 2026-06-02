@@ -22,6 +22,7 @@ const EnvSchema = z
 
     // Reduce max steps to save tokens
     SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
+    SUBAGENT_MAX_STEPS: z.coerce.number().default(20),
     TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
     CODEBASE_MAX_STEPS: z.coerce.number().default(20),
     RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
@@ -39,6 +40,12 @@ const EnvSchema = z
     SLACK_CHANNEL_ID: z.string(),
     SLACK_SIGNING_SECRET: z.string(),
 
+    /*
+      mcp integration testing
+        Only set to true if 'HC_MCP_KEY' points at a valid MCP key for the `oiva-sv` team 
+    */
+    RUN_OIVA_SV_MCP_INTEGRATION_TESTS: z.stringbool().default(false),
+
     // postgres connection string (compose service: postgres).
     // Format: postgresql://<user>:<password>@<host>:<port>/<database>
     DATABASE_URL: z
@@ -55,6 +62,7 @@ const EnvSchema = z
       message:
         "HC_SHARED_SECRET is required when NODE_ENV=production (an unset NODE_ENV defaults to production). Set NODE_ENV=development to run webhooks without a shared secret.",
       path: ["HC_SHARED_SECRET"],
+    
     },
   );
 
