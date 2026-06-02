@@ -24,18 +24,17 @@ const toolsToWrap = {
   // honeycomb_get_trace,
   // honeycomb_find_columns,
   // honeycomb_analyze_columns,
+};
+
+const wrapped: Record<string, ReturnType<typeof investigationToolWrapper>> = {};
+for (const [key, value] of Object.entries(toolsToWrap)) {
+  wrapped[key] = investigationToolWrapper(value);
 }
 
-const wrapped = {}
-for (let [key, value] of Object.entries(toolsToWrap)) {
-  wrapped[key] = investigationToolWrapper(value)
-}
-
-export const telemetryAgent: SubAgent = new Agent({
+export const testAgent: SubAgent = new Agent({
   id: "test-agent",
-  name: "Telemetry Agent",
-  description:
-    "Investigates telemetry data from Honeycomb by exploring datasets, running queries, comparing anomalies against baselines and retrieving traces.",
+  name: "Test Agent",
+  description: "For testing custom MCP tools",
   instructions: "Please use this tool",
   model: "openai/gpt-5.4",
   defaultOptions: {

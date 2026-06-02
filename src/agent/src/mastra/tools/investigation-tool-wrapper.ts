@@ -1,30 +1,37 @@
 import { createTool, Tool } from "@mastra/core/tools";
-import { z } from "zod";
+import { standardSchemaToJSONSchema } from "@mastra/schema-compat/schema";
+import type { JSONSchema7 } from "json-schema";
 
 import {
   telemetryToolCallSchema,
   telemetryTraceSchema,
 } from "@/types/investigation";
 
-// The agent-only field you want every wrapped tool to expose
-const questionField = {
-  question: z
-    .string()
-    .describe(
-      "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`",
-    ),
-};
+const questionProperty = {
+  type: "string",
+  description:
+    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`",
+} as const;
 
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
 ) {
-  const baseSchema = tool.inputSchema as z.ZodObject<any>;
+  const baseJson: JSONSchema7 = tool.inputSchema
+    ? (standardSchemaToJSONSchema(tool.inputSchema) as JSONSchema7)
+    : { type: "object", properties: {} };
+
+  const inputSchema: JSONSchema7 = {
+    ...baseJson,
+    type: "object",
+    properties: { ...baseJson.properties, question: questionProperty },
+    required: [...(baseJson.required ?? []), "question"],
+  };
 
   return createTool({
     id: tool.id,
     description: tool.description,
     outputSchema: tool.outputSchema,
-    inputSchema: baseSchema.extend(questionField),
+    inputSchema,
     execute: async (inputData, context, ...rest) => {
       
       // Extract the wrapper-only field before handing off to the real tool
@@ -32,7 +39,8 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
 
       try {
         const investigationTrace = telemetryTraceSchema.parse(
-          context.requestContext?.get("investigationTrace"),
+          // Create empty context instead of failing
+          context.requestContext?.get("investigationTrace") ?? [],
         );
 
         const toolOutput = await tool.execute!(toolInput, context, ...rest);
