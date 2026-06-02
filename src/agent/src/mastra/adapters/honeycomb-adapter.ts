@@ -1,9 +1,6 @@
 // HC verifyAlert + normalizeAlert → AlertContext
-// future: datadog-alert.ts, signoz-alert.ts
-
-// Pure domain logic. No Mastra, no env, no I/O. Easy to unit-test.
 // (env.HC_SHARED_SECRET is read here only as a function param — the caller passes it in.)
-
+import { createHash, timingSafeEqual } from "node:crypto";
 import type { HoneycombWebhookPayload } from "../types/honeycomb-alert";
 import type { AlertContext } from "../types/alert-context";
 
@@ -12,27 +9,30 @@ export type VerifyResult =
   | { kind: "filtered"; reason: "test-alert" | "status-not-triggered" }
   | { kind: "actionable" };
 
+function secretsMatch(provided: string, configured: string): boolean {
+  const a = createHash("sha256").update(provided).digest();
+  const b = createHash("sha256").update(configured).digest();
+  return timingSafeEqual(a, b);
+}
+
 export function verifyAlert(
   payload: HoneycombWebhookPayload,
+  providedSecret: string | undefined,
   configuredSecret: string | undefined,
 ): VerifyResult {
-  // Only enforce if a secret is configured (dev defaults to no-secret).
+  // Only enforce if a secret is configured (dev defaults to no-secret;
+  // production requires it).
   if (configuredSecret) {
-    if (!payload.secret)
-      return {
-        kind: "invalid",
-        reason: "missing-secret",
-      };
-    if (payload.secret !== configuredSecret)
+    if (!providedSecret) return { kind: "invalid", reason: "missing-secret" };
+    if (!secretsMatch(providedSecret, configuredSecret))
       return { kind: "invalid", reason: "wrong-secret" };
   }
-  if (payload.alert.isTest)
-    return {
-      kind: "filtered",
-      reason: "test-alert",
-    };
+
+  if (payload.alert.isTest) return { kind: "filtered", reason: "test-alert" };
+
   if (payload.alert.status !== "TRIGGERED")
     return { kind: "filtered", reason: "status-not-triggered" };
+
   return { kind: "actionable" };
 }
 
