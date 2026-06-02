@@ -18,7 +18,7 @@ const toolsToWrap = {
   // enrichAlertTool,
   honeycomb_get_workspace_context,
   // honeycomb_get_dataset,
-  // honeycomb_run_query,
+  honeycomb_run_query,
   // honeycomb_run_bubbleup,
   // honeycomb_get_query_results,
   // honeycomb_get_trace,
