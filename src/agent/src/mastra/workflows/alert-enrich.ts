@@ -107,15 +107,10 @@ INSTEAD OF THE HONEYCOMB MCP
 However, the API requires an Enterprise license
 */
 
-/**
- * It's possible / likely that this step should be omitted from production runs
- * It is helpful for testing with canned (stale alerts) and missing triggers
- * (triggers have been deleted to stay in free tier).
- */
 const redact = createStep({
   id: "scrub-alert",
   description:
-    "Remove context to keep info from Agent, with goal of improving investigation",
+    "Remove stale context with goal of improving investigation of canned alerts",
   inputSchema: workflowStateSchema,
   outputSchema: alertContextSchema,
   stateSchema: workflowStateSchema,
