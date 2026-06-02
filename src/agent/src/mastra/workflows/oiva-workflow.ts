@@ -73,7 +73,7 @@ const investigate = createStep({
     const { incidentId, alertContext } = inputData;
     const threadId = `incident:${incidentId}`;
     const requestContext = new RequestContext();
-    requestContext.set("incidentId", incidentId,);
+    requestContext.set("incidentId", incidentId);
     requestContext.set("alertContext", alertContext);
 
     await transitionIncident(incidentId, "investigating");
@@ -103,52 +103,11 @@ const investigate = createStep({
         const memory = await supervisorAgent.getMemory();
         await memory?.deleteThread(threadId);
       } catch (err) {
-        mastra.getLogger().error("supervisor memory cleanup failed", { incidentId, err });
+        mastra
+          .getLogger()
+          .error("supervisor memory cleanup failed", { incidentId, err });
       } finally {
         await cleanupCodebaseAgentWorkspace(incidentId);
-      }
-    }
-  }
-});
-
-const investigateTelemetryOnly = createStep({
-  id: "investigate-telemetry-only",
-  stateSchema: oivaWorkflowStateSchema,
-  inputSchema: oivaWorkflowInputSchema,
-  outputSchema: telemetryFindingsSchema,
-  execute: async ({ inputData, mastra, setState }) => {
-    const { incidentId, alertContext } = inputData;
-    const threadId = `incident:${incidentId}`;
-    const requestContext = new RequestContext();
-    requestContext.set("incidentId", incidentId);
-    requestContext.set("alertContext", alertContext);
-
-    await transitionIncident(incidentId, "investigating");
-    await setState({ incidentId, alertContext });
-    const telemetryAgent = mastra.getAgentById("telemetry-agent");
-
-    try {
-      const response = await telemetryAgent.generate(
-        "Please investigate this alert using the 'enrich-alert-tool'",
-        {
-          structuredOutput: {
-            schema: telemetryFindingsSchema,
-          },
-          memory: {
-            thread: threadId,
-            resource: RESOURCE_ID,
-          },
-          requestContext,
-        },
-      );
-
-      return response.object;
-    } finally {
-      try {
-        const memory = await telemetryAgent.getMemory();
-        await memory?.deleteThread(threadId);
-      } catch (err) {
-        mastra.getLogger().error("telemetry memory cleanup failed", { incidentId, err });
       }
     }
   },
@@ -270,8 +229,7 @@ export const oivaWorkflow = createWorkflow({
   inputSchema: oivaWorkflowInputSchema,
   outputSchema: z.string(),
 })
-  .then(investigateTelemetryOnly)
-  // .then(investigate)
-  // .then(generateReport)  // SV_TESTING
-  // .then(sendReportToSlack)  // SV_TESTING
+  .then(investigate)
+  .then(generateReport)
+  .then(sendReportToSlack)
   .commit();
