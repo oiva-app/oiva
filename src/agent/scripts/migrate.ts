@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
+import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -36,9 +37,12 @@ if (envPath) {
   dotenv.config({ path: envPath, override: true });
 }
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  console.error("DATABASE_URL is not set. Add it to .env or pass it inline.");
+let databaseUrl: string;
+try {
+  databaseUrl = resolvePostgresDatabaseUrl(process.env);
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(message);
   process.exit(1);
 }
 

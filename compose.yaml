@@ -24,15 +24,15 @@ services:
     # only. Production credentials never live here; they come from a secret
     # manager (or RDS IAM auth) when AWS deployment lands.
     environment:
-      POSTGRES_USER: oiva
-      POSTGRES_PASSWORD: oiva_dev
-      POSTGRES_DB: oiva
+      POSTGRES_USER: ${POSTGRES_USER:-oiva}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-oiva_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-oiva}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - oiva_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U oiva -d oiva"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
