@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { normalizeAlert } from "../../../src/mastra/adapters/honeycomb-adapter";
-import { honeycombWebhookPayloadSchema } from "../../../src/mastra/types/honeycomb-alert";
+import { extractQueryId, normalizeAlert, verifyAlert } from "../../../src/mastra/adapters/honeycomb-adapter";
+import { HoneycombWebhookPayload, honeycombWebhookPayloadSchema } from "../../../src/mastra/types/honeycomb-alert";
 import { alertContextSchema } from "../../../src/mastra/types/alert-context";
 import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
 import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
@@ -19,13 +19,6 @@ describe("normalizeAlert (honeycomb-adapter)", () => {
   });
 });
 
-import { describe, it, expect } from "vitest";
-import {
-  verifyAlert,
-  normalizeAlert,
-  extractQueryId,
-} from "../../../src/mastra/adapters/honeycomb-adapter";
-import type { HoneycombWebhookPayload } from "../../../src/mastra/types/honeycomb-alert";
 
 function payload(
   overrides: Partial<HoneycombWebhookPayload> = {},
