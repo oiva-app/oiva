@@ -5,7 +5,6 @@ import {
   telemetryToolCallSchema,
   telemetryTraceSchema,
 } from "@/types/investigation";
-import { honeycomb_get_dataset } from "@/mcp/mcpClients";
 
 // The agent-only field you want every wrapped tool to expose
 const questionField = {
@@ -25,28 +24,28 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     id: tool.id,
     description: tool.description,
     outputSchema: tool.outputSchema,
-    inputSchema: baseSchema.extend(questionField), // what the agent sees
+    inputSchema: baseSchema.extend(questionField),
     execute: async (inputData, context, ...rest) => {
-      // Drop the wrapper-only field before handing off to the real tool
+      
+      // Extract the wrapper-only field before handing off to the real tool
       const { question, ...toolInput } = inputData as any;
 
-      const investigationTrace = telemetryTraceSchema.parse(
-        context.requestContext?.get("investigationTrace")
-      );
-
       try {
-        if (!investigationTrace) throw new Error("Missing investigationTrace");
+        const investigationTrace = telemetryTraceSchema.parse(
+          context.requestContext?.get("investigationTrace"),
+        );
+
         const toolOutput = await tool.execute!(toolInput, context, ...rest);
 
         const toolTrace = telemetryToolCallSchema.parse({
           question,
           toolInput,
           toolOutput,
-          query_url: "PLACEHOLDER 🔴",
-          error: null, // or null if unknown
+          error: false,
         });
 
         investigationTrace.push(toolTrace);
+        context.requestContext?.set("investigationTrace", investigationTrace);
 
         return toolOutput;
       } catch (e) {
@@ -61,6 +60,3 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     },
   });
 }
-
-// JUST FOR TESTING, REMOVE WHEN DONE
-const wrapped_get_dataset = investigationToolWrapper(honeycomb_get_dataset);
