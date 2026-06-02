@@ -1,10 +1,3 @@
-/**
- * IncidentRepository — port.
- *
- * Domain types + interface that adapters implement.
- * Workflow steps depend on this interface, never on the Postgres adapter directly.
- * Pure TS + zod. No Postgres, no Mastra imports here.
- */
 import * as z from "zod";
 
 export const IncidentStatusSchema = z.enum([
@@ -13,6 +6,7 @@ export const IncidentStatusSchema = z.enum([
   "report_in_process",
   "report_generated",
   "report_delivered",
+  "failed",
   "closed",
 ]);
 
@@ -22,7 +16,10 @@ export const IncidentSchema = z.object({
   id: z.string().uuid(),
   status: IncidentStatusSchema,
   createdAt: z.date(),
+  statusUpdated: z.date(),
   resolvedAt: z.date().nullable(),
+  slackThreadTs: z.string().nullable(),
+  slackChannelId: z.string().nullable(),
 });
 export type Incident = z.infer<typeof IncidentSchema>;
 
@@ -42,4 +39,8 @@ export interface IncidentRepository {
    * Used by the correlation step in the workflow.
    */
   findActiveCandidates(opts: CorrelationLookup): Promise<Incident[]>;
+  attachSlackThread(id: string,
+    slack: { slackMessageId: string; slackChannelId: string },
+  ): Promise<void>;
+  findStaleIncident(opts: { statuses: IncidentStatus[]; updatedBefore: Date}): Promise<Incident[]>;
 }
