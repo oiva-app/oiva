@@ -51,7 +51,7 @@ curl -i -X POST http://localhost:4111/hook/honeycomb/alert \
             }
         },
         "alert": {
-            "instanceId": "7725bd0f-99a3-41e7-817e-9c831df21262",
+            "instanceId": "7748bd0f-99a3-41e7-817e-9c831df21262",
             "description": "astro-lisa environment:\nCurrent value (6.176 k) greater than threshold value (1)",
             "status": "TRIGGERED",
             "summary": "Triggered: error == true",
