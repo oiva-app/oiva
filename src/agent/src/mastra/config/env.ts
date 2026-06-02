@@ -22,6 +22,7 @@ const EnvSchema = z
 
     // Reduce max steps to save tokens
     SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
+    SUBAGENT_MAX_STEPS: z.coerce.number().default(20),
     TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
     CODEBASE_MAX_STEPS: z.coerce.number().default(20),
     RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
@@ -41,7 +42,7 @@ const EnvSchema = z
 
     /*
       mcp integration testing
-        Only set to true if you have a valid MCP key for the `oiva-sv` team 
+        Only set to true if 'HC_MCP_KEY' points at a valid MCP key for the `oiva-sv` team 
     */
     RUN_OIVA_SV_MCP_INTEGRATION_TESTS: z.stringbool().default(false),
 
