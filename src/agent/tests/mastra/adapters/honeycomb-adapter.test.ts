@@ -47,39 +47,45 @@ function payload(
 
 describe("verifyAlert", () => {
   it("is actionable when the secret matches and the alert is a real TRIGGERED alert", () => {
-    expect(verifyAlert(payload(), "s3cr3t")).toEqual({ kind: "actionable" });
+    expect(verifyAlert(payload(), "s3cr3t", "s3cr3t")).toEqual({
+      kind: "actionable",
+    });
   });
 
   it("rejects a wrong secret", () => {
-    expect(verifyAlert(payload({ secret: "nope" }), "s3cr3t")).toEqual({
+    expect(verifyAlert(payload(), "nope", "s3cr3t")).toEqual({
       kind: "invalid",
       reason: "wrong-secret",
     });
   });
 
   it("rejects a missing secret when one is configured", () => {
-    expect(verifyAlert(payload({ secret: undefined }), "s3cr3t")).toEqual({
+    expect(verifyAlert(payload(), undefined, "s3cr3t")).toEqual({
       kind: "invalid",
       reason: "missing-secret",
     });
   });
 
   it("skips the secret check entirely when no secret is configured (dev default)", () => {
-    // Documents the fail-open behavior in dev
-    expect(verifyAlert(payload({ secret: undefined }), undefined)).toEqual({
+    // Documents fail-open in dev; env.ts now forbids this in production.
+    expect(verifyAlert(payload(), undefined, undefined)).toEqual({
       kind: "actionable",
     });
   });
 
   it("filters test alerts even when the secret is valid", () => {
-    expect(verifyAlert(payload({}, { isTest: true }), "s3cr3t")).toEqual({
+    expect(
+      verifyAlert(payload({}, { isTest: true }), "s3cr3t", "s3cr3t"),
+    ).toEqual({
       kind: "filtered",
       reason: "test-alert",
     });
   });
 
   it("filters non-TRIGGERED (resolved) alerts", () => {
-    expect(verifyAlert(payload({}, { status: "OK" }), "s3cr3t")).toEqual({
+    expect(
+      verifyAlert(payload({}, { status: "OK" }), "s3cr3t", "s3cr3t"),
+    ).toEqual({
       kind: "filtered",
       reason: "status-not-triggered",
     });
@@ -87,7 +93,7 @@ describe("verifyAlert", () => {
 
   it("checks the secret before applying content filters", () => {
     expect(
-      verifyAlert(payload({ secret: "nope" }, { isTest: true }), "s3cr3t"),
+      verifyAlert(payload({}, { isTest: true }), "nope", "s3cr3t"),
     ).toEqual({ kind: "invalid", reason: "wrong-secret" });
   });
 });

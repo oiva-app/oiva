@@ -49,7 +49,13 @@ export async function alertHookHandler(c: Context) {
     );
   }
   // 3. Verify (auth + filter)
-  const verdict = verifyAlert(parsed.data, env.HC_SHARED_SECRET);
+  const providedSecret =
+    c.req.header("x-honeycomb-webhook-token") ?? parsed.data.secret;
+  const verdict = verifyAlert(
+    parsed.data,
+    providedSecret,
+    env.HC_SHARED_SECRET,
+  );
 
   if (verdict.kind === "invalid") {
     return c.json({ error: "unauthorized", reason: verdict.reason }, 401);

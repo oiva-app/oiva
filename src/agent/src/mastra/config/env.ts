@@ -8,45 +8,55 @@ import fs from "node:fs";
 import path from "node:path";
 import * as z from "zod";
 
-const EnvSchema = z.object({
-  OBSERVED_APP_NAME: z.string(),
-  OPENAI_API_KEY: z.string(),
-  HC_MCP_KEY: z.string(),
-  COLLECTOR_ENDPOINT: z.string(),
-  GITHUB_PAT: z.string(),
-  APP_GITHUB_HTTPS_URL: z.url(),
+const EnvSchema = z
+  .object({
+    OBSERVED_APP_NAME: z.string(),
+    OPENAI_API_KEY: z.string(),
+    HC_MCP_KEY: z.string(),
+    COLLECTOR_ENDPOINT: z.string(),
+    GITHUB_PAT: z.string(),
+    APP_GITHUB_HTTPS_URL: z.url(),
 
-  //  Unset = no secret enforcement on incoming webhooks.  Only for development.
-  HC_SHARED_SECRET: z.string().optional(),
+    // Optional in development (no webhook auth). REQUIRED in production.
+    HC_SHARED_SECRET: z.string().optional(),
 
-  // Reduce max steps to save tokens
-  SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
-  TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
-  CODEBASE_MAX_STEPS: z.coerce.number().default(20),
-  RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
+    // Reduce max steps to save tokens
+    SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
+    TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
+    CODEBASE_MAX_STEPS: z.coerce.number().default(20),
+    RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
 
-  // for future use - for implementing development-only logic
-  NODE_ENV: z.enum(["development", "production"]).default("production"),
+    // Gates HC_SHARED_SECRET enforcement (see .refine below). Defaults to
+    // "production" so an unset value fails closed.
+    NODE_ENV: z.enum(["development", "production"]).default("production"),
 
-  // absolute paths to workspaces on the machine/container
-  KNOWLEDGE_BASE_PATH: z.string(),
-  SANDBOX_BASE_PATH: z.string(),
+    // absolute paths to workspaces on the machine/container
+    KNOWLEDGE_BASE_PATH: z.string(),
+    SANDBOX_BASE_PATH: z.string(),
 
-  // for slack integration
-  SLACK_BOT_TOKEN: z.string(),
-  SLACK_CHANNEL_ID: z.string(),
-  SLACK_SIGNING_SECRET: z.string(),
+    // for slack integration
+    SLACK_BOT_TOKEN: z.string(),
+    SLACK_CHANNEL_ID: z.string(),
+    SLACK_SIGNING_SECRET: z.string(),
 
-  // postgres connection string (compose service: postgres).
-  // Format: postgresql://<user>:<password>@<host>:<port>/<database>
-  DATABASE_URL: z
-    .string()
-    .regex(
-      /^postgres(ql)?:\/\//,
-      "DATABASE_URL must be a postgres:// or postgresql:// connection string",
-    ),
-  CORRELATION_WINDOW_MINUTES: z.coerce.number().default(30),
-});
+    // postgres connection string (compose service: postgres).
+    // Format: postgresql://<user>:<password>@<host>:<port>/<database>
+    DATABASE_URL: z
+      .string()
+      .regex(
+        /^postgres(ql)?:\/\//,
+        "DATABASE_URL must be a postgres:// or postgresql:// connection string",
+      ),
+    CORRELATION_WINDOW_MINUTES: z.coerce.number().default(30),
+  })
+  .refine(
+    (env) => env.NODE_ENV !== "production" || Boolean(env.HC_SHARED_SECRET),
+    {
+      message:
+        "HC_SHARED_SECRET is required when NODE_ENV=production (an unset NODE_ENV defaults to production). Set NODE_ENV=development to run webhooks without a shared secret.",
+      path: ["HC_SHARED_SECRET"],
+    },
+  );
 
 /**
  * Find the nearest .env file using a method that is compatible with Mastra bundling
