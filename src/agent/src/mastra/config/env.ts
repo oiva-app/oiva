@@ -43,12 +43,16 @@ const EnvSchema = z
     // Postgres connection. DATABASE_URL is supported for compatibility;
     // split POSTGRES_* variables are preferred for deployment.
     DATABASE_URL: z
-      .string()
-      .regex(
-        /^postgres(ql)?:\/\//,
-        "DATABASE_URL must be a postgres:// or postgresql:// connection string",
-      )
-      .optional(),
+      .preprocess(
+        (val) => (val === "" ? undefined : val),
+        z
+          .string()
+          .regex(
+            /^postgres(ql)?:\/\//,
+            "DATABASE_URL must be a postgres:// or postgresql:// connection string",
+          )
+          .optional(),
+      ),
     POSTGRES_HOST: z.string().optional(),
     POSTGRES_PORT: z.string().optional(),
     POSTGRES_USER: z.string().optional(),
