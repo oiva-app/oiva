@@ -1,3 +1,5 @@
+
+
 ## INSTALLATION
 
 Create and edit your .env file from the example
@@ -13,6 +15,8 @@ Start the OTel Collector
 ```bash
 docker compose up
 ```
+
+
 
 ### INSTALL MASTRA OTEL EXPORTER
 
@@ -154,3 +158,20 @@ From Valerie's 3-service app
   }
 }
 ```
+## TROUBLESHOOTING
+500 error from webhook endpoint?  This might help:
+
+```bash
+docker compose down -v  # destroys all DB contents
+npm run db:migrate      # sets up Postgres database
+docker compose up
+```
+
+## Observing Oiva with an OTel Frontend (e.g. Honeycomb)
+
+### Notable Span Attributes
+Trying to understand what Oiva did? When viewing a trace, it's helpful to show these span attributes as columns in your trace view:
+- gen_ai.operation.name
+- mastra.workflow_step.input
+- gen_ai.tool.name
+- mastra.model_step.input and .output (tool inputs and outputs)

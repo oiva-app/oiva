@@ -25,6 +25,10 @@ import {
   prepareCodebaseAgentWorkspace,
 } from "../workspaces/codebase-workspace";
 
+/*
+z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
+Use `z.uuid()` instead
+*/
 const oivaWorkflowInputSchema = z.object({
   incidentId: z.uuid(),
   alertContext: alertContextSchema,
@@ -67,6 +71,7 @@ const investigate = createStep({
     const threadId = `incident:${incidentId}`;
     const requestContext = new RequestContext();
     requestContext.set("incidentId", incidentId);
+    requestContext.set("alertContext", alertContext);
 
     await transitionIncident(incidentId, "investigating");
     await setState({ incidentId, alertContext });
@@ -95,12 +100,14 @@ const investigate = createStep({
         const memory = await supervisorAgent.getMemory();
         await memory?.deleteThread(threadId);
       } catch (err) {
-        mastra.getLogger().error("supervisor memory cleanup failed", { incidentId, err });
+        mastra
+          .getLogger()
+          .error("supervisor memory cleanup failed", { incidentId, err });
       } finally {
         await cleanupCodebaseAgentWorkspace(incidentId);
       }
     }
-  }
+  },
 });
 
 const generateReport = createStep({

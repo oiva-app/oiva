@@ -41,7 +41,7 @@
       "source": "mastra-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/mastra/SKILL.md",
-      "computedHash": "c64e9569033a5ee35333f175f831c6fbcf0f894af2095f1415c431eae3c63d65"
+      "computedHash": "f0ca76d36d67a345064f471a9577e752beb2b20ab46acdf154ed223905e1d3a4"
     },
     "prototype": {
       "source": "mattpocock/skills",

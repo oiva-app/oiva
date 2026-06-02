@@ -29,9 +29,18 @@ import { registerApiRoute } from "@mastra/core/server";
 import { alertHookHandler } from "./api/honeycomb-hook-handler";
 import { slackRatingHandler } from "./api/slack-rating-handler";
 import { env } from "./config/env";
+import {
+  alertEnrich,
+  contextualizeUsingHoneycombMCP,
+} from "./workflows/alert-enrich";
 
 export const mastra = new Mastra({
-  workflows: { oivaWorkflow, weatherWorkflow },
+  workflows: {
+    oivaWorkflow,
+    weatherWorkflow,
+    alertEnrich,
+    contextualize: contextualizeUsingHoneycombMCP,
+  },
   agents: {
     helloWorldAgent,
     weatherAgent,

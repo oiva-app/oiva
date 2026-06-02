@@ -21,11 +21,6 @@ A single request to `gateway` route `/api/orders` returned a 4xx/5xx response, c
   - Codebase: no recent deployment or code change was identified that directly touched `/api/orders`, gateway routing for that endpoint, or the order handler in a way that strongly explains new 4xx/5xx responses.
   - Telemetry: the alert payload timestamp (`2026-05-22T00:00:00Z`) did not match the saved trigger result’s apparent time range (around `2026-05-13T18:53Z-18:56Z`), which reduces confidence in precise correlation.
 
-## Findings
-[WIP]
-_Relevant raw findings not yet available._
-[/WIP]
-
 
 ## Next Steps
 **Immediate**  
@@ -45,4 +40,15 @@ _Relevant raw findings not yet available._
 ## Investigation Steps
 [WIP]
 _Investigation trace not yet available._
+```
+[
+    {
+        summary: I want to check if blah blah
+        tool_call: { ... }
+        tool_result: { ... }
+        query_url: http://honeycomb.io/results/2je03kso
+    }
+]
+```
+
 [/WIP]
