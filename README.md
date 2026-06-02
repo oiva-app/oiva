@@ -159,7 +159,7 @@ From Valerie's 3-service app
 }
 ```
 ## TROUBLESHOOTING
-500 error from webhook endpoint?
+500 error from webhook endpoint?  This might help:
 
 ```bash
 docker compose down -v  # destroys all DB contents

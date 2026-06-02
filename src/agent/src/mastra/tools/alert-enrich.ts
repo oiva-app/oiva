@@ -38,7 +38,7 @@ export const enrichAlertTool = createTool({
           "app.workflowResult": JSON.stringify(result)
         }
       })
-      return "ERROR"
+      return "ERROR: try using the `get_query_results` tool"
     }
   }
 })

@@ -3,10 +3,7 @@ import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
 import { alertContextSchema } from "../types/alert-context";
-import {
-  supervisorAgentOutputSchema,
-  telemetryFindingsSchema,
-} from "../types/investigation";
+import { supervisorAgentOutputSchema } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
   postReportSummary,
@@ -201,7 +198,6 @@ const sendReportToSlack = createStep({
         slackChannelId: channel,
       });
     } catch (err) {
-      // TODO - convert ALL console.log and console.error IN ALL FILES to OTel instrumentation?
       console.error("sendReportToSlack: failed to persist slack ids", {
         reportId: inputData.id,
         ts,
