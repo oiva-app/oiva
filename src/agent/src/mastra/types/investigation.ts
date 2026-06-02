@@ -87,6 +87,18 @@ const telemetryStepOutputSchema = z.object({
   telemetryFindings: telemetryFindingsSchema, // tele agent’s findings
 });
 
+export const telemetryTraceSchema = z.array(
+  z.object({
+    question: z
+      .string()
+      .describe("What question is this tool call meant to answer?"),
+    tool_input: z.object({}).loose(),
+    tool_output: z.object({}).loose(),
+    query_url: z.string().url().default(""),
+    error: z.boolean(), // or null if unknown
+  }),
+);
+
 export { telemetryFindingsSchema, telemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;
 export type TelemetryStepOutput = z.infer<typeof telemetryStepOutputSchema>;
