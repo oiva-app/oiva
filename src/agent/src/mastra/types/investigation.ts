@@ -93,7 +93,7 @@ export const telemetryToolCallSchema = z.object({
     .describe("What question is this tool call meant to answer?"),
   toolInput: z.object({}).loose(),
   toolOutput: z.object({}).loose(),
-  queryUrl: z.url().default(""),
+  queryUrl: z.string().default(""),
   error: z.boolean(), // or null if unknown
 });
 
