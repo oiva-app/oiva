@@ -7,10 +7,10 @@ import type { telemetryTraceSchema } from "@/types/investigation";
 
 type InvestigationTrace = z.infer<typeof telemetryTraceSchema>;
 
-// Mock functions
-
 const innerInputSchema = z.object({ datasetId: z.string() });
 const innerOutputSchema = z.object({ ok: z.boolean() });
+
+const validInput = { datasetId: "product_catalog", question: "why?" };
 
 function makeInnerTool(execute: Tool<any, any>["execute"]) {
   return {
@@ -27,47 +27,56 @@ function makeContext(investigationTrace?: InvestigationTrace) {
   if (investigationTrace) store.set("investigationTrace", investigationTrace);
 
   const spanUpdate = vi.fn();
+  const childEnd = vi.fn();
+  const childError = vi.fn();
+  const createChildSpan = vi.fn(() => ({ end: childEnd, error: childError }));
+
   return {
     context: {
       requestContext: {
         get: (key: string) => store.get(key),
         set: (key: string, value: unknown) => store.set(key, value),
       },
-      tracingContext: { currentSpan: { update: spanUpdate } },
+      tracingContext: { currentSpan: { update: spanUpdate, createChildSpan } },
     },
     spanUpdate,
+    childEnd,
+    childError,
     getTrace: () =>
       store.get("investigationTrace") as InvestigationTrace | undefined,
   };
 }
 
-const validInput = { datasetId: "product_catalog", question: "why?" };
+// Wrap a tool, point it at a fresh mock context, and return a ready-to-call
+// `run()` plus the spies so each test is just its scenario and assertions.
+function setup(opts: { trace?: InvestigationTrace; error?: Error } = {}) {
+  const innerExecute = opts.error
+    ? vi.fn().mockRejectedValue(opts.error)
+    : vi.fn().mockResolvedValue({ ok: true });
+  const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
+  const ctx = makeContext(opts.trace);
+  const run = () => wrapped.execute!(validInput, ctx.context as any);
+  return { innerExecute, run, ...ctx };
+}
 
 describe("investigationToolWrapper", () => {
   beforeEach(() => vi.clearAllMocks());
 
   test("calls the wrapped tool with the input minus 'question'", async () => {
-    const innerExecute = vi.fn().mockResolvedValue({ ok: true });
-    const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
-    const { context } = makeContext([]);
+    const { innerExecute, run } = setup({ trace: [] });
 
-    const result = await wrapped.execute!(validInput, context as any);
+    const result = await run();
 
     expect(result).toEqual({ ok: true });
     expect(innerExecute).toHaveBeenCalledTimes(1);
-    // First arg is the tool input with the wrapper-only `question` stripped.
-    expect(innerExecute.mock.calls[0][0]).toEqual({
-      datasetId: "product_catalog",
-    });
-    expect(innerExecute.mock.calls[0][0]).not.toHaveProperty("question");
+    // The wrapper-only `question` is stripped before the real tool runs.
+    expect(innerExecute.mock.calls[0][0]).toEqual({ datasetId: "product_catalog" });
   });
 
   test("pushes a trace entry onto the requestContext trace on success", async () => {
-    const innerExecute = vi.fn().mockResolvedValue({ ok: true });
-    const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
-    const { context, getTrace } = makeContext([]);
+    const { run, getTrace } = setup({ trace: [] });
 
-    await wrapped.execute!(validInput, context as any);
+    await run();
 
     const trace = getTrace()!;
     expect(trace).toHaveLength(1);
@@ -80,32 +89,35 @@ describe("investigationToolWrapper", () => {
     });
   });
 
-  test("records the error on the span and rethrows when the tool throws", async () => {
-    const er = new Error("☹️");
-    const innerExecute = vi.fn().mockRejectedValue(er);
-    const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
-    const { context, spanUpdate, getTrace } = makeContext([]);
+  test("records the error and rethrows when the tool throws", async () => {
+    const { run, spanUpdate, childError, getTrace } = setup({
+      trace: [],
+      error: new Error("☹️"),
+    });
 
-    await expect(wrapped.execute!(validInput, context as any)).rejects.toThrow(
-      "☹️",
-    );
+    await expect(run()).rejects.toThrow("☹️");
 
+    expect(childError).toHaveBeenCalled();
     expect(spanUpdate).toHaveBeenCalledWith({
       metadata: { error: true, "app.error": "☹️" },
     });
-
     expect(getTrace()).toHaveLength(0);
   });
 
-  test("records the error and rethrows when the investigationTrace is missing/invalid", async () => {
-    const innerExecute = vi.fn().mockResolvedValue({ ok: true });
-    const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
-    const { context, spanUpdate } = makeContext(); // no investigationTrace
+  test("starts a fresh trace when none exists in requestContext", async () => {
+    const { innerExecute, run, getTrace } = setup(); // no investigationTrace
 
-    // telemetryTraceSchema.parse(undefined) throws a ZodError before the tool runs.
-    await expect(
-      wrapped.execute!(validInput, context as any),
-    ).rejects.toThrow();
+    await run();
+
+    expect(innerExecute).toHaveBeenCalledTimes(1);
+    expect(getTrace()).toHaveLength(1);
+  });
+
+  test("records the error and rethrows when the trace is invalid", async () => {
+    // A non-array trace fails telemetryTraceSchema.parse before the tool runs.
+    const { innerExecute, run, spanUpdate } = setup({ trace: {} as any });
+
+    await expect(run()).rejects.toThrow();
 
     expect(innerExecute).not.toHaveBeenCalled();
     expect(spanUpdate).toHaveBeenCalledWith({
