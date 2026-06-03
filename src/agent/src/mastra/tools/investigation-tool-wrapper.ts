@@ -10,6 +10,21 @@ import {
   telemetryToolCallSchema,
   telemetryTraceSchema,
 } from "@/types/investigation";
+import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
+
+
+function extractQueryUrl(toolOutput: unknown): string {
+  const parsed = ResourceLinkSchema.safeParse(toolOutput);
+  if (!parsed.success) return "";
+
+  const textBlock = parsed.data.content.find(
+    (c): c is McpTextContent => c.type === "text",
+  );
+  // Metadata section has a line: query_url: "https://ui.honeycomb.io/.../result/..."
+  const match = textBlock?.text.match(/query_url:.+?"(.+?)"/);
+  return match?.[1] ?? "";
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Additional properties to be added to the wrapped tool
@@ -17,7 +32,7 @@ import {
 const questionProperty = {
   type: "string",
   description:
-    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`",
+    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters.",
 } as const;
 
 /*
@@ -90,17 +105,17 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
             toolInput,
             toolOutput,
             error: false,
-            // TODO after we get basic wrapper functionality working:
-            // implement `url` capture functionality
+            queryUrl: extractQueryUrl(toolOutput),
           });
 
           investigationTrace.push(toolTrace);
           context.requestContext?.set("investigationTrace", investigationTrace);
 
           // end child span and annotate parent span
-          span?.end({ output: toolOutput, attributes: { success: true } }); // TODO - include toolTrace in telemetry
+          span?.end({ output: toolOutput, attributes: { success: true } });
           context.tracingContext?.currentSpan?.update({
             metadata: {
+              "app.toolTrace": JSON.stringify(toolTrace),
               "app.investigationTrace": JSON.stringify(
                 context.requestContext?.get("investigationTrace"),
               ),
