@@ -4,6 +4,7 @@ import type { AlertContext } from "../types/alert-context";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
 import type { ClosedBy } from "../ports/progress-reporter";
 import type { IncidentStatus } from "../ports/incident-repository";
+import type { InvestigationTrace } from "../types/investigation";
 import { formatDuration } from "../domain/incident-duration";
 
 function toMrkdwn(markdown: string | undefined | null): string {
@@ -92,6 +93,29 @@ export function buildSummaryBlocks(
       ],
     },
   ];
+}
+
+export function formatInvestigationSteps(trace: InvestigationTrace): string {
+  if (trace.length === 0) {
+    return "Hmm, something went wrong, nothing to see here.";
+  }
+
+  return trace
+    .map((step, index) => {
+      const heading = `**${index + 1}. ${step.question || step.toolName}**`;
+
+      let toolLine: string;
+      if (step.error) {
+        toolLine = "(invalid tool call)";
+      } else if (step.queryUrl) {
+        toolLine = `Tool use: [${step.toolName}](${step.queryUrl})`;
+      } else {
+        toolLine = `Tool use: ${step.toolName}`;
+      }
+
+      return `${heading}\n${toolLine}`;
+    })
+    .join("\n\n");
 }
 
 export function renderFullReportMarkdown(report: IncidentReport): string {

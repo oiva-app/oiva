@@ -11,6 +11,7 @@ import {
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
+import { formatInvestigationSteps } from "../slack/formatters";
 import {
   alertRepository,
   incidentRepository,
@@ -158,12 +159,15 @@ const generateReport = createStep({
     }
 
     const report = response.object;
+    const investigationSteps = formatInvestigationSteps(
+      state.investigationTrace ?? [],
+    );
 
     let persistedReport;
     try {
       persistedReport = await reportRepository.insert({
         incidentId: state.incidentId,
-        reportJson: report,
+        reportJson: { ...report, investigationSteps },
       });
     } catch (err) {
       console.error("generateReport: failed to insert report", err);
@@ -178,7 +182,7 @@ const generateReport = createStep({
 
     await transitionIncident(state.incidentId, "report_generated");
 
-    return { id: persistedReport.id, durationMs, ...report };
+    return { id: persistedReport.id, durationMs, ...report, investigationSteps };
   },
 });
 

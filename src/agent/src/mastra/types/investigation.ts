@@ -99,6 +99,7 @@ export const investigationToolCallSchema = z.object({
 });
 
 export const investigationTraceSchema = z.array(investigationToolCallSchema);
+export type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 
 export { telemetryFindingsSchema, telemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;
