@@ -97,8 +97,8 @@ const investigate = createStep({
       );
 
       /*
-      why don't we simply do `...state` here?  
-      It will not contain the incidentId or other values that are set in the lines above
+      Question: why don't we simply do `...state` here?  
+      Answer: It will not contain the incidentId or other values that are set in the lines above
       */
       await setState({
         incidentId,

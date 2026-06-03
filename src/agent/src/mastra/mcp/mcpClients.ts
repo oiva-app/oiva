@@ -65,8 +65,6 @@ export const wrappedHoneycombTools: Record<
   ReturnType<typeof investigationToolWrapper>
 > = {};
 for (const [key, tool] of Object.entries(honeycombToolsToWrap)) {
-  // A name not returned by the MCP server destructures to `undefined`
-  // (e.g. analyze_columns); skip it rather than crash in the wrapper.
   if (!tool) {
     console.warn(`[mcpClients] skipping wrap: "${key}" not provided by MCP server`);
     continue;
