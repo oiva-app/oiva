@@ -3,6 +3,7 @@ import {
   Block,
   KnownBlock,
   ChatPostMessageResponse,
+  retryPolicies,
 } from "@slack/web-api";
 import { env } from "../config/env";
 import {
@@ -14,8 +15,11 @@ import {
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
 import type { SlackThreadData } from "../types/slack";
+import { fiveRetriesInFiveMinutes } from "@slack/web-api/dist/retry-policies";
 
-const client = new WebClient(env.SLACK_BOT_TOKEN);
+const client = new WebClient(env.SLACK_BOT_TOKEN, {
+  retryConfig: retryPolicies.fiveRetriesInFiveMinutes,
+});
 
 export async function postReportSummary(
   report: IncidentReport,
@@ -38,6 +42,40 @@ export async function postReportSummary(
   }
 
   return { ts: result.ts, channel: result.channel };
+}
+
+export async function postIncidentRoot(input: {
+  blocks: (Block | KnownBlock)[];
+  fallbackText: string;
+}): Promise<SlackThreadData> {
+  const result = await client.chat.postMessage({
+    channel: env.SLACK_CHANNEL_ID,
+    blocks: input.blocks,
+    text: input.fallbackText,
+  });
+
+  if (!result.ts) {
+    throw new Error("Slack API did not return a message timestamp.");
+  }
+  if (!result.channel) {
+    throw new Error("Slack API did not return a channel.");
+  }
+
+  return { ts: result.ts, channel: result.channel };
+}
+
+export async function updateIncidentMessage(input: {
+  channel: string;
+  ts: string;
+  blocks: (Block | KnownBlock)[];
+  fallbackText: string;
+}): Promise<void> {
+  await client.chat.update({
+    channel: input.channel,
+    ts: input.ts,
+    blocks: input.blocks,
+    text: input.fallbackText,
+  });
 }
 
 export async function uploadFileToThread(

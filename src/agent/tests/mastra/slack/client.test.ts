@@ -6,14 +6,19 @@ const mockFns = vi.hoisted(() => ({
   postMessage: vi.fn(),
   filesUploadV2: vi.fn(),
   update: vi.fn(),
+  capturedConfig: null as unknown,
 }));
 
 vi.mock("@slack/web-api", () => ({
-  WebClient: function () {
+  WebClient: function (_token: string, config?: unknown) {
+    mockFns.capturedConfig = config;
     return {
       chat: { postMessage: mockFns.postMessage, update: mockFns.update },
       filesUploadV2: mockFns.filesUploadV2,
     };
+  },
+  retryPolicies: {
+    fiveRetriesInFiveMinutes: { policyName: "fiveRetriesInFiveMinutes" },
   },
 }));
 
@@ -26,6 +31,8 @@ vi.mock("../../../src/mastra/config/env", () => ({
 
 const {
   postReportSummary,
+  postIncidentRoot,
+  updateIncidentMessage,
   uploadFileToThread,
   postRatingConfirmation,
   postErrorMessage,
@@ -67,6 +74,14 @@ describe("slack client", () => {
     vi.clearAllMocks();
   });
 
+  describe("WebClient construction", () => {
+    it("uses the fiveRetriesInFiveMinutes retry policy", () => {
+      expect(mockFns.capturedConfig).toEqual({
+        retryConfig: { policyName: "fiveRetriesInFiveMinutes" },
+      });
+    });
+  });
+
   describe("postReportSummary", () => {
     it("posts to the configured channel and returns the message timestamp and channel", async () => {
       mockFns.postMessage.mockResolvedValue({
@@ -101,6 +116,70 @@ describe("slack client", () => {
       await expect(
         postReportSummary(mockReport, mockAlertContext.resultUrl),
       ).rejects.toThrow("Slack API did not return a channel");
+    });
+  });
+
+  describe("postIncidentRoot", () => {
+    const blocks = [{ type: "section", text: { type: "mrkdwn", text: "hi" } }];
+
+    it("posts to the configured channel with provided blocks and fallback text", async () => {
+      mockFns.postMessage.mockResolvedValue({
+        ts: "mock-ts-1",
+        channel: "mock-channel-id",
+      });
+
+      const result = await postIncidentRoot({
+        blocks,
+        fallbackText: "Investigating: trigger",
+      });
+
+      expect(mockFns.postMessage).toHaveBeenCalledWith({
+        channel: "mock-channel-id",
+        blocks,
+        text: "Investigating: trigger",
+      });
+      expect(result).toStrictEqual({
+        ts: "mock-ts-1",
+        channel: "mock-channel-id",
+      });
+    });
+
+    it("throws if the Slack API does not return a timestamp", async () => {
+      mockFns.postMessage.mockResolvedValue({ ts: undefined });
+      await expect(
+        postIncidentRoot({ blocks, fallbackText: "x" }),
+      ).rejects.toThrow("Slack API did not return a message timestamp.");
+    });
+
+    it("throws if the Slack API does not return a channel", async () => {
+      mockFns.postMessage.mockResolvedValue({
+        ts: "mock-ts-1",
+        channel: undefined,
+      });
+      await expect(
+        postIncidentRoot({ blocks, fallbackText: "x" }),
+      ).rejects.toThrow("Slack API did not return a channel.");
+    });
+  });
+
+  describe("updateIncidentMessage", () => {
+    it("calls chat.update with channel, ts, blocks, and fallback text", async () => {
+      mockFns.update.mockResolvedValue({});
+      const blocks = [{ type: "section", text: { type: "mrkdwn", text: "x" } }];
+
+      await updateIncidentMessage({
+        channel: "C123",
+        ts: "T456",
+        blocks,
+        fallbackText: "Status update",
+      });
+
+      expect(mockFns.update).toHaveBeenCalledWith({
+        channel: "C123",
+        ts: "T456",
+        blocks,
+        text: "Status update",
+      });
     });
   });
 
