@@ -87,7 +87,7 @@ const telemetryStepOutputSchema = z.object({
   telemetryFindings: telemetryFindingsSchema, // tele agent’s findings
 });
 
-export const telemetryToolCallSchema = z.object({
+export const investigationToolCallSchema = z.object({
   toolName: z.string().describe("Which tool was called?"),
   question: z
     .string()
@@ -98,7 +98,7 @@ export const telemetryToolCallSchema = z.object({
   error: z.boolean(), // or null if unknown
 });
 
-export const telemetryTraceSchema = z.array(telemetryToolCallSchema);
+export const investigationTraceSchema = z.array(investigationToolCallSchema);
 
 export { telemetryFindingsSchema, telemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;

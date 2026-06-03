@@ -7,11 +7,10 @@ import {
 import type { JSONSchema7 } from "json-schema";
 
 import {
-  telemetryToolCallSchema,
-  telemetryTraceSchema,
+  investigationToolCallSchema,
+  investigationTraceSchema,
 } from "@/types/investigation";
 import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
-
 
 function extractQueryUrl(toolOutput: unknown): string {
   const parsed = ResourceLinkSchema.safeParse(toolOutput);
@@ -25,14 +24,13 @@ function extractQueryUrl(toolOutput: unknown): string {
   return match?.[1] ?? "";
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Additional properties to be added to the wrapped tool
 
 const questionProperty = {
   type: "string",
   description:
-    // REMEMBER: the description is passed to the LLM.  
+    // REMEMBER: the description is passed to the LLM.
     // Changing the description may change agent behavior.
     "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
 } as const;
@@ -71,7 +69,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     inputSchema,
     execute: async (inputData, context, ...rest) => {
       function getInvestigationTrace() {
-        return telemetryTraceSchema.parse(
+        return investigationTraceSchema.parse(
           // Create empty investigationTrace instead of failing
           context.requestContext?.get("investigationTrace") ?? [],
         );
@@ -102,7 +100,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
         try {
           const toolOutput = await tool.execute!(toolInput, context, ...rest);
 
-          const toolTrace = telemetryToolCallSchema.parse({
+          const toolTrace = investigationToolCallSchema.parse({
             toolName: tool.id,
             question,
             toolInput,

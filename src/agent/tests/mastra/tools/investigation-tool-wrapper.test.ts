@@ -3,9 +3,9 @@ import { z } from "zod";
 import { Tool } from "@mastra/core/tools";
 
 import { investigationToolWrapper } from "@/tools/investigation-tool-wrapper";
-import type { telemetryTraceSchema } from "@/types/investigation";
+import type { investigationTraceSchema } from "@/types/investigation";
 
-type InvestigationTrace = z.infer<typeof telemetryTraceSchema>;
+type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 
 const innerInputSchema = z.object({ datasetId: z.string() });
 const innerOutputSchema = z.object({ ok: z.boolean() });
@@ -70,7 +70,9 @@ describe("investigationToolWrapper", () => {
     expect(result).toEqual({ ok: true });
     expect(innerExecute).toHaveBeenCalledTimes(1);
     // The wrapper-only `question` is stripped before the real tool runs.
-    expect(innerExecute.mock.calls[0][0]).toEqual({ datasetId: "product_catalog" });
+    expect(innerExecute.mock.calls[0][0]).toEqual({
+      datasetId: "product_catalog",
+    });
   });
 
   test("pushes a trace entry onto the requestContext trace on success", async () => {

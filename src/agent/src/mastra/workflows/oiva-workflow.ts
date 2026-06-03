@@ -3,7 +3,7 @@ import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
 import { alertContextSchema } from "../types/alert-context";
-import { supervisorAgentOutputSchema } from "../types/investigation";
+import { investigationTraceSchema, supervisorAgentOutputSchema } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
   postReportSummary,
@@ -37,6 +37,7 @@ const oivaWorkflowInputSchema = z.object({
 const oivaWorkflowStateSchema = z.object({
   incidentId: z.uuid().optional(),
   alertContext: alertContextSchema.optional(),
+  investigationTrace: investigationTraceSchema.default([])
 });
 
 const RESOURCE_ID = `${env.OBSERVED_APP_NAME}:investigation`;
@@ -66,7 +67,7 @@ const investigate = createStep({
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: oivaWorkflowInputSchema,
   outputSchema: supervisorAgentOutputSchema,
-  execute: async ({ inputData, mastra, setState }) => {
+  execute: async ({ inputData, mastra, state, setState }) => {
     const { incidentId, alertContext } = inputData;
     const threadId = `incident:${incidentId}`;
     const requestContext = new RequestContext();
@@ -93,6 +94,11 @@ const investigate = createStep({
           requestContext,
         },
       );
+
+      await setState({
+        ...state,
+        investigationTrace: requestContext.get("investigationTrace") ?? [],
+      });
 
       return response.object;
     } finally {
@@ -181,7 +187,7 @@ const sendReportToSlack = createStep({
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: incidentReportSchema,
   outputSchema: z.string(),
-  execute: async ({ inputData, state }) => {
+  execute: async ({ inputData, state, requestContext }) => {
     if (!state.alertContext || !state.incidentId) {
       throw new Error(
         "sendReportToSlack: alert context or incident id unavailable",
