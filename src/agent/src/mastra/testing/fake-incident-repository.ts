@@ -5,7 +5,6 @@ import type {
   IncidentRepository,
   IncidentStatus,
 } from "../ports/incident-repository";
-import { clear } from "node:console";
 
 // Mirrors PgIncidentRepository.updateStatus's resolved_at policy: set on
 // entering report_delivered or closed (end-of-lifecycle transitions),
