@@ -4,7 +4,7 @@ import type { AlertContext } from "../types/alert-context";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
 import type { ClosedBy } from "../ports/progress-reporter";
 import type { IncidentStatus } from "../ports/incident-repository";
-import type { InvestigationTrace } from "../types/investigation";
+import type { InvestigationStep } from "../types/investigation";
 import { formatDuration } from "../domain/incident-duration";
 
 function toMrkdwn(markdown: string | undefined | null): string {
@@ -95,11 +95,6 @@ export function buildSummaryBlocks(
   ];
 }
 
-
-export type InvestigationStep = Pick<
-  InvestigationTrace[number],
-  "toolName" | "question" | "error"
-> & { queryUrl?: string };
 
 export function formatInvestigationSteps(
   trace: readonly InvestigationStep[],

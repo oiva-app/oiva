@@ -95,11 +95,18 @@ export const investigationToolCallSchema = z.object({
   toolInput: z.object({}).loose(),
   toolOutput: z.object({}).loose(),
   queryUrl: z.string().default(""),
-  error: z.boolean(), // or null if unknown
+  error: z.boolean(), 
 });
 
 export const investigationTraceSchema = z.array(investigationToolCallSchema);
 export type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
+
+// Type acrobatics to deal with mismatch btw input and output types
+// TODO - is there a better way?
+export type InvestigationStep = Pick<
+  InvestigationTrace[number],
+  "toolName" | "question" | "error"
+> & { queryUrl?: string };
 
 export { telemetryFindingsSchema, telemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;
