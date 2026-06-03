@@ -1,4 +1,5 @@
 import { createTool, Tool } from "@mastra/core/tools";
+import { SpanType } from "@mastra/core/observability";
 import { standardSchemaToJSONSchema } from "@mastra/schema-compat/schema";
 import type { JSONSchema7 } from "json-schema";
 
@@ -13,6 +14,9 @@ const questionProperty = {
     "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`",
 } as const;
 
+/**
+  Remember: the investigationTrace is NOT OTel instrumentation
+ */
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
 ) {
@@ -34,28 +38,59 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     inputSchema,
     execute: async (inputData, context, ...rest) => {
       
-      // Extract the wrapper-only field before handing off to the real tool
+      /**
+       * Create empty investigationTrace instead of failing
+       */
+      function getInvestigationTrace() {
+        return telemetryTraceSchema.parse(
+          context.requestContext?.get("investigationTrace") ?? [],
+        );
+      }
+
+      function createOTelChildSpan() {
+        return context.tracingContext?.currentSpan?.createChildSpan({
+          type: SpanType.TOOL_CALL,
+          name: `wrapped_tool ${tool.id}`,
+          attributes: {
+            toolDescription: tool.description,
+          },
+          input: toolInput,
+          metadata: { toolId: tool.id, question },
+        });
+      }
+
+      // Extract the wrapper-only field(s) before handing off to the real tool
       const { question, ...toolInput } = inputData as any;
 
       try {
-        const investigationTrace = telemetryTraceSchema.parse(
-          // Create empty context instead of failing
-          context.requestContext?.get("investigationTrace") ?? [],
-        );
+        const investigationTrace = getInvestigationTrace()
+        const span = createOTelChildSpan()
 
-        const toolOutput = await tool.execute!(toolInput, context, ...rest);
+        try {
+          const toolOutput = await tool.execute!(toolInput, context, ...rest);
 
-        const toolTrace = telemetryToolCallSchema.parse({
-          question,
-          toolInput,
-          toolOutput,
-          error: false,
-        });
+          const toolTrace = telemetryToolCallSchema.parse({
+            question,
+            toolInput,
+            toolOutput,
+            error: false,
+            // TODO after we get basic wrapper functionality working:
+            // implement `url` capture functionality
+          });
 
-        investigationTrace.push(toolTrace);
-        context.requestContext?.set("investigationTrace", investigationTrace);
+          investigationTrace.push(toolTrace);
+          context.requestContext?.set("investigationTrace", investigationTrace);
 
-        return toolOutput;
+          span?.end({ output: toolOutput, attributes: { success: true } });  // TODO - include toolTrace in telemetry
+
+          return toolOutput;
+        } catch (e) {
+          span?.error({
+            error: e instanceof Error ? e : new Error(String(e)),
+            attributes: { success: false },
+          });
+          throw e;
+        }
       } catch (e) {
         context.tracingContext?.currentSpan?.update({
           metadata: {
