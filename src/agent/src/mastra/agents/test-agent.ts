@@ -17,7 +17,7 @@ import {
 const toolsToWrap = {
   // enrichAlertTool,
   honeycomb_get_workspace_context,
-  // honeycomb_get_dataset,
+  honeycomb_get_dataset,
   honeycomb_run_query,
   // honeycomb_run_bubbleup,
   // honeycomb_get_query_results,
@@ -26,9 +26,9 @@ const toolsToWrap = {
   // honeycomb_analyze_columns,
 };
 
-const wrapped: Record<string, ReturnType<typeof investigationToolWrapper>> = {};
-for (const [key, value] of Object.entries(toolsToWrap)) {
-  wrapped[key] = investigationToolWrapper(value);
+const wrappedTools: Record<string, ReturnType<typeof investigationToolWrapper>> = {};
+for (const [key, tool] of Object.entries(toolsToWrap)) {
+  wrappedTools[key] = investigationToolWrapper(tool);
 }
 
 export const testAgent: SubAgent = new Agent({
@@ -40,6 +40,6 @@ export const testAgent: SubAgent = new Agent({
   defaultOptions: {
     maxSteps: 2,
   },
-  tools: { ...wrapped },
+  tools: { ...wrappedTools },
   memory: new Memory(),
 });
