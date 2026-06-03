@@ -132,7 +132,7 @@ export function buildErrorBlocks(
       fields: [
         {
           type: "mrkdwn",
-          text: `*Alert Trigger*\n${alertContext.triggerName}`,
+          text: `*Alert Trigger*\n${truncateForHeader(alertContext.triggerName)}`,
         },
         { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
         {
@@ -185,6 +185,13 @@ const STATUS_BADGES: Record<IncidentStatus, { emoji: string; label: string }> =
     closed: { emoji: "⚫", label: "Closed" },
   };
 
+const HEADER_TEXT_LIMIT = 150;
+
+function truncateForHeader(text: string): string {
+  if (text.length <= HEADER_TEXT_LIMIT) return text;
+  return text.slice(0, HEADER_TEXT_LIMIT - 1) + "…";
+}
+
 export function buildStatusBadgeBlock(status: IncidentStatus): KnownBlock {
   const { emoji, label } = STATUS_BADGES[status];
   return {
@@ -199,7 +206,11 @@ export function buildIncidentHeaderBlocks(
   return [
     {
       type: "header",
-      text: { type: "plain_text", text: alert.triggerName, emoji: false },
+      text: {
+        type: "plain_text",
+        text: truncateForHeader(alert.triggerName),
+        emoji: false,
+      },
     },
     {
       type: "section",
@@ -265,6 +276,7 @@ export function buildAttachCounterBlock(count: number): KnownBlock | null {
 
 export function buildIncidentFailedBlocks(
   reason: string,
+  incidentId?: string,
 ): (Block | KnownBlock)[] {
   return [
     {
@@ -281,13 +293,14 @@ export function buildIncidentFailedBlocks(
           type: "button",
           text: { type: "plain_text", text: "Retry", emoji: false },
           action_id: "incident_retry",
-          // value populated by the reporter from incidentId
+          value: incidentId,
         },
         {
           type: "button",
           text: { type: "plain_text", text: "Close", emoji: false },
           action_id: "incident_close",
           style: "danger",
+          value: incidentId,
         },
       ],
     },
@@ -332,7 +345,7 @@ export function buildIncidentMessageBlocks(
   if (inputs.failure) {
     blocks.push(
       { type: "divider" },
-      ...buildIncidentFailedBlocks(inputs.failure.reason),
+      ...buildIncidentFailedBlocks(inputs.failure.reason, inputs.incidentId),
     );
   }
 
