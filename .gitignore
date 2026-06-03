@@ -175,3 +175,5 @@ SKILL.md
 
 # temporary report storage before db set up
 src/agent/src/mastra/public/reports/
+
+docs/

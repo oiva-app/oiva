@@ -92,11 +92,10 @@ const findEnvUpward = (start: string): string | undefined => {
 };
 
 const rootEnv = findEnvUpward(process.cwd());
-if (!rootEnv) {
-  throw new Error(`env.ts -> no .env file found upward from ${process.cwd()}`);
-}
 
-dotenv.config({ path: rootEnv, override: true });
+if (rootEnv) {
+  dotenv.config({ path: rootEnv, override: true });
+}
 
 /**
  * Checks the env that's required for the agent and NOT every entry in the .env file
@@ -137,5 +136,8 @@ export const env = {
   ...parsed,
 };
 
-console.log("Loaded environment using dotenv.");
-// console.log(env)
+if (rootEnv) {
+  console.log(`env.ts -> .env loaded from ${rootEnv}`);
+} else {
+  console.log("env.ts -> .env not found; using process environment");
+}
