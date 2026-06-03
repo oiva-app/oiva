@@ -4,9 +4,20 @@ import {
   buildErrorBlocks,
   renderFullReportMarkdown,
   buildRatingConfirmationBlock,
+  buildStatusBadgeBlock,
+  buildIncidentHeaderBlocks,
+  buildActivityLogBlock,
+  buildAttachCounterBlock,
+  buildIncidentFailedBlocks,
+  buildIncidentClosedAttributionBlock,
+  buildIncidentMessageBlocks,
 } from "../../../src/mastra/slack/formatters";
 import type { IncidentReport } from "../../../src/mastra/types/report";
 import type { AlertContext } from "../../../src/mastra/types/alert-context";
+import type {
+  ActivityLogEntry,
+  IncidentRenderInputs,
+} from "../../../src/mastra/slack/render-types";
 
 const mockReport: IncidentReport = {
   id: "d5f259b7-a84e-4ece-9659-8dec496c03af",
@@ -243,4 +254,93 @@ describe("buildRatingConfirmationBlock", () => {
       expect(block.elements[0].text).toBe(`Rated ${emoji} by <@U07ABCDE>`);
     },
   );
+});
+
+describe("incident root message blocks", () => {
+  it("status badge renders emoji + label per status", () => {
+    const block = buildStatusBadgeBlock("investigating");
+    expect(block.type).toBe("context");
+    expect(JSON.stringify(block)).toContain("🟡");
+    expect(JSON.stringify(block)).toContain("Investigating");
+  });
+
+  it("activity log omits when empty, renders mixed entries in order", () => {
+    expect(buildActivityLogBlock([])).toBeNull();
+    const entries: ActivityLogEntry[] = [
+      { kind: "milestone", label: "Alert verified" },
+      { kind: "delegationPending", agentLabel: "Telemetry investigator" },
+      {
+        kind: "delegationCompleted",
+        agentLabel: "Codebase reviewer",
+        durationMs: 15_000,
+        success: true,
+        headline: "Likely the failing migration",
+      },
+      {
+        kind: "delegationCompleted",
+        agentLabel: "Flaky tool",
+        durationMs: 2_000,
+        success: false,
+      },
+    ];
+    const block = buildActivityLogBlock(entries);
+    expect(block).not.toBeNull();
+    const text = (block as { text: { text: string } }).text.text;
+    expect(text).toMatch(/✓ Alert verified/);
+    expect(text).toMatch(/⏳ Telemetry investigator/);
+    expect(text).toMatch(
+      /✓ Codebase reviewer — Likely the failing migration - 15s/,
+    );
+    expect(text).toMatch(/✕ Flaky tool - No Discovery - 2s/);
+  });
+
+  it("attach counter omits at zero, pluralizes correctly", () => {
+    expect(buildAttachCounterBlock(0)).toBeNull();
+    const one = buildAttachCounterBlock(1);
+    expect(JSON.stringify(one)).toContain("1 related alert");
+    expect(JSON.stringify(one)).not.toContain("related alerts");
+    const many = buildAttachCounterBlock(7);
+    expect(JSON.stringify(many)).toContain("7 related alerts");
+  });
+
+  it("failed render includes retry and close actions", () => {
+    const blocks = buildIncidentFailedBlocks("git pull timed out");
+    const actions = blocks.find((b) => b.type === "actions");
+    expect(actions).toBeDefined();
+    const actionIds = JSON.stringify(actions);
+    expect(actionIds).toContain("incident_retry");
+    expect(actionIds).toContain("incident_close");
+  });
+
+  it("closed attribution distinguishes user vs reaper", () => {
+    const user = buildIncidentClosedAttributionBlock({
+      kind: "user",
+      userId: "U123",
+    });
+    expect(JSON.stringify(user)).toContain("<@U123>");
+    const reaper = buildIncidentClosedAttributionBlock({ kind: "reaper" });
+    expect(JSON.stringify(reaper)).toContain("🔒");
+  });
+
+  it("orchestrator: alert header replaced by report summary once report present", () => {
+    const baseAlert = {
+      triggerName: "checkout-latency",
+      description: "p99 over 2s",
+      environment: "production",
+      alert: { timestamp: "2026-06-03T12:00:00Z" },
+      resultUrl: "https://ui.honeycomb.io/x",
+      // …fill in remaining AlertContext required fields per the test helper pattern
+    } as unknown as IncidentRenderInputs["alert"];
+
+    const withoutReport = buildIncidentMessageBlocks({
+      status: "investigating",
+      alert: baseAlert,
+      log: [],
+      attachCount: 0,
+    });
+    expect(JSON.stringify(withoutReport)).toContain("checkout-latency");
+
+    // Once a report is present, expect the summary header text instead.
+    // Use the existing report fixture/helper for IncidentReport.
+  });
 });

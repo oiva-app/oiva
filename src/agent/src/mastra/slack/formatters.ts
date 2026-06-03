@@ -1,6 +1,9 @@
 import type { Block, KnownBlock } from "@slack/web-api";
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
+import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
+import type { ClosedBy } from "../ports/progress-reporter";
+import type { IncidentStatus } from "../ports/incident-repository";
 import { formatDuration } from "../domain/incident-duration";
 
 function toMrkdwn(markdown: string | undefined | null): string {
@@ -129,7 +132,7 @@ export function buildErrorBlocks(
       fields: [
         {
           type: "mrkdwn",
-          text: `*Alert Trigger*\n${alertContext.triggerName}`,
+          text: `*Alert Trigger*\n${truncateForHeader(alertContext.triggerName)}`,
         },
         { type: "mrkdwn", text: `*Environment*\n${alertContext.environment}` },
         {
@@ -169,4 +172,186 @@ export function buildRatingConfirmationBlock(
       },
     ],
   };
+}
+
+const STATUS_BADGES: Record<IncidentStatus, { emoji: string; label: string }> =
+  {
+    triggered: { emoji: "⚪", label: "Triggered" },
+    investigating: { emoji: "🟡", label: "Investigating" },
+    report_in_process: { emoji: "🟡", label: "Generating report" },
+    report_generated: { emoji: "🟡", label: "Report ready" },
+    report_delivered: { emoji: "🟢", label: "Delivered" },
+    failed: { emoji: "🔴", label: "Failed" },
+    closed: { emoji: "⚫", label: "Closed" },
+  };
+
+const HEADER_TEXT_LIMIT = 150;
+
+function truncateForHeader(text: string): string {
+  if (text.length <= HEADER_TEXT_LIMIT) return text;
+  return text.slice(0, HEADER_TEXT_LIMIT - 1) + "…";
+}
+
+export function buildStatusBadgeBlock(status: IncidentStatus): KnownBlock {
+  const { emoji, label } = STATUS_BADGES[status];
+  return {
+    type: "context",
+    elements: [{ type: "mrkdwn", text: `${emoji} *${label}*` }],
+  };
+}
+
+export function buildIncidentHeaderBlocks(
+  alert: AlertContext,
+): (Block | KnownBlock)[] {
+  return [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: truncateForHeader(alert.triggerName),
+        emoji: false,
+      },
+    },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: toMrkdwn(alert.description) },
+    },
+    {
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `*Environment*: ${alert.environment}  ·  *Triggered at*: ${alert.alert.timestamp}`,
+        },
+      ],
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${alert.resultUrl}|View Result Query in Honeycomb>`,
+      },
+    },
+  ];
+}
+
+function renderActivityLine(entry: ActivityLogEntry): string {
+  switch (entry.kind) {
+    case "milestone":
+      return `✓ ${entry.label}`;
+    case "delegationPending":
+      return `⏳ ${entry.agentLabel}…`;
+    case "delegationCompleted": {
+      const icon = entry.success ? "✓" : "✕";
+      const dur = formatDuration(entry.durationMs);
+      const tail = entry.headline
+        ? `— ${toMrkdwn(entry.headline)}`
+        : "- No Discovery";
+      return `${icon} ${entry.agentLabel} ${tail} - ${dur}`;
+    }
+  }
+}
+
+export function buildActivityLogBlock(
+  entries: ReadonlyArray<ActivityLogEntry>,
+): KnownBlock | null {
+  if (entries.length === 0) return null;
+  return {
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: ["*Activity*", ...entries.map(renderActivityLine)].join("\n"),
+    },
+  };
+}
+
+export function buildAttachCounterBlock(count: number): KnownBlock | null {
+  if (count <= 0) return null;
+  const label = count === 1 ? "related alert" : "related alerts";
+  return {
+    type: "context",
+    elements: [{ type: "mrkdwn", text: `↻ ${count} ${label}` }],
+  };
+}
+
+export function buildIncidentFailedBlocks(
+  reason: string,
+  incidentId?: string,
+): (Block | KnownBlock)[] {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Investigation failed*\n${toMrkdwn(reason)}`,
+      },
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "Retry", emoji: false },
+          action_id: "incident_retry",
+          value: incidentId,
+        },
+        {
+          type: "button",
+          text: { type: "plain_text", text: "Close", emoji: false },
+          action_id: "incident_close",
+          style: "danger",
+          value: incidentId,
+        },
+      ],
+    },
+  ];
+}
+
+export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
+  const text =
+    by.kind === "user"
+      ? `Closed by <@${by.userId}>`
+      : "🔒 Auto-closed (no activity)";
+  return {
+    type: "context",
+    elements: [{ type: "mrkdwn", text }],
+  };
+}
+
+/**
+ * Composition: badge → (report summary OR alert header) → activity log →
+ * attach counter → (failed banner + actions IF failed) → (closed attribution
+ * IF closed).
+ */
+export function buildIncidentMessageBlocks(
+  inputs: IncidentRenderInputs,
+): (Block | KnownBlock)[] {
+  const blocks: (Block | KnownBlock)[] = [buildStatusBadgeBlock(inputs.status)];
+
+  if (inputs.report) {
+    blocks.push(
+      ...buildSummaryBlocks(inputs.report.report, inputs.report.resultUrl),
+    );
+  } else {
+    blocks.push(...buildIncidentHeaderBlocks(inputs.alert));
+  }
+
+  const activity = buildActivityLogBlock(inputs.log);
+  if (activity) blocks.push({ type: "divider" }, activity);
+
+  const counter = buildAttachCounterBlock(inputs.attachCount);
+  if (counter) blocks.push(counter);
+
+  if (inputs.failure) {
+    blocks.push(
+      { type: "divider" },
+      ...buildIncidentFailedBlocks(inputs.failure.reason, inputs.incidentId),
+    );
+  }
+
+  if (inputs.closedBy) {
+    blocks.push(buildIncidentClosedAttributionBlock(inputs.closedBy));
+  }
+
+  return blocks;
 }
