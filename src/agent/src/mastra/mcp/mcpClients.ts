@@ -54,7 +54,7 @@ const honeycombToolsToWrap = {
   honeycomb_get_dataset,
   honeycomb_run_query,
   honeycomb_run_bubbleup,
-  honeycomb_get_query_results,
+  // honeycomb_get_query_results,  // omitted here because the agent doesn't seem to know how to properly use this tool, and the enrichAlert tool does everything that the agent needs?
   honeycomb_get_trace,
   honeycomb_find_columns,
   honeycomb_analyze_columns,
