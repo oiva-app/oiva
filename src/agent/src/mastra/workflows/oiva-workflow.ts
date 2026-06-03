@@ -68,7 +68,7 @@ const investigate = createStep({
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: oivaWorkflowInputSchema,
   outputSchema: supervisorAgentOutputSchema,
-  execute: async ({ inputData, mastra, state, setState }) => {
+  execute: async ({ inputData, mastra, setState }) => {
     const { incidentId, alertContext } = inputData;
     const threadId = `incident:${incidentId}`;
     const requestContext = new RequestContext();
@@ -96,8 +96,13 @@ const investigate = createStep({
         },
       );
 
+      /*
+      why don't we simply do `...state` here?  
+      It will not contain the incidentId or other values that are set in the lines above
+      */
       await setState({
-        ...state,
+        incidentId,
+        alertContext,
         investigationTrace: requestContext.get("investigationTrace") ?? [],
       });
 
