@@ -95,7 +95,15 @@ export function buildSummaryBlocks(
   ];
 }
 
-export function formatInvestigationSteps(trace: InvestigationTrace): string {
+
+export type InvestigationStep = Pick<
+  InvestigationTrace[number],
+  "toolName" | "question" | "error"
+> & { queryUrl?: string };
+
+export function formatInvestigationSteps(
+  trace: readonly InvestigationStep[],
+): string {
   if (trace.length === 0) {
     return "Hmm, something went wrong, nothing to see here.";
   }

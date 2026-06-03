@@ -13,13 +13,13 @@ import {
   buildIncidentMessageBlocks,
   formatInvestigationSteps,
 } from "../../../src/mastra/slack/formatters";
+import type { InvestigationStep } from "../../../src/mastra/slack/formatters";
 import type { IncidentReport } from "../../../src/mastra/types/report";
 import type { AlertContext } from "../../../src/mastra/types/alert-context";
 import type {
   ActivityLogEntry,
   IncidentRenderInputs,
 } from "../../../src/mastra/slack/render-types";
-import type { InvestigationTrace } from "../../../src/mastra/types/investigation";
 
 const mockReport: IncidentReport = {
   id: "d5f259b7-a84e-4ece-9659-8dec496c03af",
@@ -242,27 +242,21 @@ describe("renderFullReportMarkdown", () => {
 });
 
 describe("formatInvestigationSteps", () => {
-  const linkedStep: InvestigationTrace[number] = {
+  const linkedStep: InvestigationStep = {
     toolName: "honeycomb_get_query_results",
-    toolInput: {},
-    toolOutput: {},
     question: "Inspect alert query metadata for anomaly window",
     queryUrl:
       "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr",
     error: false,
   };
-  const erroredStep: InvestigationTrace[number] = {
+  const erroredStep: InvestigationStep = {
     toolName: "honeycomb_run_query",
-    toolInput: {},
-    toolOutput: {},
     question: "Error rate by service around alert over 30m",
     queryUrl: "",
     error: true,
   };
-  const linklessStep: InvestigationTrace[number] = {
+  const linklessStep: InvestigationStep = {
     toolName: "honeycomb_get_workspace_context",
-    toolInput: {},
-    toolOutput: {},
     question: "Investigate astro-lisa alert",
     queryUrl: "",
     error: false,
