@@ -96,11 +96,12 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
         const span = createOTelChildSpan();
 
         // Why a nested try-catch block?
-        // To annotate tool call errors on the *child* OTel span
+        // To annotate MCP tool call errors on the *child OTel span*
         try {
           const toolOutput = await tool.execute!(toolInput, context, ...rest);
 
           const toolTrace = telemetryToolCallSchema.parse({
+            toolName: tool.id,
             question,
             toolInput,
             toolOutput,

@@ -88,6 +88,7 @@ const telemetryStepOutputSchema = z.object({
 });
 
 export const telemetryToolCallSchema = z.object({
+  toolName: z.string().describe("Which tool was called?"),
   question: z
     .string()
     .describe("What question is this tool call meant to answer?"),
