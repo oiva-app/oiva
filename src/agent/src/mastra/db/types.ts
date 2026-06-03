@@ -10,7 +10,10 @@ export interface IncidentRow {
   id: string;
   status: string;
   created_at: Date;
+  status_updated_at: Date;
   resolved_at: Date | null;
+  slack_thread_ts: string | null;
+  slack_channel_id: string | null;
 }
 
 export interface AlertRow {

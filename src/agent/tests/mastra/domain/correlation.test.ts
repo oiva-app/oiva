@@ -6,7 +6,10 @@ const incident = (id: string): Incident => ({
   id,
   status: "investigating",
   createdAt: new Date("2026-05-22T00:00:00Z"),
+  statusUpdated: new Date("2026-05-22T00:00:00Z"),
   resolvedAt: null,
+  slackThreadTs: null,
+  slackChannelId: null,
 });
 
 describe("correlate", () => {
