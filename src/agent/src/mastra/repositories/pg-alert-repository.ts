@@ -69,6 +69,19 @@ export class PgAlertRepository implements AlertRepository {
     }
   }
 
+  async findFirstByIncident(incidentId: string): Promise<Alert | null> {
+    const { rows } = await this.pool.query<AlertRow>(
+      `SELECT id, incident_id, received_at, raw_payload, source, vendor_instance_id, trigger_name, dataset, query_id
+        FROM alerts
+        WHERE incident_id = $1
+        ORDER BY received_at ASC, id ASC
+        LIMIT 1`,
+      [incidentId],
+    );
+    if (rows.length === 0) return null;
+    return this.toAlert(rows[0]);
+  }
+
   private toAlert(row: AlertRow): Alert {
     return {
       id: row.id,
