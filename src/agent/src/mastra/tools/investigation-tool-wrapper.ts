@@ -32,7 +32,7 @@ function extractQueryUrl(toolOutput: unknown): string {
 const questionProperty = {
   type: "string",
   description:
-    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters.",
+    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
 } as const;
 
 /*
