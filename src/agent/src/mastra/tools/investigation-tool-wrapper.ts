@@ -1,6 +1,6 @@
 import { createTool, Tool } from "@mastra/core/tools";
 import { SpanType } from "@mastra/core/observability";
-import { standardSchemaToJSONSchema } from "@mastra/schema-compat/schema";
+import { standardSchemaToJSONSchema, type StandardSchemaWithJSON } from "@mastra/schema-compat/schema";
 import type { JSONSchema7 } from "json-schema";
 
 import {
@@ -8,11 +8,33 @@ import {
   telemetryTraceSchema,
 } from "@/types/investigation";
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Additional properties to be added to the wrapped tool
+
 const questionProperty = {
   type: "string",
   description:
     "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`",
 } as const;
+
+/*
+Todo: refactor to make function pure, remove closure, and accept multiple properties (not just one)
+*/
+function wrapInputSchema(inputSchema: StandardSchemaWithJSON | undefined): JSONSchema7 {
+  const baseJson: JSONSchema7 = inputSchema
+    ? (standardSchemaToJSONSchema(inputSchema) as JSONSchema7)
+    : { type: "object", properties: {} };
+
+  return {
+    ...baseJson,
+    type: "object",
+    properties: { ...baseJson.properties, question: questionProperty },
+    required: [...(baseJson.required ?? []), "question"],
+  };
+}
+///////////////////////////////////////////////////////////////////////////////
+
 
 /**
   Remember: the investigationTrace is NOT OTel instrumentation
@@ -20,16 +42,9 @@ const questionProperty = {
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
 ) {
-  const baseJson: JSONSchema7 = tool.inputSchema
-    ? (standardSchemaToJSONSchema(tool.inputSchema) as JSONSchema7)
-    : { type: "object", properties: {} };
 
-  const inputSchema: JSONSchema7 = {
-    ...baseJson,
-    type: "object",
-    properties: { ...baseJson.properties, question: questionProperty },
-    required: [...(baseJson.required ?? []), "question"],
-  };
+
+  const inputSchema: JSONSchema7 = wrapInputSchema(tool.inputSchema)
 
   return createTool({
     id: tool.id,
@@ -38,11 +53,10 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     inputSchema,
     execute: async (inputData, context, ...rest) => {
       
-      /**
-       * Create empty investigationTrace instead of failing
-       */
+
       function getInvestigationTrace() {
         return telemetryTraceSchema.parse(
+          // Create empty investigationTrace instead of failing
           context.requestContext?.get("investigationTrace") ?? [],
         );
       }
@@ -64,8 +78,11 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
 
       try {
         const investigationTrace = getInvestigationTrace()
-        const span = createOTelChildSpan()
 
+        const span = createOTelChildSpan()
+        
+        // Why a nested try-catch block?
+        // To annotate tool call errors on the *child* OTel span
         try {
           const toolOutput = await tool.execute!(toolInput, context, ...rest);
 
@@ -91,6 +108,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
           });
           throw e;
         }
+
       } catch (e) {
         context.tracingContext?.currentSpan?.update({
           metadata: {
