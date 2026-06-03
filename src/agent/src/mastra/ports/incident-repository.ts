@@ -41,7 +41,7 @@ export interface IncidentRepository {
   findActiveCandidates(opts: CorrelationLookup): Promise<Incident[]>;
   attachSlackThread(
     id: string,
-    slack: { slackMessageId: string; slackChannelId: string },
+    slack: { slackThreadTs: string; slackChannelId: string },
   ): Promise<void>;
   findStaleIncidents(opts: {
     statuses: IncidentStatus[];

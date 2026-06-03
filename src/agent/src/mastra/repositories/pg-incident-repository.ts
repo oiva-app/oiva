@@ -93,7 +93,7 @@ export class PgIncidentRepository implements IncidentRepository {
 
   async attachSlackThread(
     id: string,
-    slack: { slackMessageId: string; slackChannelId: string },
+    slack: { slackThreadTs: string; slackChannelId: string },
   ): Promise<void> {
     const { rows } = await this.pool.query(
       `UPDATE incidents
@@ -101,7 +101,7 @@ export class PgIncidentRepository implements IncidentRepository {
              slack_channel_id = $3
          WHERE id = $1
          RETURNING id`,
-      [id, slack.slackMessageId, slack.slackChannelId],
+      [id, slack.slackThreadTs, slack.slackChannelId],
     );
     if (rows.length === 0) {
       throw new Error(
