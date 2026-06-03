@@ -115,7 +115,7 @@ export class PgIncidentRepository implements IncidentRepository {
    * than `updatedBefore`. Drives the cleanup reaper's sweeps (parked delivered
    * or failed incidents, and non-terminal incidents stuck past a deadline).
    */
-  async findStaleIncident(opts: {
+  async findStaleIncidents(opts: {
     statuses: IncidentStatus[];
     updatedBefore: Date;
   }): Promise<Incident[]> {

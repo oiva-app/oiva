@@ -39,8 +39,12 @@ export interface IncidentRepository {
    * Used by the correlation step in the workflow.
    */
   findActiveCandidates(opts: CorrelationLookup): Promise<Incident[]>;
-  attachSlackThread(id: string,
+  attachSlackThread(
+    id: string,
     slack: { slackMessageId: string; slackChannelId: string },
   ): Promise<void>;
-  findStaleIncident(opts: { statuses: IncidentStatus[]; updatedBefore: Date}): Promise<Incident[]>;
+  findStaleIncidents(opts: {
+    statuses: IncidentStatus[];
+    updatedBefore: Date;
+  }): Promise<Incident[]>;
 }
