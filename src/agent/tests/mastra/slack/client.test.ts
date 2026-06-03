@@ -33,6 +33,7 @@ const {
   postReportSummary,
   postIncidentRoot,
   updateIncidentMessage,
+  postThreadReply,
   uploadFileToThread,
   postRatingConfirmation,
   postErrorMessage,
@@ -179,6 +180,27 @@ describe("slack client", () => {
         ts: "T456",
         blocks,
         text: "Status update",
+      });
+    });
+  });
+
+  describe("postThreadReply", () => {
+    it("posts to the given channel + thread_ts with provided blocks and fallback text", async () => {
+      mockFns.postMessage.mockResolvedValue({});
+      const blocks = [{ type: "section", text: { type: "mrkdwn", text: "x" } }];
+
+      await postThreadReply({
+        channel: "C123",
+        threadTs: "T456",
+        blocks,
+        fallbackText: "Auto-closed",
+      });
+
+      expect(mockFns.postMessage).toHaveBeenCalledWith({
+        channel: "C123",
+        thread_ts: "T456",
+        blocks,
+        text: "Auto-closed",
       });
     });
   });

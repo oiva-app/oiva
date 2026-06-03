@@ -78,6 +78,20 @@ export async function updateIncidentMessage(input: {
   });
 }
 
+export async function postThreadReply(input: {
+  channel: string;
+  threadTs: string;
+  blocks: (Block | KnownBlock)[];
+  fallbackText: string;
+}): Promise<void> {
+  await client.chat.postMessage({
+    channel: input.channel,
+    thread_ts: input.threadTs,
+    blocks: input.blocks,
+    text: input.fallbackText,
+  });
+}
+
 export async function uploadFileToThread(
   threadTs: string,
   report: IncidentReport,
