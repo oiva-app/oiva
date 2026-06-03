@@ -244,6 +244,8 @@ describe("renderFullReportMarkdown", () => {
 describe("formatInvestigationSteps", () => {
   const linkedStep: InvestigationTrace[number] = {
     toolName: "honeycomb_get_query_results",
+    toolInput: {},
+    toolOutput: {},
     question: "Inspect alert query metadata for anomaly window",
     queryUrl:
       "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr",
@@ -251,12 +253,16 @@ describe("formatInvestigationSteps", () => {
   };
   const erroredStep: InvestigationTrace[number] = {
     toolName: "honeycomb_run_query",
+    toolInput: {},
+    toolOutput: {},
     question: "Error rate by service around alert over 30m",
     queryUrl: "",
     error: true,
   };
   const linklessStep: InvestigationTrace[number] = {
     toolName: "honeycomb_get_workspace_context",
+    toolInput: {},
+    toolOutput: {},
     question: "Investigate astro-lisa alert",
     queryUrl: "",
     error: false,
