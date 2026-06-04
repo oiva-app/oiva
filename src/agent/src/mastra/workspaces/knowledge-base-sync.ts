@@ -14,9 +14,16 @@ const s3 = new S3Client({
   maxAttempts: 5,
 });
 
-export async function syncKnowledgeBaseForIncident(
-  incidentId: string,
-): Promise<string> {
+const inFlight = new Map<string, Promise<string>>();
+
+export function syncKnowledgeBaseForIncident(incidentId: string): Promise<string> {
+  if (!inFlight.has(incidentId)) {
+    inFlight.set(incidentId, doSync(incidentId).finally(() => inFlight.delete(incidentId)));
+  }
+  return inFlight.get(incidentId)!;
+}
+
+async function doSync(incidentId: string): Promise<string> {
   const destination = getKnowledgeBaseMirrorPath(incidentId);
 
   await fs.rm(destination, { recursive: true, force: true });
