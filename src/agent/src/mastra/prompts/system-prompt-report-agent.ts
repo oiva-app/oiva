@@ -51,7 +51,4 @@ Priority-grouped action list. Use these bold headings and omit any group with no
 **Follow-up** (priority: follow_up)
 
 One bullet per action with its rationale.
-
-investigationSteps
-Output exactly: _Investigation trace not yet available._
 `;

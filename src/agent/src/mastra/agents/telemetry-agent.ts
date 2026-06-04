@@ -3,16 +3,7 @@ import { Memory } from "@mastra/memory";
 import type { SubAgent } from "@mastra/core/agent";
 import { env } from "../config/env"
 import { enrichAlertTool } from "@/tools/alert-enrich";
-import {
-  honeycomb_get_workspace_context,
-  honeycomb_get_dataset,
-  honeycomb_run_query,
-  honeycomb_run_bubbleup,
-  honeycomb_get_query_results,
-  honeycomb_get_trace,
-  honeycomb_find_columns,
-  honeycomb_analyze_columns,
-} from "../mcp/mcpClients";
+import { wrappedHoneycombTools } from "../mcp/mcpClients";
 import { telemetryPrompt } from "../prompts/telemetry-prompt";
 
 export const telemetryAgent: SubAgent = new Agent({
@@ -27,14 +18,7 @@ export const telemetryAgent: SubAgent = new Agent({
   },
   tools: {
     enrichAlertTool,
-    honeycomb_get_workspace_context,
-    honeycomb_get_dataset,
-    honeycomb_run_query,
-    honeycomb_run_bubbleup,
-    honeycomb_get_query_results,
-    honeycomb_get_trace,
-    honeycomb_find_columns,
-    honeycomb_analyze_columns,
+    ...wrappedHoneycombTools,
   },
   memory: new Memory(),
 });

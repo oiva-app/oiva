@@ -7,9 +7,6 @@ export const reportAgentOutputSchema = z.object({
   hypothesis: z.string().describe("Markdown string. No section heading."),
   findings: z.string().describe("Markdown string. No section heading."),
   nextSteps: z.string().describe("Markdown string. No section heading."),
-  investigationSteps: z
-    .string()
-    .describe("Markdown string. No section heading."),
 });
 
 export type ReportAgentOutput = z.infer<typeof reportAgentOutputSchema>;
@@ -17,6 +14,9 @@ export type ReportAgentOutput = z.infer<typeof reportAgentOutputSchema>;
 export const incidentReportSchema = reportAgentOutputSchema.extend({
   id: z.string(),
   durationMs: z.number().nullable(),
+  investigationSteps: z
+    .string()
+    .describe("Markdown string. No section heading."),
 });
 
 export type IncidentReport = z.infer<typeof incidentReportSchema>;

@@ -174,4 +174,33 @@ Trying to understand what Oiva did? When viewing a trace, it's helpful to show t
 - gen_ai.operation.name
 - mastra.workflow_step.input
 - gen_ai.tool.name
-- mastra.model_step.input and .output (tool inputs and outputs)
+- mastra.model_step.input and .output (agent LLM inputs and outputs)
+
+### Model inputs and outputs
+When viewing the `mastra.model_step.input` and `.output` attributes, keep in mind that you are NOT viewing the actual data set to the LLM API.  Mastra redacts tool calls.
+
+TBD: this is likely an OTel-implemented behavior?
+```json
+[
+  {
+    "role": "system",
+    "content": "..."
+  },
+  {
+    "role": "system",
+    "content": "Local filesystem at \"/home/sv/projects/capstone/test-workspaces/opentelemetry-demo-workspaces/knowledge-base\". Relative paths resolve from this directory. File access is restricted to this directory."
+  },
+  {
+    "role": "user",
+    "content": { "omittedForBrevity": "raw alert is here" },
+  {
+    "role": "assistant",
+    "content": "[tool: agent-telemetryAgent]"
+  },
+  {
+    "role": "tool",
+    "content": "[tool: agent-telemetryAgent]"
+  }
+]
+
+```
