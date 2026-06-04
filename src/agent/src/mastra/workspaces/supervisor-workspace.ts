@@ -8,15 +8,20 @@ const workspacesByIncidentId = new Map<string, AnyWorkspace>();
 const inFlight = new Map<string, Promise<AnyWorkspace>>();
 
 async function initSupervisorWorkspace(incidentId: string): Promise<AnyWorkspace> {
-  const workspace = new Workspace({
-    filesystem: new LocalFilesystem({
-      basePath: getKnowledgeBaseMirrorPath(incidentId),
-      readOnly: true,
-    }),
-  });
-  await workspace.init();
-  workspacesByIncidentId.set(incidentId, workspace);
-  return workspace;
+  try {
+    const workspace = new Workspace({
+      filesystem: new LocalFilesystem({
+        basePath: getKnowledgeBaseMirrorPath(incidentId),
+        readOnly: true,
+      }),
+    });
+    await workspace.init();
+    workspacesByIncidentId.set(incidentId, workspace);
+    return workspace;
+  } catch (error) {
+    await cleanupSupervisorWorkspace(incidentId);
+    throw error;
+  }
 }
 
 export function prepareSupervisorWorkspace(incidentId: string): Promise<AnyWorkspace> {
