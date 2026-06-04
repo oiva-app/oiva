@@ -24,6 +24,9 @@ import {
   cleanupCodebaseAgentWorkspace,
   prepareCodebaseAgentWorkspace,
 } from "../workspaces/codebase-workspace";
+import {
+  prepareSupervisorWorkspace,
+} from "../workspaces/supervisor-workspace";
 
 /*
 z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
@@ -79,6 +82,7 @@ const investigate = createStep({
 
     try {
       await prepareCodebaseAgentWorkspace(incidentId);
+      await prepareSupervisorWorkspace(incidentId);
 
       const response = await supervisorAgent.generate(
         JSON.stringify(alertContext, null, 2),

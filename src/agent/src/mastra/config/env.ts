@@ -32,9 +32,11 @@ const EnvSchema = z
     // "production" so an unset value fails closed.
     NODE_ENV: z.enum(["development", "production"]).default("production"),
 
-    // absolute paths to workspaces on the machine/container
-    KNOWLEDGE_BASE_PATH: z.string(),
-    SANDBOX_BASE_PATH: z.string(),
+    // Knowledge base source in S3. Local per-incident mirrors are created under
+    // /tmp/workspaces by the workspace layer.
+    KNOWLEDGE_BASE_S3_BUCKET: z.string(),
+    KNOWLEDGE_BASE_S3_PREFIX: z.string().default(""),
+    AWS_REGION: z.string(),
 
     // for slack integration
     SLACK_BOT_TOKEN: z.string(),
@@ -73,7 +75,6 @@ const EnvSchema = z
       message:
         "HC_SHARED_SECRET is required when NODE_ENV=production (an unset NODE_ENV defaults to production). Set NODE_ENV=development to run webhooks without a shared secret.",
       path: ["HC_SHARED_SECRET"],
-    
     },
   );
 

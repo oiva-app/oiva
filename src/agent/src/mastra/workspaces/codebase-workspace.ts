@@ -8,6 +8,15 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "../config/env";
+import { syncKnowledgeBaseForIncident } from "./knowledge-base-sync";
+import { cleanupSupervisorWorkspace } from "./supervisor-workspace";
+import {
+  WORKSPACE_BASE_PATH,
+  getCodebaseClonePath,
+  getCodebaseRoot,
+  getKnowledgeBaseMirrorPath,
+  getWorkspaceRoot,
+} from "./workspace-paths";
 
 const execFileAsync = promisify(execFile);
 
@@ -15,28 +24,6 @@ const KNOWLEDGE_BASE_MOUNT = "/knowledge-base";
 const CODEBASE_MOUNT = "/codebase";
 
 const workspacesByIncidentId = new Map<string, AnyWorkspace>();
-
-function getSandboxRoot(incidentId: string) {
-  return path.join(env.SANDBOX_BASE_PATH, incidentId);
-}
-
-function getCodebaseClonePath(incidentId: string) {
-  return path.join(
-    getSandboxRoot(incidentId),
-    getRepoName(env.APP_GITHUB_HTTPS_URL),
-  );
-}
-
-function getRepoName(remoteUrl: string) {
-  const pathname = new URL(remoteUrl).pathname;
-  const repoName = path.basename(pathname).replace(/\.git$/, "");
-  if (repoName.length === 0) {
-    throw new Error(
-      `Unable to derive repository name from APP_GITHUB_HTTPS_URL: ${remoteUrl}`,
-    );
-  }
-  return repoName;
-}
 
 function getSixMonthsAgoDate() {
   const now = new Date();
@@ -98,21 +85,21 @@ async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv }) {
 }
 
 function createWorkspace(incidentId: string) {
-  const sandboxRoot = getSandboxRoot(incidentId);
+  const codebaseRoot = getCodebaseRoot(incidentId);
 
   return new Workspace(
     {
       mounts: {
         [KNOWLEDGE_BASE_MOUNT]: new LocalFilesystem({
-          basePath: env.KNOWLEDGE_BASE_PATH,
+          basePath: getKnowledgeBaseMirrorPath(incidentId),
           readOnly: true,
         }),
         [CODEBASE_MOUNT]: new LocalFilesystem({
-          basePath: sandboxRoot,
+          basePath: codebaseRoot,
         }),
       },
       sandbox: new LocalSandbox({
-        workingDirectory: sandboxRoot,
+        workingDirectory: codebaseRoot,
       }),
       onMount: ({ mountPath }) => {
         if (mountPath === CODEBASE_MOUNT) return false;
@@ -130,12 +117,14 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
     return workspacesByIncidentId.get(incidentId)!;
   }
 
-  const sandboxRoot = getSandboxRoot(incidentId);
+  const workspaceRoot = getWorkspaceRoot(incidentId);
+  const codebaseRoot = getCodebaseRoot(incidentId);
   const clonePath = getCodebaseClonePath(incidentId);
 
   try {
-    await fs.mkdir(env.SANDBOX_BASE_PATH, { recursive: true });
-    await resetSandboxRoot(sandboxRoot);
+    await fs.mkdir(WORKSPACE_BASE_PATH, { recursive: true });
+    await resetSandboxRoot(workspaceRoot);
+    await fs.mkdir(codebaseRoot, { recursive: true });
 
     await withGitAskpass(async (gitEnv) => {
       await runGit([
@@ -146,6 +135,8 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
         clonePath,
       ], { env: gitEnv });
     });
+
+    await syncKnowledgeBaseForIncident(incidentId);
 
     const workspace = createWorkspace(incidentId);
     await workspace.init();
@@ -158,9 +149,11 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
 }
 
 export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
-  const sandboxRoot = getSandboxRoot(incidentId);
+  const workspaceRoot = getWorkspaceRoot(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
+
+  await cleanupSupervisorWorkspace(incidentId);
 
   try {
     await workspace?.destroy();
@@ -168,7 +161,7 @@ export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
     // Continue tearing down the sandbox even if workspace provider cleanup fails.
   }
 
-  await fs.rm(sandboxRoot, { recursive: true, force: true });
+  await fs.rm(workspaceRoot, { recursive: true, force: true });
 }
 
 export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: RequestContext }) {
