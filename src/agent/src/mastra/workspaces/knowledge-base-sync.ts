@@ -12,6 +12,7 @@ import { getKnowledgeBaseMirrorPath } from "./workspace-paths";
 
 const s3 = new S3Client({
   region: env.AWS_REGION,
+  maxAttempts: 5,
 });
 
 export async function syncKnowledgeBaseForIncident(
@@ -33,30 +34,34 @@ export async function syncKnowledgeBaseForIncident(
       }),
     );
 
-    for (const object of listed.Contents ?? []) {
-      if (!object.Key || object.Key.endsWith("/")) continue;
+    const objects = (listed.Contents ?? []).filter(
+      (o) => o.Key && !o.Key.endsWith("/"),
+    );
 
-      const relativePath = getRelativeObjectPath(object.Key);
-      if (!relativePath) continue;
+    await Promise.all(
+      objects.map(async (object) => {
+        const relativePath = getRelativeObjectPath(object.Key!);
+        if (!relativePath) return;
 
-      const localPath = safeJoin(destination, relativePath);
-      await fs.mkdir(path.dirname(localPath), { recursive: true });
+        const localPath = safeJoin(destination, relativePath);
+        await fs.mkdir(path.dirname(localPath), { recursive: true });
 
-      const objectResult = await s3.send(
-        new GetObjectCommand({
-          Bucket: env.KNOWLEDGE_BASE_S3_BUCKET,
-          Key: object.Key,
-        }),
-      );
-
-      if (!objectResult.Body) {
-        throw new Error(
-          `S3 object ${object.Key} in ${env.KNOWLEDGE_BASE_S3_BUCKET} had no body`,
+        const objectResult = await s3.send(
+          new GetObjectCommand({
+            Bucket: env.KNOWLEDGE_BASE_S3_BUCKET,
+            Key: object.Key!,
+          }),
         );
-      }
 
-      await fs.writeFile(localPath, await bodyToBuffer(objectResult.Body));
-    }
+        if (!objectResult.Body) {
+          throw new Error(
+            `S3 object ${object.Key} in ${env.KNOWLEDGE_BASE_S3_BUCKET} had no body`,
+          );
+        }
+
+        await fs.writeFile(localPath, await bodyToBuffer(objectResult.Body));
+      }),
+    );
 
     continuationToken = listed.NextContinuationToken;
   } while (continuationToken);
