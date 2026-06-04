@@ -26,6 +26,7 @@ import {
 } from "../workspaces/codebase-workspace";
 import {
   prepareSupervisorWorkspace,
+  cleanupSupervisorWorkspace,
 } from "../workspaces/supervisor-workspace";
 import { syncKnowledgeBaseForIncident } from "../workspaces/knowledge-base-sync";
 
@@ -110,6 +111,7 @@ const investigate = createStep({
           .getLogger()
           .error("supervisor memory cleanup failed", { incidentId, err });
       } finally {
+        await cleanupSupervisorWorkspace(incidentId);
         await cleanupCodebaseAgentWorkspace(incidentId);
       }
     }

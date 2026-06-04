@@ -8,7 +8,6 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "../config/env";
-import { cleanupSupervisorWorkspace } from "./supervisor-workspace";
 import {
   WORKSPACE_BASE_PATH,
   getCodebaseClonePath,
@@ -149,8 +148,6 @@ export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
-
-  await cleanupSupervisorWorkspace(incidentId);
 
   try {
     await workspace?.destroy();
