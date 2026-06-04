@@ -95,7 +95,7 @@ const findEnvUpward = (start: string): string | undefined => {
 const rootEnv = findEnvUpward(process.cwd());
 
 if (rootEnv) {
-  dotenv.config({ path: rootEnv, override: true });
+  dotenv.config({ path: rootEnv });
 }
 
 /**
