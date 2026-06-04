@@ -95,7 +95,6 @@ export function buildSummaryBlocks(
   ];
 }
 
-
 export function formatInvestigationSteps(
   trace: readonly InvestigationStep[],
 ): string {
@@ -374,10 +373,6 @@ export function buildIncidentMessageBlocks(
       { type: "divider" },
       ...buildIncidentFailedBlocks(inputs.failure.reason, inputs.incidentId),
     );
-  }
-
-  if (inputs.closedBy) {
-    blocks.push(buildIncidentClosedAttributionBlock(inputs.closedBy));
   }
 
   return blocks;
