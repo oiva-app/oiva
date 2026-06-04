@@ -3,7 +3,7 @@ import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
 import { alertContextSchema } from "../types/alert-context";
-import { supervisorAgentOutputSchema } from "../types/investigation";
+import { investigationTraceSchema, supervisorAgentOutputSchema } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
   postReportSummary,
@@ -11,6 +11,7 @@ import {
   postErrorMessage,
   postErrorToThread,
 } from "../slack/client";
+import { formatInvestigationSteps } from "../slack/formatters";
 import {
   alertRepository,
   incidentRepository,
@@ -37,6 +38,7 @@ const oivaWorkflowInputSchema = z.object({
 const oivaWorkflowStateSchema = z.object({
   incidentId: z.uuid().optional(),
   alertContext: alertContextSchema.optional(),
+  investigationTrace: investigationTraceSchema.default([])
 });
 
 const RESOURCE_ID = `${env.OBSERVED_APP_NAME}:investigation`;
@@ -93,6 +95,16 @@ const investigate = createStep({
           requestContext,
         },
       );
+
+      /*
+      Question: why don't we simply do `...state` here?  
+      Answer: It will not contain the incidentId or other values that are set in the lines above
+      */
+      await setState({
+        incidentId,
+        alertContext,
+        investigationTrace: requestContext.get("investigationTrace") ?? [],
+      });
 
       return response.object;
     } finally {
@@ -152,12 +164,15 @@ const generateReport = createStep({
     }
 
     const report = response.object;
+    const investigationSteps = formatInvestigationSteps(
+      state.investigationTrace ?? [],
+    );
 
     let persistedReport;
     try {
       persistedReport = await reportRepository.insert({
         incidentId: state.incidentId,
-        reportJson: report,
+        reportJson: { ...report, investigationSteps },
       });
     } catch (err) {
       console.error("generateReport: failed to insert report", err);
@@ -172,7 +187,7 @@ const generateReport = createStep({
 
     await transitionIncident(state.incidentId, "report_generated");
 
-    return { id: persistedReport.id, durationMs, ...report };
+    return { id: persistedReport.id, durationMs, ...report, investigationSteps };
   },
 });
 
@@ -181,7 +196,7 @@ const sendReportToSlack = createStep({
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: incidentReportSchema,
   outputSchema: z.string(),
-  execute: async ({ inputData, state }) => {
+  execute: async ({ inputData, state, requestContext }) => {
     if (!state.alertContext || !state.incidentId) {
       throw new Error(
         "sendReportToSlack: alert context or incident id unavailable",
