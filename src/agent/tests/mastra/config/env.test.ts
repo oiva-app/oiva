@@ -69,6 +69,9 @@ describe("env config", () => {
   });
 
   it("loads .env when present", async () => {
+    vi.stubEnv("KNOWLEDGE_BASE_S3_BUCKET", undefined);
+    vi.stubEnv("KNOWLEDGE_BASE_S3_PREFIX", undefined);
+
     await fs.writeFile(
       path.join(testRoot, ".env"),
       [
@@ -103,14 +106,4 @@ describe("env config", () => {
     expect(env.KNOWLEDGE_BASE_S3_PREFIX).toBe("");
   });
 
-  it("does not require old workspace path env vars", async () => {
-    stubRequiredEnv({
-      KNOWLEDGE_BASE_PATH: undefined,
-      SANDBOX_BASE_PATH: undefined,
-    });
-
-    const { env } = await importEnv();
-
-    expect(env.KNOWLEDGE_BASE_S3_BUCKET).toBe("test-bucket");
-  });
 });

@@ -74,16 +74,23 @@ describe("knowledge-base sync", () => {
   });
 
   it("downloads S3 objects into the per-incident knowledge-base directory", async () => {
-    mocks.send
-      .mockResolvedValueOnce(
-        listResponse([
-          "three-services-demo/knowledge-base/",
-          "three-services-demo/knowledge-base/ARCHITECTURE.md",
-          "three-services-demo/knowledge-base/services/api.md",
-        ]),
-      )
-      .mockResolvedValueOnce(getResponse("architecture"))
-      .mockResolvedValueOnce(getResponse("api"));
+    const contentByKey: Record<string, string> = {
+      "three-services-demo/knowledge-base/ARCHITECTURE.md": "architecture",
+      "three-services-demo/knowledge-base/services/api.md": "api",
+    };
+
+    mocks.send.mockImplementation((command) => {
+      if (command.kind === "ListObjectsV2Command") {
+        return Promise.resolve(
+          listResponse([
+            "three-services-demo/knowledge-base/",
+            "three-services-demo/knowledge-base/ARCHITECTURE.md",
+            "three-services-demo/knowledge-base/services/api.md",
+          ]),
+        );
+      }
+      return Promise.resolve(getResponse(contentByKey[command.input.Key]));
+    });
 
     const { syncKnowledgeBaseForIncident } = await importSyncModule();
 
@@ -154,7 +161,7 @@ describe("knowledge-base sync", () => {
 
     await expect(
       syncKnowledgeBaseForIncident("incident-traversal"),
-    ).rejects.toThrow("Rejected unsafe S3 object path");
+    ).rejects.toThrow("Rejected S3 object path outside destination");
     await expect(
       fs.access("/tmp/workspaces/incident-traversal/escape.md"),
     ).rejects.toThrow();

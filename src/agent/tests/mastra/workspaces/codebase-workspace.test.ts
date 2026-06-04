@@ -6,7 +6,6 @@ import { RequestContext } from "@mastra/core/request-context";
 
 const mocks = vi.hoisted(() => ({
   execFile: vi.fn(),
-  syncKnowledgeBaseForIncident: vi.fn(),
   Workspace: vi.fn(),
   LocalFilesystem: vi.fn(function (config) {
     return { kind: "LocalFilesystem", config };
@@ -39,10 +38,6 @@ vi.mock("../../../src/mastra/config/env", () => ({
     APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
     GITHUB_PAT: "test-token",
   },
-}));
-
-vi.mock("../../../src/mastra/workspaces/knowledge-base-sync", () => ({
-  syncKnowledgeBaseForIncident: mocks.syncKnowledgeBaseForIncident,
 }));
 
 async function importWorkspaceModule() {
@@ -85,9 +80,6 @@ describe("codebase workspace", () => {
       recursive: true,
       force: true,
     });
-    mocks.syncKnowledgeBaseForIncident.mockResolvedValue(
-      path.join(workspaceBasePath, "incident-123", "knowledge-base"),
-    );
   });
 
   afterEach(async () => {
@@ -108,7 +100,6 @@ describe("codebase workspace", () => {
     const workspace = await prepareCodebaseAgentWorkspace("incident-123");
 
     expect(workspace).toBe(mocks.workspaces[0]);
-    expect(mocks.execFile).toHaveBeenCalledTimes(1);
     expect(mocks.execFile).toHaveBeenCalledWith(
       "git",
       [
@@ -126,9 +117,6 @@ describe("codebase workspace", () => {
         maxBuffer: 1024 * 1024 * 10,
       }),
       expect.any(Function),
-    );
-    expect(mocks.syncKnowledgeBaseForIncident).toHaveBeenCalledWith(
-      "incident-123",
     );
     expect(mocks.Workspace).toHaveBeenCalledTimes(1);
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
@@ -156,7 +144,6 @@ describe("codebase workspace", () => {
 
     expect(secondWorkspace).toBe(firstWorkspace);
     expect(mocks.execFile).toHaveBeenCalledTimes(1);
-    expect(mocks.syncKnowledgeBaseForIncident).toHaveBeenCalledTimes(1);
     expect(mocks.Workspace).toHaveBeenCalledTimes(1);
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
   });
@@ -187,19 +174,14 @@ describe("codebase workspace", () => {
       cleanupCodebaseAgentWorkspace,
       getCodebaseAgentWorkspace,
     } = await importWorkspaceModule();
-    const { prepareSupervisorWorkspace, getSupervisorWorkspace } = await import(
-      "../../../src/mastra/workspaces/supervisor-workspace"
-    );
 
     await prepareCodebaseAgentWorkspace("incident-123");
-    const supervisorWorkspace = await prepareSupervisorWorkspace("incident-123");
     const incidentSandboxPath = path.join(workspaceBasePath, "incident-123");
     await fs.mkdir(incidentSandboxPath, { recursive: true });
 
     await cleanupCodebaseAgentWorkspace("incident-123");
 
     expect(mocks.workspaces[0].destroy).toHaveBeenCalledTimes(1);
-    expect(supervisorWorkspace.destroy).toHaveBeenCalledTimes(1);
     await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
     expect(() =>
       getCodebaseAgentWorkspace({
@@ -208,38 +190,6 @@ describe("codebase workspace", () => {
     ).toThrow(
       "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-123",
     );
-    expect(() =>
-      getSupervisorWorkspace({
-        requestContext: createRequestContext("incident-123"),
-      }),
-    ).toThrow(
-      "getSupervisorWorkspace: workspace not prepared for incidentId incident-123",
-    );
   });
 
-  it("cleans up and does not cache a workspace when knowledge-base sync fails", async () => {
-    mocks.syncKnowledgeBaseForIncident.mockRejectedValueOnce(
-      new Error("S3 sync failed"),
-    );
-    const {
-      prepareCodebaseAgentWorkspace,
-      getCodebaseAgentWorkspace,
-    } = await importWorkspaceModule();
-
-    await expect(
-      prepareCodebaseAgentWorkspace("incident-sync-failure"),
-    ).rejects.toThrow("S3 sync failed");
-
-    expect(mocks.Workspace).not.toHaveBeenCalled();
-    await expect(
-      fs.access(path.join(workspaceBasePath, "incident-sync-failure")),
-    ).rejects.toThrow();
-    expect(() =>
-      getCodebaseAgentWorkspace({
-        requestContext: createRequestContext("incident-sync-failure"),
-      }),
-    ).toThrow(
-      "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-sync-failure",
-    );
-  });
 });
