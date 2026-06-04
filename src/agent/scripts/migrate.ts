@@ -34,7 +34,7 @@ function findEnvUpward(start: string): string | undefined {
 
 const envPath = findEnvUpward(process.cwd());
 if (envPath) {
-  dotenv.config({ path: envPath, override: true });
+  dotenv.config({ path: envPath });
 }
 
 let databaseUrl: string;
@@ -49,17 +49,42 @@ try {
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const migrationsDir = path.resolve(scriptDir, "../src/mastra/db/migrations");
 
+const OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE = 0x4f495641; // OIVA
+const OIVA_SCHEMA_MIGRATION_LOCK_RESOURCE = 0x4d494752; // MIGR
+
 interface MigrationRow {
   filename: string;
   sha256: string;
 }
 
+async function releaseMigrationLock(client: pg.Client) {
+  const { rows } = await client.query<{ unlocked: boolean }>(
+    "SELECT pg_advisory_unlock($1, $2) AS unlocked",
+    [OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE, OIVA_SCHEMA_MIGRATION_LOCK_RESOURCE],
+  );
+
+  if (!rows[0]?.unlocked) {
+    console.warn("migration advisory lock was not held at release time");
+  }
+}
+
 async function main() {
-  const pool = new pg.Pool({ connectionString: databaseUrl });
+  const client = new pg.Client({ connectionString: databaseUrl });
+  let connected = false;
+  let lockAcquired = false;
 
   try {
+    await client.connect();
+    connected = true;
+
+    await client.query("SELECT pg_advisory_lock($1, $2)", [
+      OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE,
+      OIVA_SCHEMA_MIGRATION_LOCK_RESOURCE,
+    ]);
+    lockAcquired = true;
+
     // Bootstrap the tracking table. Idempotent.
-    await pool.query(`
+    await client.query(`
         CREATE TABLE IF NOT EXISTS _migrations (
           filename   TEXT PRIMARY KEY,
           sha256     TEXT NOT NULL,
@@ -76,7 +101,7 @@ async function main() {
       return;
     }
 
-    const { rows: applied } = await pool.query<MigrationRow>(
+    const { rows: applied } = await client.query<MigrationRow>(
       "SELECT filename, sha256 FROM _migrations",
     );
     const appliedByFilename = new Map(
@@ -104,7 +129,6 @@ async function main() {
       }
 
       console.log(`apply: ${file}`);
-      const client = await pool.connect();
       try {
         await client.query("BEGIN");
         await client.query(contents);
@@ -116,10 +140,12 @@ async function main() {
         appliedCount += 1;
         console.log(`done:    ${file}`);
       } catch (err) {
-        await client.query("ROLLBACK");
+        try {
+          await client.query("ROLLBACK");
+        } catch (rollbackErr) {
+          console.error("failed to roll back migration transaction:", rollbackErr);
+        }
         throw err;
-      } finally {
-        client.release();
       }
     }
 
@@ -127,7 +153,16 @@ async function main() {
       `migrations complete (${appliedCount} applied, ${files.length} total)`,
     );
   } finally {
-    await pool.end();
+    if (connected) {
+      if (lockAcquired) {
+        try {
+          await releaseMigrationLock(client);
+        } catch (err) {
+          console.error("failed to release migration advisory lock:", err);
+        }
+      }
+      await client.end();
+    }
   }
 }
 
