@@ -5,7 +5,6 @@ import {
 } from "@aws-sdk/client-s3";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Readable } from "node:stream";
 
 import { env } from "../config/env";
 import { getKnowledgeBaseMirrorPath } from "./workspace-paths";
@@ -111,21 +110,13 @@ function safeJoin(destination: string, relativePath: string) {
 }
 
 async function bodyToBuffer(body: unknown): Promise<Buffer> {
-  if (body instanceof Readable) {
-    const chunks: Buffer[] = [];
-    for await (const chunk of body) {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-    }
-    return Buffer.concat(chunks);
-  }
-
   if (
     typeof body === "object" &&
     body !== null &&
     "transformToByteArray" in body &&
-    typeof body.transformToByteArray === "function"
+    typeof (body as { transformToByteArray: unknown }).transformToByteArray === "function"
   ) {
-    return Buffer.from(await body.transformToByteArray());
+    return Buffer.from(await (body as { transformToByteArray(): Promise<Uint8Array> }).transformToByteArray());
   }
 
   throw new Error("Unsupported S3 object body type");
