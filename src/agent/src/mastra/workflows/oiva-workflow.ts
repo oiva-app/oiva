@@ -25,6 +25,11 @@ import {
   cleanupCodebaseAgentWorkspace,
   prepareCodebaseAgentWorkspace,
 } from "../workspaces/codebase-workspace";
+import {
+  prepareSupervisorWorkspace,
+  cleanupSupervisorWorkspace,
+} from "../workspaces/supervisor-workspace";
+import { syncKnowledgeBaseForIncident } from "../workspaces/knowledge-base-sync";
 
 /*
 z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
@@ -80,7 +85,9 @@ const investigate = createStep({
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
 
     try {
+      await syncKnowledgeBaseForIncident(incidentId);
       await prepareCodebaseAgentWorkspace(incidentId);
+      await prepareSupervisorWorkspace(incidentId);
 
       const response = await supervisorAgent.generate(
         JSON.stringify(alertContext, null, 2),
@@ -116,6 +123,7 @@ const investigate = createStep({
           .getLogger()
           .error("supervisor memory cleanup failed", { incidentId, err });
       } finally {
+        await cleanupSupervisorWorkspace(incidentId);
         await cleanupCodebaseAgentWorkspace(incidentId);
       }
     }

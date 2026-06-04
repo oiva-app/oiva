@@ -31,13 +31,10 @@ vi.mock("@mastra/core/workspace", () => ({
 }));
 
 const testRoot = path.join(os.tmpdir(), "oiva-codebase-workspace-test");
-const sandboxBasePath = path.join(testRoot, "sandbox");
-const knowledgeBasePath = path.join(testRoot, "knowledge-base");
+const workspaceBasePath = "/tmp/workspaces";
 
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
-    SANDBOX_BASE_PATH: sandboxBasePath,
-    KNOWLEDGE_BASE_PATH: knowledgeBasePath,
     APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
     GITHUB_PAT: "test-token",
   },
@@ -75,10 +72,26 @@ describe("codebase workspace", () => {
     });
     setExecFileSuccess();
     await fs.rm(testRoot, { recursive: true, force: true });
+    await fs.rm(path.join(workspaceBasePath, "incident-123"), {
+      recursive: true,
+      force: true,
+    });
+    await fs.rm(path.join(workspaceBasePath, "incident-sync-failure"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   afterEach(async () => {
     await fs.rm(testRoot, { recursive: true, force: true });
+    await fs.rm(path.join(workspaceBasePath, "incident-123"), {
+      recursive: true,
+      force: true,
+    });
+    await fs.rm(path.join(workspaceBasePath, "incident-sync-failure"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   it("clones and initializes a workspace once for an incident", async () => {
@@ -87,7 +100,6 @@ describe("codebase workspace", () => {
     const workspace = await prepareCodebaseAgentWorkspace("incident-123");
 
     expect(workspace).toBe(mocks.workspaces[0]);
-    expect(mocks.execFile).toHaveBeenCalledTimes(1);
     expect(mocks.execFile).toHaveBeenCalledWith(
       "git",
       [
@@ -95,7 +107,7 @@ describe("codebase workspace", () => {
         "--shallow-since",
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         "https://github.com/acme/orders-api.git",
-        path.join(sandboxBasePath, "incident-123", "orders-api"),
+        path.join(workspaceBasePath, "incident-123", "codebase", "orders-api"),
       ],
       expect.objectContaining({
         env: expect.objectContaining({
@@ -108,6 +120,20 @@ describe("codebase workspace", () => {
     );
     expect(mocks.Workspace).toHaveBeenCalledTimes(1);
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
+    expect(mocks.LocalFilesystem).toHaveBeenCalledWith({
+      basePath: path.join(workspaceBasePath, "incident-123", "knowledge-base"),
+      readOnly: true,
+    });
+    expect(mocks.LocalFilesystem).toHaveBeenCalledWith({
+      basePath: path.join(workspaceBasePath, "incident-123", "codebase"),
+    });
+    expect(mocks.LocalSandbox).toHaveBeenCalledWith({
+      workingDirectory: path.join(
+        workspaceBasePath,
+        "incident-123",
+        "codebase",
+      ),
+    });
   });
 
   it("returns the cached workspace for the same incident", async () => {
@@ -120,6 +146,24 @@ describe("codebase workspace", () => {
     expect(mocks.execFile).toHaveBeenCalledTimes(1);
     expect(mocks.Workspace).toHaveBeenCalledTimes(1);
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves the synced knowledge base when resetting the codebase sandbox", async () => {
+    const knowledgeBasePath = path.join(
+      workspaceBasePath,
+      "incident-123",
+      "knowledge-base",
+    );
+    await fs.mkdir(knowledgeBasePath, { recursive: true });
+    await fs.writeFile(path.join(knowledgeBasePath, "ARCHITECTURE.md"), "kb");
+
+    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
+
+    await prepareCodebaseAgentWorkspace("incident-123");
+
+    await expect(
+      fs.readFile(path.join(knowledgeBasePath, "ARCHITECTURE.md"), "utf8"),
+    ).resolves.toBe("kb");
   });
 
   it("throws when incidentId is missing from request context", async () => {
@@ -150,7 +194,7 @@ describe("codebase workspace", () => {
     } = await importWorkspaceModule();
 
     await prepareCodebaseAgentWorkspace("incident-123");
-    const incidentSandboxPath = path.join(sandboxBasePath, "incident-123");
+    const incidentSandboxPath = path.join(workspaceBasePath, "incident-123");
     await fs.mkdir(incidentSandboxPath, { recursive: true });
 
     await cleanupCodebaseAgentWorkspace("incident-123");
@@ -165,4 +209,5 @@ describe("codebase workspace", () => {
       "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-123",
     );
   });
+
 });

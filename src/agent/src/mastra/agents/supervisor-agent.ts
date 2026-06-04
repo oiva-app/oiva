@@ -4,7 +4,7 @@ import { supervisorPrompt } from "../prompts/supervisor-prompt";
 import { codebaseAgent } from "./codebase-agent"
 import { telemetryAgent } from "./telemetry-agent";
 import { env } from "../config/env"
-import { supervisorWorkspace } from "../workspaces/supervisor-workspace";
+import { getSupervisorWorkspace } from "../workspaces/supervisor-workspace";
 
 const SUBAGENTS = {
   "codebase-agent": codebaseAgent,
@@ -44,5 +44,5 @@ export const supervisorAgent = new Agent({
       }
     },
   },
-  workspace: supervisorWorkspace,
+  workspace: getSupervisorWorkspace,
 });

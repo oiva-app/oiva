@@ -8,6 +8,12 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "../config/env";
+import {
+  getCodebaseClonePath,
+  getCodebaseRoot,
+  getKnowledgeBaseMirrorPath,
+  getWorkspaceRoot,
+} from "./workspace-paths";
 
 const execFileAsync = promisify(execFile);
 
@@ -15,28 +21,7 @@ const KNOWLEDGE_BASE_MOUNT = "/knowledge-base";
 const CODEBASE_MOUNT = "/codebase";
 
 const workspacesByIncidentId = new Map<string, AnyWorkspace>();
-
-function getSandboxRoot(incidentId: string) {
-  return path.join(env.SANDBOX_BASE_PATH, incidentId);
-}
-
-function getCodebaseClonePath(incidentId: string) {
-  return path.join(
-    getSandboxRoot(incidentId),
-    getRepoName(env.APP_GITHUB_HTTPS_URL),
-  );
-}
-
-function getRepoName(remoteUrl: string) {
-  const pathname = new URL(remoteUrl).pathname;
-  const repoName = path.basename(pathname).replace(/\.git$/, "");
-  if (repoName.length === 0) {
-    throw new Error(
-      `Unable to derive repository name from APP_GITHUB_HTTPS_URL: ${remoteUrl}`,
-    );
-  }
-  return repoName;
-}
+const inFlight = new Map<string, Promise<AnyWorkspace>>();
 
 function getSixMonthsAgoDate() {
   const now = new Date();
@@ -98,21 +83,21 @@ async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv }) {
 }
 
 function createWorkspace(incidentId: string) {
-  const sandboxRoot = getSandboxRoot(incidentId);
+  const codebaseRoot = getCodebaseRoot(incidentId);
 
   return new Workspace(
     {
       mounts: {
         [KNOWLEDGE_BASE_MOUNT]: new LocalFilesystem({
-          basePath: env.KNOWLEDGE_BASE_PATH,
+          basePath: getKnowledgeBaseMirrorPath(incidentId),
           readOnly: true,
         }),
         [CODEBASE_MOUNT]: new LocalFilesystem({
-          basePath: sandboxRoot,
+          basePath: codebaseRoot,
         }),
       },
       sandbox: new LocalSandbox({
-        workingDirectory: sandboxRoot,
+        workingDirectory: codebaseRoot,
       }),
       onMount: ({ mountPath }) => {
         if (mountPath === CODEBASE_MOUNT) return false;
@@ -125,17 +110,14 @@ function createWorkspace(incidentId: string) {
   );
 }
 
-export async function prepareCodebaseAgentWorkspace(incidentId: string) {
-  if (workspacesByIncidentId.has(incidentId)) {
-    return workspacesByIncidentId.get(incidentId)!;
-  }
-
-  const sandboxRoot = getSandboxRoot(incidentId);
+async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
+  const workspaceRoot = getWorkspaceRoot(incidentId);
+  const codebaseRoot = getCodebaseRoot(incidentId);
   const clonePath = getCodebaseClonePath(incidentId);
 
   try {
-    await fs.mkdir(env.SANDBOX_BASE_PATH, { recursive: true });
-    await resetSandboxRoot(sandboxRoot);
+    await fs.mkdir(workspaceRoot, { recursive: true });
+    await resetSandboxRoot(codebaseRoot);
 
     await withGitAskpass(async (gitEnv) => {
       await runGit([
@@ -157,8 +139,16 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
   }
 }
 
+export function prepareCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
+  if (!inFlight.has(incidentId)) {
+    inFlight.set(incidentId, initCodebaseAgentWorkspace(incidentId));
+  }
+  return inFlight.get(incidentId)!;
+}
+
 export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
-  const sandboxRoot = getSandboxRoot(incidentId);
+  inFlight.delete(incidentId);
+  const workspaceRoot = getWorkspaceRoot(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
 
@@ -168,7 +158,7 @@ export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
     // Continue tearing down the sandbox even if workspace provider cleanup fails.
   }
 
-  await fs.rm(sandboxRoot, { recursive: true, force: true });
+  await fs.rm(workspaceRoot, { recursive: true, force: true });
 }
 
 export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: RequestContext }) {
