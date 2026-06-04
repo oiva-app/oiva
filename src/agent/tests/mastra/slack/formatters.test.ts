@@ -11,6 +11,7 @@ import {
   buildIncidentFailedBlocks,
   buildIncidentClosedAttributionBlock,
   buildIncidentMessageBlocks,
+  formatInvestigationSteps,
 } from "../../../src/mastra/slack/formatters";
 import type { IncidentReport } from "../../../src/mastra/types/report";
 import type { AlertContext } from "../../../src/mastra/types/alert-context";
@@ -18,6 +19,7 @@ import type {
   ActivityLogEntry,
   IncidentRenderInputs,
 } from "../../../src/mastra/slack/render-types";
+import type { InvestigationStep } from "../../../src/mastra/types/investigation";
 
 const mockReport: IncidentReport = {
   id: "d5f259b7-a84e-4ece-9659-8dec496c03af",
@@ -236,6 +238,79 @@ describe("renderFullReportMarkdown", () => {
     expect(markdown).toContain(mockReport.findings);
     expect(markdown).toContain(mockReport.nextSteps);
     expect(markdown).toContain(mockReport.investigationSteps);
+  });
+});
+
+describe("formatInvestigationSteps", () => {
+  const linkedStep: InvestigationStep = {
+    toolName: "honeycomb_get_query_results",
+    question: "Inspect alert query metadata for anomaly window",
+    queryUrl:
+      "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr",
+    error: false,
+  };
+  const erroredStep: InvestigationStep = {
+    toolName: "honeycomb_run_query",
+    question: "Error rate by service around alert over 30m",
+    queryUrl: "",
+    error: true,
+  };
+  const linklessStep: InvestigationStep = {
+    toolName: "honeycomb_get_workspace_context",
+    question: "Investigate astro-lisa alert",
+    queryUrl: "",
+    error: false,
+  };
+
+  it("renders a successful step as a numbered, linked tool use", () => {
+    const md = formatInvestigationSteps([linkedStep]);
+    expect(md).toBe(
+      `**1. Inspect alert query metadata for anomaly window**\n` +
+        `Tool use: [honeycomb_get_query_results](${linkedStep.queryUrl})`,
+    );
+  });
+
+  it("renders an errored step as (invalid tool call) with no link", () => {
+    const md = formatInvestigationSteps([erroredStep]);
+    expect(md).toBe(
+      `**1. Error rate by service around alert over 30m**\n(invalid tool call)`,
+    );
+  });
+
+  it("renders a linkless step as plain tool name without a hyperlink", () => {
+    const md = formatInvestigationSteps([linklessStep]);
+    expect(md).toBe(
+      `**1. Investigate astro-lisa alert**\n` +
+        `Tool use: honeycomb_get_workspace_context`,
+    );
+  });
+
+  it("numbers every element 1..N in order, separated by blank lines", () => {
+    const md = formatInvestigationSteps([
+      linklessStep,
+      linkedStep,
+      erroredStep,
+    ]);
+    const steps = md.split("\n\n");
+    expect(steps).toHaveLength(3);
+    expect(steps[0]).toContain("**1. Investigate astro-lisa alert**");
+    expect(steps[1]).toContain(
+      "**2. Inspect alert query metadata for anomaly window**",
+    );
+    expect(steps[2]).toContain(
+      "**3. Error rate by service around alert over 30m**",
+    );
+  });
+
+  it("falls back to the tool name when the question is empty", () => {
+    const md = formatInvestigationSteps([{ ...linkedStep, question: "" }]);
+    expect(md).toContain("**1. honeycomb_get_query_results**");
+  });
+
+  it("returns a fallback message for an empty trace", () => {
+    expect(formatInvestigationSteps([]).toLowerCase()).toContain(
+      "something went wrong",
+    );
   });
 });
 

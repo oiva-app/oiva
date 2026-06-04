@@ -1,5 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import { env } from "../config/env";
+import { investigationToolWrapper } from "@/tools/investigation-tool-wrapper";
 
 export const mvpMcpClient = new MCPClient({
   id: "honeycomb-mcp-client",
@@ -45,5 +46,28 @@ export const {
   honeycomb_get_query_results,
   honeycomb_get_trace,
   honeycomb_find_columns,
-  honeycomb_analyze_columns,
+  honeycomb_analyze_columns,  // TODO -this is a deprecated or fake tool name?
 } = await mvpMcpClient.listTools();
+
+const honeycombToolsToWrap = {
+  honeycomb_get_workspace_context,
+  honeycomb_get_dataset,
+  honeycomb_run_query,
+  honeycomb_run_bubbleup,
+  // honeycomb_get_query_results,  // omitted here because the agent doesn't seem to know how to properly use this tool, and the enrichAlert tool does everything that the agent needs?
+  honeycomb_get_trace,
+  honeycomb_find_columns,
+  honeycomb_analyze_columns,
+};
+
+export const wrappedHoneycombTools: Record<
+  string,
+  ReturnType<typeof investigationToolWrapper>
+> = {};
+for (const [key, tool] of Object.entries(honeycombToolsToWrap)) {
+  if (!tool) {
+    console.warn(`[mcpClients] skipping wrap: "${key}" not provided by MCP server`);
+    continue;
+  }
+  wrappedHoneycombTools[key] = investigationToolWrapper(tool);
+}

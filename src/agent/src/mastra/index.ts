@@ -33,6 +33,7 @@ import {
   alertEnrich,
   contextualizeUsingHoneycombMCP,
 } from "./workflows/alert-enrich";
+import { testAgent } from "./agents/test-agent";
 
 export const mastra = new Mastra({
   workflows: {
@@ -49,6 +50,7 @@ export const mastra = new Mastra({
     supervisorAgent,
     telemetryAgent,
     codebaseAgent,
+    testAgent,
   },
   scorers: {},
   server: {
