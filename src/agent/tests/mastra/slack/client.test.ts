@@ -9,17 +9,24 @@ const mockFns = vi.hoisted(() => ({
   capturedConfig: null as unknown,
 }));
 
-vi.mock("@slack/web-api", () => ({
-  WebClient: function (_token: string, config?: unknown) {
-    mockFns.capturedConfig = config;
-    return {
-      chat: { postMessage: mockFns.postMessage, update: mockFns.update },
-      filesUploadV2: mockFns.filesUploadV2,
-    };
-  },
-  retryPolicies: {
-    fiveRetriesInFiveMinutes: { policyName: "fiveRetriesInFiveMinutes" },
-  },
+vi.mock("@slack/web-api", () => {
+  const mockModule = {
+    WebClient: function (_token: string, config?: unknown) {
+      mockFns.capturedConfig = config;
+      return {
+        chat: { postMessage: mockFns.postMessage, update: mockFns.update },
+        filesUploadV2: mockFns.filesUploadV2,
+      };
+    },
+  };
+  return {
+    default: mockModule,
+    ...mockModule,
+  };
+});
+
+vi.mock("@slack/web-api/dist/retry-policies", () => ({
+  fiveRetriesInFiveMinutes: { policyName: "fiveRetriesInFiveMinutes" },
 }));
 
 vi.mock("../../../src/mastra/config/env", () => ({

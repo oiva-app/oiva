@@ -8,16 +8,23 @@ const mockFns = vi.hoisted(() => ({
   filesUploadV2: vi.fn(),
 }));
 
-vi.mock("@slack/web-api", () => ({
-  WebClient: function () {
-    return {
-      chat: { postMessage: mockFns.postMessage, update: mockFns.update },
-      filesUploadV2: mockFns.filesUploadV2,
-    };
-  },
-  retryPolicies: {
-    fiveRetriesInFiveMinutes: { policyName: "fiveRetriesInFiveMinutes" },
-  },
+vi.mock("@slack/web-api", () => {
+  const mockModule = {
+    WebClient: function () {
+      return {
+        chat: { postMessage: mockFns.postMessage, update: mockFns.update },
+        filesUploadV2: mockFns.filesUploadV2,
+      };
+    },
+  };
+  return {
+    default: mockModule,
+    ...mockModule,
+  };
+});
+
+vi.mock("@slack/web-api/dist/retry-policies", () => ({
+  fiveRetriesInFiveMinutes: { policyName: "fiveRetriesInFiveMinutes" },
 }));
 
 vi.mock("../../../src/mastra/config/env", () => ({
@@ -130,24 +137,26 @@ describe("SlackProgressReporter", () => {
         expect.objectContaining({ channel: "C-prior", thread_ts: "T-prior" }),
       );
     });
+  });
 
-    it("user-close on a stateful incident updates the root in place", async () => {
-      const incident = await repo.create();
-      mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
-      await reporter.incidentOpened(incident.id, alert);
-      await vi.runAllTimersAsync();
-      mockFns.update.mockClear();
+  it("user-close posts a threaded reply, does not chat.update the root", async () => {
+    const incident = await repo.create();
+    mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+    await reporter.incidentOpened(incident.id, alert);
+    await vi.runAllTimersAsync();
+    mockFns.update.mockClear();
+    mockFns.postMessage.mockClear();
 
-      await reporter.incidentClosed(incident.id, {
-        kind: "user",
-        userId: "U123",
-      });
-
-      expect(mockFns.update).toHaveBeenCalledTimes(1);
-      const args = mockFns.update.mock.calls[0][0];
-      expect(args).toMatchObject({ channel: "C-default", ts: "T1" });
-      expect(JSON.stringify(args.blocks)).toContain("<@U123>");
+    await reporter.incidentClosed(incident.id, {
+      kind: "user",
+      userId: "U123",
     });
+
+    expect(mockFns.update).not.toHaveBeenCalled();
+    expect(mockFns.postMessage).toHaveBeenCalledTimes(1);
+    const args = mockFns.postMessage.mock.calls[0][0];
+    expect(args).toMatchObject({ channel: "C-default", thread_ts: "T1" });
+    expect(JSON.stringify(args.blocks)).toContain("<@U123>");
   });
 
   describe("safe wrapper", () => {

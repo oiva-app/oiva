@@ -1,10 +1,4 @@
-import {
-  WebClient,
-  Block,
-  KnownBlock,
-  ChatPostMessageResponse,
-  retryPolicies,
-} from "@slack/web-api";
+import { WebClient, Block, KnownBlock } from "@slack/web-api";
 import { env } from "../config/env";
 import {
   buildSummaryBlocks,
@@ -15,10 +9,10 @@ import {
 import type { IncidentReport } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
 import type { SlackThreadData } from "../types/slack";
-import { fiveRetriesInFiveMinutes } from "@slack/web-api/dist/retry-policies";
+import { fiveRetriesInFiveMinutes } from "@slack/web-api/dist/retry-policies.js";
 
 const client = new WebClient(env.SLACK_BOT_TOKEN, {
-  retryConfig: retryPolicies.fiveRetriesInFiveMinutes,
+  retryConfig: fiveRetriesInFiveMinutes,
 });
 
 export async function postReportSummary(

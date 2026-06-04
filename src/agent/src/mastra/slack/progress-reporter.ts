@@ -200,39 +200,18 @@ export class SlackProgressReporter implements ProgressReporter {
 
   async incidentClosed(incidentId: string, by: ClosedBy): Promise<void> {
     return this.safe("incidentClosed", incidentId, async () => {
-      if (by.kind === "reaper") {
-        const persisted = await this.incidents.findById(incidentId);
-
-        if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
-
-        await postThreadReply({
-          channel: persisted.slackChannelId,
-          threadTs: persisted.slackThreadTs,
-          blocks: [buildIncidentClosedAttributionBlock(by)],
-          fallbackText: "Incident auto-closed",
-        });
-        this.dropState(incidentId);
-        return;
-      }
-
-      const state = this.states.get(incidentId);
-      if (state) {
-        state.status = "closed";
-        state.closedBy = by;
-        await this.flushNow(incidentId);
-        this.dropState(incidentId);
-        return;
-      }
-
-      // Stateless user-close: minimal in-place update from persisted identity.
       const persisted = await this.incidents.findById(incidentId);
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
-      await updateIncidentMessage({
+
+      await postThreadReply({
         channel: persisted.slackChannelId,
-        ts: persisted.slackThreadTs,
+        threadTs: persisted.slackThreadTs,
         blocks: [buildIncidentClosedAttributionBlock(by)],
-        fallbackText: "Incident closed",
+        fallbackText:
+          by.kind === "user" ? "Incident closed" : "Incident auto-closed",
       });
+
+      this.dropState(incidentId);
     });
   }
 
@@ -252,7 +231,7 @@ export class SlackProgressReporter implements ProgressReporter {
     const existing = this.pending.get(incidentId);
     if (existing) clearTimeout(existing.timer);
     const timer = setTimeout(() => {
-      void this.flushNow(incidentId);
+      void this.safe("flushNow", incidentId, () => this.flushNow(incidentId));
     }, DEBOUNCE_MS);
     this.pending.set(incidentId, { timer });
   }
