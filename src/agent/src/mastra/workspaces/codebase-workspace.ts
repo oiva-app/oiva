@@ -8,7 +8,6 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { env } from "../config/env";
-import { syncKnowledgeBaseForIncident } from "./knowledge-base-sync";
 import { cleanupSupervisorWorkspace } from "./supervisor-workspace";
 import {
   WORKSPACE_BASE_PATH,
@@ -135,8 +134,6 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
         clonePath,
       ], { env: gitEnv });
     });
-
-    await syncKnowledgeBaseForIncident(incidentId);
 
     const workspace = createWorkspace(incidentId);
     await workspace.init();

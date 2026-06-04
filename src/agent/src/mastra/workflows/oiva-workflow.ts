@@ -27,6 +27,7 @@ import {
 import {
   prepareSupervisorWorkspace,
 } from "../workspaces/supervisor-workspace";
+import { syncKnowledgeBaseForIncident } from "../workspaces/knowledge-base-sync";
 
 /*
 z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
@@ -81,6 +82,7 @@ const investigate = createStep({
     const supervisorAgent = mastra.getAgentById("supervisor-agent");
 
     try {
+      await syncKnowledgeBaseForIncident(incidentId);
       await prepareCodebaseAgentWorkspace(incidentId);
       await prepareSupervisorWorkspace(incidentId);
 
