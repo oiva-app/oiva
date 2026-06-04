@@ -5,25 +5,29 @@ import { RequestContext } from "@mastra/core/request-context";
 import { getKnowledgeBaseMirrorPath } from "./workspace-paths";
 
 const workspacesByIncidentId = new Map<string, AnyWorkspace>();
+const inFlight = new Map<string, Promise<AnyWorkspace>>();
 
-export async function prepareSupervisorWorkspace(incidentId: string) {
-  if (workspacesByIncidentId.has(incidentId)) {
-    return workspacesByIncidentId.get(incidentId)!;
-  }
-
+async function initSupervisorWorkspace(incidentId: string): Promise<AnyWorkspace> {
   const workspace = new Workspace({
     filesystem: new LocalFilesystem({
       basePath: getKnowledgeBaseMirrorPath(incidentId),
       readOnly: true,
     }),
   });
-
   await workspace.init();
   workspacesByIncidentId.set(incidentId, workspace);
   return workspace;
 }
 
+export function prepareSupervisorWorkspace(incidentId: string): Promise<AnyWorkspace> {
+  if (!inFlight.has(incidentId)) {
+    inFlight.set(incidentId, initSupervisorWorkspace(incidentId));
+  }
+  return inFlight.get(incidentId)!;
+}
+
 export async function cleanupSupervisorWorkspace(incidentId: string) {
+  inFlight.delete(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
 

@@ -22,6 +22,7 @@ const KNOWLEDGE_BASE_MOUNT = "/knowledge-base";
 const CODEBASE_MOUNT = "/codebase";
 
 const workspacesByIncidentId = new Map<string, AnyWorkspace>();
+const inFlight = new Map<string, Promise<AnyWorkspace>>();
 
 function getSixMonthsAgoDate() {
   const now = new Date();
@@ -110,11 +111,7 @@ function createWorkspace(incidentId: string) {
   );
 }
 
-export async function prepareCodebaseAgentWorkspace(incidentId: string) {
-  if (workspacesByIncidentId.has(incidentId)) {
-    return workspacesByIncidentId.get(incidentId)!;
-  }
-
+async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const codebaseRoot = getCodebaseRoot(incidentId);
   const clonePath = getCodebaseClonePath(incidentId);
@@ -144,7 +141,15 @@ export async function prepareCodebaseAgentWorkspace(incidentId: string) {
   }
 }
 
+export function prepareCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
+  if (!inFlight.has(incidentId)) {
+    inFlight.set(incidentId, initCodebaseAgentWorkspace(incidentId));
+  }
+  return inFlight.get(incidentId)!;
+}
+
 export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
+  inFlight.delete(incidentId);
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);
