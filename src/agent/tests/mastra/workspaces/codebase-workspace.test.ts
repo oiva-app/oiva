@@ -148,6 +148,24 @@ describe("codebase workspace", () => {
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
   });
 
+  it("preserves the synced knowledge base when resetting the codebase sandbox", async () => {
+    const knowledgeBasePath = path.join(
+      workspaceBasePath,
+      "incident-123",
+      "knowledge-base",
+    );
+    await fs.mkdir(knowledgeBasePath, { recursive: true });
+    await fs.writeFile(path.join(knowledgeBasePath, "ARCHITECTURE.md"), "kb");
+
+    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
+
+    await prepareCodebaseAgentWorkspace("incident-123");
+
+    await expect(
+      fs.readFile(path.join(knowledgeBasePath, "ARCHITECTURE.md"), "utf8"),
+    ).resolves.toBe("kb");
+  });
+
   it("throws when incidentId is missing from request context", async () => {
     const { getCodebaseAgentWorkspace } = await importWorkspaceModule();
 

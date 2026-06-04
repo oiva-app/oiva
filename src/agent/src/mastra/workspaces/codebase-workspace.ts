@@ -9,7 +9,6 @@ import { promisify } from "node:util";
 
 import { env } from "../config/env";
 import {
-  WORKSPACE_BASE_PATH,
   getCodebaseClonePath,
   getCodebaseRoot,
   getKnowledgeBaseMirrorPath,
@@ -117,9 +116,8 @@ async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorksp
   const clonePath = getCodebaseClonePath(incidentId);
 
   try {
-    await fs.mkdir(WORKSPACE_BASE_PATH, { recursive: true });
-    await resetSandboxRoot(workspaceRoot);
-    await fs.mkdir(codebaseRoot, { recursive: true });
+    await fs.mkdir(workspaceRoot, { recursive: true });
+    await resetSandboxRoot(codebaseRoot);
 
     await withGitAskpass(async (gitEnv) => {
       await runGit([
