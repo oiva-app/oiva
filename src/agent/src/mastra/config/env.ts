@@ -35,7 +35,7 @@ const EnvSchema = z
     // Knowledge base source in S3. Local per-incident mirrors are created under
     // /tmp/workspaces by the workspace layer.
     KNOWLEDGE_BASE_S3_BUCKET: z.string(),
-    KNOWLEDGE_BASE_S3_PREFIX: z.string().default(""),
+    KNOWLEDGE_BASE_S3_PREFIX: z.string(),
     AWS_REGION: z.string(),
 
     // for slack integration
