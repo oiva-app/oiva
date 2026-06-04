@@ -85,19 +85,8 @@ function getRelativeObjectPath(key: string): string | undefined {
 }
 
 function safeJoin(destination: string, relativePath: string) {
-  const normalizedRelativePath = path.normalize(relativePath);
-
-  if (
-    normalizedRelativePath === "." ||
-    path.isAbsolute(normalizedRelativePath) ||
-    normalizedRelativePath.startsWith(`..${path.sep}`) ||
-    normalizedRelativePath === ".."
-  ) {
-    throw new Error(`Rejected unsafe S3 object path: ${relativePath}`);
-  }
-
   const resolvedDestination = path.resolve(destination);
-  const resolvedLocalPath = path.resolve(destination, normalizedRelativePath);
+  const resolvedLocalPath = path.resolve(destination, relativePath);
 
   if (
     resolvedLocalPath !== resolvedDestination &&
