@@ -43,15 +43,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
 ) {
 
-  const questionProperty = {
-    type: "string",
-    description:
-      // REMEMBER: the description is passed to the LLM.
-      // Changing the description may change agent behavior.
-      "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
-  } as const;
-
-    /*
+  /*
   Todo: refactor to make function pure, remove closure, and accept multiple properties (not just one)
   */
   function wrapInputSchema(
@@ -64,7 +56,13 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     return {
       ...baseJson,
       type: "object",
-      properties: { ...baseJson.properties, question: questionProperty },
+      properties: { ...baseJson.properties, question: {
+        type: "string",
+        description:
+          // REMEMBER: the description is passed to the LLM.
+          // Changing the description may change agent behavior.
+          "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
+      } },
       required: [...(baseJson.required ?? []), "question"],
     };
   }
