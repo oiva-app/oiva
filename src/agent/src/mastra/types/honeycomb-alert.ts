@@ -16,7 +16,7 @@ export const honeycombWebhookPayloadSchema = z.object({
   description: z.string(),
   links: z.object({ url: z.string() }),
   environment: z.string(),
-  threshold: z.object({ op: z.string(), value: z.string() }),
+  threshold: z.object({ op: z.string(), value: z.union([z.string(), z.number()]) }),
   datasets: z.array(z.string()),
   result: z.object({
     groupsTriggered: z.array(
