@@ -12,7 +12,8 @@ import {
 } from "@/types/investigation";
 import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
 
-const DEFAULT_PROMPT = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible."
+const DEFAULT_PROMPT =
+  "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.";
 
 function extractQueryUrl(toolOutput: unknown): string {
   const parsed = ResourceLinkSchema.safeParse(toolOutput);
@@ -21,13 +22,15 @@ function extractQueryUrl(toolOutput: unknown): string {
   const textBlock = parsed.data.content.find(
     (c): c is McpTextContent => c.type === "text",
   );
-  const text = textBlock?.text
-  if (!text) return ""
+  const text = textBlock?.text;
+  if (!text) return "";
 
-  const queryUrl = text.match(/query_url:.*?"(.+?)\\*"/);
-  const traceUrl = text.match(/trace_link:.*?"(.+?)\\*"/);
-  const resultUrl = text.match(/result_url:.*?"(.+?)\\*"/);
-  const bubbleupUrl = text.match(/bubble_up_url:.*?"(.+?)\\*"/);
+  // Regex must be careful to avoid selecting an adjacent URL, e.g.
+  // '... query_url: null  evil_url: "http://don't select me by accident.com"...'
+  const queryUrl = text.match(/query_url:\s*\\*"(.+?)\\*"/);
+  const traceUrl = text.match(/trace_link:\s*\\*"(.+?)\\*"/);
+  const resultUrl = text.match(/result_url:\s*\\*"(.+?)\\*"/);
+  const bubbleupUrl = text.match(/bubble_up_url:\s*\\*"(.+?)\\*"/);
   return (
     queryUrl?.[1] || traceUrl?.[1] || resultUrl?.[1] || bubbleupUrl?.[1] || ""
   );
