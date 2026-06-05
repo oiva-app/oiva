@@ -41,7 +41,7 @@ describe("codebaseAgent", () => {
     const { investigationSchema } = await import(
       "../../../src/mastra/memory/investigation-schema"
     );
-    const { getWrappedCodebaseTools } = await import(
+    const { getCodebaseAgentWorkspace } = await import(
       "../../../src/mastra/workspaces/codebase-workspace"
     );
 
@@ -57,7 +57,7 @@ describe("codebaseAgent", () => {
           maxSteps: 12,
         },
         model: "openai/gpt-5.4",
-        tools: getWrappedCodebaseTools,
+        workspace: getCodebaseAgentWorkspace,
       }),
     });
 

@@ -1,8 +1,6 @@
-import { Workspace, LocalFilesystem, LocalSandbox, createWorkspaceTools } from '@mastra/core/workspace';
+import { Workspace, LocalFilesystem, LocalSandbox } from '@mastra/core/workspace';
 import type { AnyWorkspace } from "@mastra/core/workspace";
 import { RequestContext } from "@mastra/core/request-context";
-
-import { wrapTools } from "@/tools/investigation-tool-wrapper";
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -163,9 +161,6 @@ export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
   await fs.rm(workspaceRoot, { recursive: true, force: true });
 }
 
-/**
- * **Only exported for tests.  Use `getWrapedCodebaseTools` instead**
- */
 export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: RequestContext }) {
   const incidentId = requestContext.get("incidentId");
   if (typeof incidentId !== "string" || incidentId.length === 0) {
@@ -178,18 +173,4 @@ export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: 
   }
 
   return workspace;
-}
-
-
-const CODEBASE_TOOL_INTENT =
-  "Why are you using this tool? e.g. `Find where PaymentService.charge is defined`. Limit to 65 chars.";
-
-export async function getWrappedCodebaseTools({
-  requestContext,
-}: {
-  requestContext: RequestContext;
-}) {
-  const workspace = getCodebaseAgentWorkspace({ requestContext });
-  const allTools = await createWorkspaceTools(workspace, { workspace, requestContext });
-  return wrapTools(allTools, CODEBASE_TOOL_INTENT);
 }
