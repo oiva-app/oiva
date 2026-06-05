@@ -1,6 +1,6 @@
 import { MCPClient } from "@mastra/mcp";
 import { env } from "../config/env";
-import { investigationToolWrapper } from "@/tools/investigation-tool-wrapper";
+import { wrapTools } from "@/tools/investigation-tool-wrapper";
 
 export const mvpMcpClient = new MCPClient({
   id: "honeycomb-mcp-client",
@@ -46,7 +46,7 @@ export const {
   honeycomb_get_query_results,
   honeycomb_get_trace,
   honeycomb_find_columns,
-  honeycomb_analyze_columns,  // TODO -this is a deprecated or fake tool name?
+  honeycomb_analyze_columns, // TODO -this is a deprecated or fake tool name?
 } = await mvpMcpClient.listTools();
 
 const honeycombToolsToWrap = {
@@ -60,14 +60,7 @@ const honeycombToolsToWrap = {
   honeycomb_analyze_columns,
 };
 
-export const wrappedHoneycombTools: Record<
-  string,
-  ReturnType<typeof investigationToolWrapper>
-> = {};
-for (const [key, tool] of Object.entries(honeycombToolsToWrap)) {
-  if (!tool) {
-    console.warn(`[mcpClients] skipping wrap: "${key}" not provided by MCP server`);
-    continue;
-  }
-  wrappedHoneycombTools[key] = investigationToolWrapper(tool);
-}
+export const wrappedHoneycombTools = wrapTools(
+  honeycombToolsToWrap,
+  "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
+);

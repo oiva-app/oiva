@@ -244,20 +244,20 @@ describe("renderFullReportMarkdown", () => {
 describe("formatInvestigationSteps", () => {
   const linkedStep: InvestigationStep = {
     toolName: "honeycomb_get_query_results",
-    question: "Inspect alert query metadata for anomaly window",
+    toolUseIntent: "Inspect alert query metadata for anomaly window",
     queryUrl:
       "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr",
     error: false,
   };
   const erroredStep: InvestigationStep = {
     toolName: "honeycomb_run_query",
-    question: "Error rate by service around alert over 30m",
+    toolUseIntent: "Error rate by service around alert over 30m",
     queryUrl: "",
     error: true,
   };
   const linklessStep: InvestigationStep = {
     toolName: "honeycomb_get_workspace_context",
-    question: "Investigate astro-lisa alert",
+    toolUseIntent: "Investigate astro-lisa alert",
     queryUrl: "",
     error: false,
   };
@@ -303,7 +303,7 @@ describe("formatInvestigationSteps", () => {
   });
 
   it("falls back to the tool name when the question is empty", () => {
-    const md = formatInvestigationSteps([{ ...linkedStep, question: "" }]);
+    const md = formatInvestigationSteps([{ ...linkedStep, toolUseIntent: "" }]);
     expect(md).toContain("**1. honeycomb_get_query_results**");
   });
 
