@@ -161,7 +161,11 @@ async function main() {
           console.error("failed to release migration advisory lock:", err);
         }
       }
-      await client.end();
+      try {
+        await client.end();
+      } catch (err) {
+        console.error("failed to close database connection cleanly:", err);
+      }
     }
   }
 }
