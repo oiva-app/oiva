@@ -104,7 +104,7 @@ export function formatInvestigationSteps(
 
   return trace
     .map((step, index) => {
-      const heading = `**${index + 1}. ${step.question || step.toolName}**`;
+      const heading = `**${index + 1}. ${step.toolUseIntent || step.toolName}**`;
 
       let toolLine: string;
       if (step.error) {

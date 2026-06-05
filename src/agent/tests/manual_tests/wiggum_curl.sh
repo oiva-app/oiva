@@ -1,0 +1,65 @@
+# WARNING: If response payload includes "status":"already-accepted", you must modify the request `instanceId` value and retry
+curl -i -X POST http://localhost:4111/hook/honeycomb/alert \
+  -H "Content-Type: application/json" \
+  -d '{
+  "name": "Excess 4xx HTTP Status Codes",
+  "id": "9G1ViaHDAar",
+  "description": "A higher-than normal number of 4xx status codes are firing",
+  "links": {
+    "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/triggers/9G1ViaHDAar?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
+  },
+  "environment": "astro-lisa",
+  "threshold": {
+    "op": "greater than",
+    "value": 20
+  },
+  "datasets": [
+    "unknown_metrics",
+    "otelcol-contrib",
+    "product-catalog",
+    "checkout",
+    "cart",
+    "kafka",
+    "accounting",
+    "recommendation",
+    "payment",
+    "load-generator",
+    "frontend-proxy",
+    "image-provider",
+    "ad",
+    "currency",
+    "product-reviews",
+    "frontend-web",
+    "frontend",
+    "quote",
+    "shipping",
+    "email",
+    "fraud-detection"
+  ],
+  "result": {
+    "groupsTriggered": [
+      {
+        "field": "service.name",
+        "value": "frontend",
+        "count": 65
+      },
+      {
+        "field": "service.name",
+        "value": "frontend-proxy",
+        "count": 62
+      }
+    ],
+    "links": {
+      "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/5CYtgUbpdT/a/DoxFDWn9eJE?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
+    }
+  },
+  "alert": {
+    "instanceId": "4df64857-9529-421b-9094-9202025638fd",
+    "description": "astro-lisa environment:\nCurrently greater than threshold value (20) for service.name: frontend (value 65), service.name: frontend-proxy (value 62)",
+    "status": "TRIGGERED",
+    "summary": "Triggered: Excess 4xx HTTP Status Codes",
+    "timestamp": "2026-05-28 16:28:18.376867679 +0000 UTC",
+    "isTest": false
+  },
+  "secret": "letmein"
+}'
