@@ -34,6 +34,7 @@ import {
   contextualizeUsingHoneycombMCP,
 } from "./workflows/alert-enrich";
 import { testAgent } from "./agents/test-agent";
+import { startCleanupReaper } from "./services/cleanup-service-scheduler";
 
 export const mastra = new Mastra({
   workflows: {
@@ -102,3 +103,5 @@ export const mastra = new Mastra({
     },
   }),
 });
+
+startCleanupReaper({ logger: mastra.getLogger() });

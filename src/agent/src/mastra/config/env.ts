@@ -50,24 +50,29 @@ const EnvSchema = z
     RUN_OIVA_SV_MCP_INTEGRATION_TESTS: z.stringbool().default(false),
 
     // Postgres connection. DATABASE_URL is supported for compatibility;
-    // split POSTGRES_* variables are preferred for deployment.  
-    DATABASE_URL: z
-      .preprocess(
-        (val) => (val === "" ? undefined : val),
-        z
-          .string()
-          .regex(
-            /^postgres(ql)?:\/\//,
-            "DATABASE_URL must be a postgres:// or postgresql:// connection string",
-          )
-          .optional(),
-      ),
+    // split POSTGRES_* variables are preferred for deployment.
+    DATABASE_URL: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z
+        .string()
+        .regex(
+          /^postgres(ql)?:\/\//,
+          "DATABASE_URL must be a postgres:// or postgresql:// connection string",
+        )
+        .optional(),
+    ),
     POSTGRES_HOST: z.string().optional(),
     POSTGRES_PORT: z.string().optional(),
     POSTGRES_USER: z.string().optional(),
     POSTGRES_PASSWORD: z.string().optional(),
     POSTGRES_DB: z.string().optional(),
     CORRELATION_WINDOW_MINUTES: z.coerce.number().default(30),
+    // Cleanup reaper thresholds (minutes). See services/reaper.ts.
+    REAPER_DELIVERED_QUIET_MINUTES: z.coerce.number().default(1440),
+    REAPER_FAILED_QUIET_MINUTES: z.coerce.number().default(1440), // 24h — keep the Retry button around for a day
+    REAPER_STUCK_DEADLINE_MINUTES: z.coerce.number().default(60), // MUST exceed the slowest investigation (sweep 3 kills live-but-slow runs)
+    REAPER_ENABLED: z.stringbool().default(false),
+    REAPER_INTERVAL_MINUTES: z.coerce.number().default(10),
   })
   .refine(
     (env) => env.NODE_ENV !== "production" || Boolean(env.HC_SHARED_SECRET),
