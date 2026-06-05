@@ -10,7 +10,7 @@ type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 const innerInputSchema = z.object({ datasetId: z.string() });
 const innerOutputSchema = z.object({ ok: z.boolean() });
 
-const validInput = { datasetId: "product_catalog", question: "why?" };
+const validInput = { datasetId: "product_catalog", toolUseIntent: "why?" };
 
 function makeInnerTool(execute: Tool<any, any>["execute"]) {
   return {
@@ -62,14 +62,14 @@ function setup(opts: { trace?: InvestigationTrace; error?: Error } = {}) {
 describe("investigationToolWrapper", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  test("calls the wrapped tool with the input minus 'question'", async () => {
+  test("calls the wrapped tool with the input minus 'toolUseIntent'", async () => {
     const { innerExecute, run } = setup({ trace: [] });
 
     const result = await run();
 
     expect(result).toEqual({ ok: true });
     expect(innerExecute).toHaveBeenCalledTimes(1);
-    // The wrapper-only `question` is stripped before the real tool runs.
+    // The wrapper-only `toolUseIntent` is stripped before the real tool runs.
     expect(innerExecute.mock.calls[0][0]).toEqual({
       datasetId: "product_catalog",
     });
@@ -83,7 +83,7 @@ describe("investigationToolWrapper", () => {
     const trace = getTrace()!;
     expect(trace).toHaveLength(1);
     expect(trace[0]).toMatchObject({
-      question: "why?",
+      toolUseIntent: "why?",
       toolInput: { datasetId: "product_catalog" },
       toolOutput: { ok: true },
       queryUrl: "",

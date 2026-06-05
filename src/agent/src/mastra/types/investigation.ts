@@ -89,7 +89,7 @@ const telemetryStepOutputSchema = z.object({
 
 export const investigationToolCallSchema = z.object({
   toolName: z.string().describe("Which tool was called?"),
-  question: z
+  toolUseIntent: z
     .string()
     .describe("What question is this tool call meant to answer?"),
   toolInput: z.object({}).loose(),
@@ -105,7 +105,7 @@ export type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 // TODO - is there a better way?
 export type InvestigationStep = Pick<
   InvestigationTrace[number],
-  "toolName" | "question" | "error"
+  "toolName" | "toolUseIntent" | "error"
 > & { queryUrl?: string };
 
 export { telemetryFindingsSchema, telemetryStepOutputSchema };

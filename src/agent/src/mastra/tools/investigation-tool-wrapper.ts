@@ -34,11 +34,11 @@ function extractQueryUrl(toolOutput: unknown): string {
 
   Remember: the investigationTrace is NOT OTel instrumentation!
   @param tool the tool you wish to wrap
-  @param question LLM prompt used to get more info on the tool-use intent
+  @param toolUseIntent LLM prompt used to get more info on the tool-use intent
  */
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
-  question: string = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
+  toolUseIntent: string = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
 ) {
 
   /*
@@ -54,14 +54,14 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     return {
       ...baseJson,
       type: "object",
-      properties: { ...baseJson.properties, question: {
+      properties: { ...baseJson.properties, toolUseIntent: {
         type: "string",
         description:
           // REMEMBER: the description is passed to the LLM.
           // Changing the description may change agent behavior.
-          question
+          toolUseIntent
       } },
-      required: [...(baseJson.required ?? []), "question"],
+      required: [...(baseJson.required ?? []), "toolUseIntent"],
     };
   }
   
@@ -89,12 +89,12 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
             toolDescription: tool.description,
           },
           input: toolInput,
-          metadata: { toolId: tool.id, question },
+          metadata: { toolId: tool.id, toolUseIntent },
         });
       }
 
       // Extract the wrapper-only field(s) before handing off to the real tool
-      const { question, ...toolInput } = inputData as any;
+      const { toolUseIntent, ...toolInput } = inputData as any;
 
       try {
         const investigationTrace = getInvestigationTrace();
@@ -108,7 +108,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
 
           const toolTrace = investigationToolCallSchema.parse({
             toolName: tool.id,
-            question,
+            toolUseIntent,
             toolInput,
             toolOutput,
             error: false,
