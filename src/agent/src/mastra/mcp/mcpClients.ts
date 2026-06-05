@@ -1,6 +1,7 @@
 import { MCPClient } from "@mastra/mcp";
 import { env } from "../config/env";
 import { investigationToolWrapper } from "@/tools/investigation-tool-wrapper";
+import { Tool } from "@mastra/core/tools";
 
 export const mvpMcpClient = new MCPClient({
   id: "honeycomb-mcp-client",
@@ -60,14 +61,16 @@ const honeycombToolsToWrap = {
   honeycomb_analyze_columns,
 };
 
-export const wrappedHoneycombTools: Record<
-  string,
-  ReturnType<typeof investigationToolWrapper>
-> = {};
-for (const [key, tool] of Object.entries(honeycombToolsToWrap)) {
-  if (!tool) {
-    console.warn(`[mcpClients] skipping wrap: "${key}" not provided by MCP server`);
-    continue;
+function wrapTools(tools: Record<string, Tool<any, any> | undefined>) {
+  const wrappedTools: Record<string, ReturnType<typeof investigationToolWrapper>> = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    if (!tool) {
+      console.warn(`[mcpClients] skipping wrap: "${key}" not provided by MCP server`);
+      continue;
+    }
+    wrappedTools[key] = investigationToolWrapper(tool);
   }
-  wrappedHoneycombTools[key] = investigationToolWrapper(tool);
+  return wrappedTools;
 }
+
+export const wrappedHoneycombTools = wrapTools(honeycombToolsToWrap)
