@@ -160,7 +160,7 @@ export function wrapTools(
   for (const [key, tool] of Object.entries(tools)) {
     if (!tool) {
       console.warn(
-        `[mcpClients] skipping wrap: "${key}" not provided by MCP server`,
+        `[wrapTools] skipping wrap: "${key}" not provided by the tool source`,
       );
       continue;
     }

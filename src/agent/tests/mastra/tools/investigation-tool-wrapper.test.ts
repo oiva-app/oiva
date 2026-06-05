@@ -12,12 +12,15 @@ const innerOutputSchema = z.object({ ok: z.boolean() });
 
 const validInput = { datasetId: "product_catalog", toolUseIntent: "why?" };
 
-function makeInnerTool(execute: Tool<any, any>["execute"]) {
+function makeInnerTool(
+  execute: Tool<any, any>["execute"],
+  outputSchema: z.ZodType = innerOutputSchema,
+) {
   return {
     id: "fake_tool",
     description: "a fake tool used for testing",
     inputSchema: innerInputSchema,
-    outputSchema: innerOutputSchema,
+    outputSchema,
     execute,
   } as unknown as Tool<any, any>;
 }
@@ -49,11 +52,20 @@ function makeContext(investigationTrace?: InvestigationTrace) {
 
 // Wrap a tool, point it at a fresh mock context, and return a ready-to-call
 // `run()` plus the spies so each test is just its scenario and assertions.
-function setup(opts: { trace?: InvestigationTrace; error?: Error } = {}) {
+function setup(
+  opts: {
+    trace?: InvestigationTrace;
+    error?: Error;
+    output?: unknown;
+    outputSchema?: z.ZodType;
+  } = {},
+) {
   const innerExecute = opts.error
     ? vi.fn().mockRejectedValue(opts.error)
-    : vi.fn().mockResolvedValue({ ok: true });
-  const wrapped = investigationToolWrapper(makeInnerTool(innerExecute));
+    : vi.fn().mockResolvedValue(opts.output ?? { ok: true });
+  const wrapped = investigationToolWrapper(
+    makeInnerTool(innerExecute, opts.outputSchema),
+  );
   const ctx = makeContext(opts.trace);
   const run = () => wrapped.execute!(validInput, ctx.context as any);
   return { innerExecute, run, ...ctx };
@@ -87,6 +99,26 @@ describe("investigationToolWrapper", () => {
       toolInput: { datasetId: "product_catalog" },
       toolOutput: { ok: true },
       queryUrl: "",
+      error: false,
+    });
+  });
+
+  test("records a string tool output (e.g. workspace grep/search) without throwing", async () => {
+    // Workspace tools like grep/search/read_file return plain strings, not objects.
+    // The trace schema must accept them — under the old object-only schema this threw.
+    const { run, getTrace } = setup({
+      trace: [],
+      output: "line 1\nline 2",
+      outputSchema: z.string(),
+    });
+
+    const result = await run();
+
+    expect(result).toBe("line 1\nline 2");
+    const trace = getTrace()!;
+    expect(trace).toHaveLength(1);
+    expect(trace[0]).toMatchObject({
+      toolOutput: "line 1\nline 2",
       error: false,
     });
   });
