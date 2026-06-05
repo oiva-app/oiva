@@ -21,10 +21,13 @@ function extractQueryUrl(toolOutput: unknown): string {
   const textBlock = parsed.data.content.find(
     (c): c is McpTextContent => c.type === "text",
   );
-  const queryUrl = textBlock?.text.match(/query_url:.*?"(.+?)\\*"/);
-  const traceUrl = textBlock?.text.match(/trace_link:.*?"(.+?)\\*"/);
-  const resultUrl = textBlock?.text.match(/result_url:.*?"(.+?)\\*"/);
-  const bubbleupUrl = textBlock?.text.match(/bubble_up_url:.*?"(.+?)\\*"/);
+  const text = textBlock?.text
+  if (!text) return ""
+
+  const queryUrl = text.match(/query_url:.*?"(.+?)\\*"/);
+  const traceUrl = text.match(/trace_link:.*?"(.+?)\\*"/);
+  const resultUrl = text.match(/result_url:.*?"(.+?)\\*"/);
+  const bubbleupUrl = text.match(/bubble_up_url:.*?"(.+?)\\*"/);
   return (
     queryUrl?.[1] || traceUrl?.[1] || resultUrl?.[1] || bubbleupUrl?.[1] || ""
   );
