@@ -1,15 +1,19 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { supervisorPrompt } from "../prompts/supervisor-prompt";
-import { codebaseAgent } from "./codebase-agent"
+import { codebaseAgent } from "./codebase-agent";
 import { telemetryAgent } from "./telemetry-agent";
-import { env } from "../config/env"
+import { env } from "../config/env";
 import { getSupervisorWorkspace } from "../workspaces/supervisor-workspace";
+import { progressReporter } from "../slack";
+import { DelegationProgressTracker } from "./delegation-progress-adapter";
 
 const SUBAGENTS = {
   "codebase-agent": codebaseAgent,
   "telemetry-agent": telemetryAgent,
 } as const;
+
+const delegationProgress = new DelegationProgressTracker(progressReporter);
 
 export const supervisorAgent = new Agent({
   id: "supervisor-agent",
@@ -22,12 +26,17 @@ export const supervisorAgent = new Agent({
     maxSteps: env.SUPERVISOR_MAX_STEPS,
     disableBackgroundTasks: true,
     delegation: {
-      onDelegationStart: () => {
+      onDelegationStart: async (ctx) => {
+        await delegationProgress.started(ctx);
         return { modifiedMaxSteps: env.SUBAGENT_MAX_STEPS };
       },
-      // this is used to clean up subagent memory in local storage after an investigation
-      onDelegationComplete: async ({ primitiveId, result }) => {
-        if (!result?.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId)) return;
+      onDelegationComplete: async (ctx) => {
+        await delegationProgress.completed(ctx);
+
+        // this is used to clean up subagent memory in local storage after an investigation
+        const { primitiveId, result } = ctx;
+        if (!result?.subAgentThreadId || !Object.hasOwn(SUBAGENTS, primitiveId))
+          return;
         try {
           const subAgent = SUBAGENTS[primitiveId as keyof typeof SUBAGENTS];
           const memory = await subAgent.getMemory({});
@@ -41,7 +50,7 @@ export const supervisorAgent = new Agent({
           const logger = supervisorAgent.getMastraInstance()?.getLogger();
           logger?.error("subagent memory cleanup failed", logContext);
         }
-      }
+      },
     },
   },
   workspace: getSupervisorWorkspace,
