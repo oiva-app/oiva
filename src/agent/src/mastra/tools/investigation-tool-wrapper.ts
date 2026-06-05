@@ -28,19 +28,17 @@ function extractQueryUrl(toolOutput: unknown): string {
   );
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Additional properties to be added to the wrapped tool
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-
 /**
-  Remember: the investigationTrace is NOT OTel instrumentation
+  Returns a 'wrapped' MCP tool in order to add the 
+  tool-use intent to the investigationTrace
+
+  Remember: the investigationTrace is NOT OTel instrumentation!
+  @param tool the tool you wish to wrap
+  @param question LLM prompt used to get more info on the tool-use intent
  */
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
+  question: string = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
 ) {
 
   /*
@@ -61,7 +59,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
         description:
           // REMEMBER: the description is passed to the LLM.
           // Changing the description may change agent behavior.
-          "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
+          question
       } },
       required: [...(baseJson.required ?? []), "question"],
     };
