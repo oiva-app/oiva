@@ -302,7 +302,7 @@ export function buildAttachCounterBlock(count: number): KnownBlock | null {
 
 export function buildIncidentFailedBlocks(
   reason: string,
-  incidentId?: string,
+  incidentId: string,
 ): (Block | KnownBlock)[] {
   return [
     {
@@ -351,8 +351,12 @@ export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
  */
 export function buildIncidentMessageBlocks(
   inputs: IncidentRenderInputs,
+  incidentId: string,
 ): (Block | KnownBlock)[] {
   const blocks: (Block | KnownBlock)[] = [buildStatusBadgeBlock(inputs.status)];
+
+  const activity = buildActivityLogBlock(inputs.log);
+  if (activity) blocks.push({ type: "divider" }, activity);
 
   if (inputs.report) {
     blocks.push(
@@ -362,16 +366,13 @@ export function buildIncidentMessageBlocks(
     blocks.push(...buildIncidentHeaderBlocks(inputs.alert));
   }
 
-  const activity = buildActivityLogBlock(inputs.log);
-  if (activity) blocks.push({ type: "divider" }, activity);
-
   const counter = buildAttachCounterBlock(inputs.attachCount);
   if (counter) blocks.push(counter);
 
   if (inputs.failure) {
     blocks.push(
       { type: "divider" },
-      ...buildIncidentFailedBlocks(inputs.failure.reason, inputs.incidentId),
+      ...buildIncidentFailedBlocks(inputs.failure.reason, incidentId),
     );
   }
 
