@@ -8,12 +8,6 @@ import {
   supervisorAgentOutputSchema,
 } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
-// import {
-//   postReportSummary,
-//   uploadFileToThread,
-//   postErrorMessage,
-//   postErrorToThread,
-// } from "../slack/client";
 import { progressReporter } from "@/slack";
 import { formatInvestigationSteps } from "../slack/formatters";
 import {
@@ -25,6 +19,7 @@ import { assertTransition } from "../domain/incident-state";
 import { incidentDurationMs } from "../domain/incident-duration";
 import { threadIdForIncident } from "../domain/incident-thread";
 import type { IncidentStatus } from "../ports/incident-repository";
+import { failIncident as failIncidentService } from "../services/incident-service";
 import { env } from "../config/env";
 import {
   cleanupCodebaseAgentWorkspace,
@@ -79,15 +74,10 @@ function failureReason(err: unknown): string {
 }
 
 async function failIncident(incidentId: string, reason: string): Promise<void> {
-  try {
-    await transitionIncident(incidentId, "failed");
-  } catch (err) {
-    console.error("failIncident: transition to 'failed' -> failed", {
-      incidentId,
-      err,
-    });
-  }
-  await progressReporter.incidentFailed(incidentId, { reason });
+  await failIncidentService(incidentId, reason, {
+    incidents: incidentRepository,
+    reporter: progressReporter,
+  });
 }
 
 const announce = createStep({
