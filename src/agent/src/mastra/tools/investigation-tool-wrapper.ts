@@ -12,6 +12,8 @@ import {
 } from "@/types/investigation";
 import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
 
+const DEFAULT_PROMPT = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible."
+
 function extractQueryUrl(toolOutput: unknown): string {
   const parsed = ResourceLinkSchema.safeParse(toolOutput);
   if (!parsed.success) return "";
@@ -34,13 +36,12 @@ function extractQueryUrl(toolOutput: unknown): string {
 
   Remember: the investigationTrace is NOT OTel instrumentation!
   @param tool the tool you wish to wrap
-  @param toolUseIntent LLM prompt used to get more info on the tool-use intent
+  @param toolUseIntent LLM prompt used to generate the toolUseIntent description
  */
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
-  toolUseIntent: string = "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
+  toolUseIntent: string = DEFAULT_PROMPT,
 ) {
-
   /*
   Todo: refactor to make function pure, remove closure, and accept multiple properties (not just one)
   */
@@ -54,19 +55,18 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
     return {
       ...baseJson,
       type: "object",
-      properties: { ...baseJson.properties, toolUseIntent: {
-        type: "string",
-        description:
-          // REMEMBER: the description is passed to the LLM.
-          // Changing the description may change agent behavior.
-          toolUseIntent
-      } },
+      properties: {
+        ...baseJson.properties,
+        toolUseIntent: {
+          type: "string",
+          description: toolUseIntent,
+        },
+      },
       required: [...(baseJson.required ?? []), "toolUseIntent"],
     };
   }
-  
-  const inputSchema: JSONSchema7 = wrapInputSchema(tool.inputSchema);
 
+  const inputSchema: JSONSchema7 = wrapInputSchema(tool.inputSchema);
 
   return createTool({
     id: tool.id,
@@ -148,4 +148,23 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
       }
     },
   });
+}
+export function wrapTools(
+  tools: Record<string, Tool<any, any> | undefined>,
+  toolUseIntent: string = DEFAULT_PROMPT,
+) {
+  const wrappedTools: Record<
+    string,
+    ReturnType<typeof investigationToolWrapper>
+  > = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    if (!tool) {
+      console.warn(
+        `[mcpClients] skipping wrap: "${key}" not provided by MCP server`,
+      );
+      continue;
+    }
+    wrappedTools[key] = investigationToolWrapper(tool, toolUseIntent);
+  }
+  return wrappedTools;
 }
