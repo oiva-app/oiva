@@ -89,6 +89,7 @@ const announce = createStep({
     const { incidentId, alertContext } = inputData;
 
     await progressReporter.incidentOpened(incidentId, alertContext);
+    await progressReporter.milestone(incidentId, "Alert verified");
     return inputData;
   },
 });
@@ -138,6 +139,8 @@ const investigate = createStep({
         investigationTrace: requestContext.get("investigationTrace") ?? [],
       });
 
+      await progressReporter.milestone(incidentId, "Investigation concluded");
+
       return response.object;
     } catch (err) {
       await failIncident(incidentId, failureReason(err));
@@ -179,6 +182,8 @@ const generateReport = createStep({
 
     const reportAgent = mastra.getAgentById("report-agent");
     let response;
+    const reportStartedAt = Date.now();
+    await progressReporter.delegationStarted(state.incidentId, "report");
     try {
       response = await reportAgent.generate(
         JSON.stringify(reportInput, null, 2),
@@ -197,6 +202,11 @@ const generateReport = createStep({
       await failIncident(state.incidentId, failureReason(err));
       throw err;
     }
+
+    await progressReporter.delegationCompleted(state.incidentId, "report", {
+      durationMs: Date.now() - reportStartedAt,
+      success: true,
+    });
 
     const report = response.object;
     const investigationSteps = formatInvestigationSteps(

@@ -112,21 +112,18 @@ export class SlackProgressReporter implements ProgressReporter {
     });
   }
 
-  async delegationStarted(
-    incidentId: string,
-    agentLabel: string,
-  ): Promise<void> {
+  async delegationStarted(incidentId: string, taskKey: string): Promise<void> {
     return this.safe("delegationStarted", incidentId, async () => {
       const state = this.states.get(incidentId);
       if (!state) return;
-      state.log.push({ kind: "delegationPending", agentLabel });
+      state.log.push({ kind: "delegationPending", taskKey });
       this.scheduleFlush(incidentId);
     });
   }
 
   async delegationCompleted(
     incidentId: string,
-    agentLabel: string,
+    taskKey: string,
     outcome: DelegationOutcome,
   ): Promise<void> {
     return this.safe("delegationCompleted", incidentId, async () => {
@@ -134,14 +131,14 @@ export class SlackProgressReporter implements ProgressReporter {
       if (!state) return;
       const completed: ActivityLogEntry = {
         kind: "delegationCompleted",
-        agentLabel,
+        taskKey,
         durationMs: outcome.durationMs,
         success: outcome.success,
         headline: outcome.headline,
       };
       // Replace the most recent matching pending entry in place so visual
       // ordering doesn't shift; if no pending exists (out-of-order), append.
-      const idx = findLastPendingIndex(state.log, agentLabel);
+      const idx = findLastPendingIndex(state.log, taskKey);
       if (idx !== -1) state.log.splice(idx, 1, completed);
       else state.log.push(completed);
       this.scheduleFlush(incidentId);
@@ -200,6 +197,21 @@ export class SlackProgressReporter implements ProgressReporter {
 
   async incidentClosed(incidentId: string, by: ClosedBy): Promise<void> {
     return this.safe("incidentClosed", incidentId, async () => {
+      // Warm path: render state is still live (the common same-process case,
+      // including the in-process reaper). Edit the root in place so dangling
+      // spinners reconcile and the header flips to "Closed", then drop state.
+      const state = this.states.get(incidentId);
+      if (state) {
+        state.status = "closed";
+        state.closedBy = by;
+        await this.flushNow(incidentId);
+        this.dropState(incidentId);
+        return;
+      }
+
+      // Cold fallback (e.g. after a server restart): the activity log lives only
+      // in memory, so there's nothing to rebuild the root from — post a threaded
+      // note instead.
       const persisted = await this.incidents.findById(incidentId);
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
 
@@ -210,8 +222,6 @@ export class SlackProgressReporter implements ProgressReporter {
         fallbackText:
           by.kind === "user" ? "Incident closed" : "Incident auto-closed",
       });
-
-      this.dropState(incidentId);
     });
   }
 
@@ -287,13 +297,10 @@ export class SlackProgressReporter implements ProgressReporter {
   }
 }
 
-function findLastPendingIndex(
-  log: ActivityLogEntry[],
-  agentLabel: string,
-): number {
+function findLastPendingIndex(log: ActivityLogEntry[], taskKey: string): number {
   for (let i = log.length - 1; i >= 0; i--) {
     const e = log[i];
-    if (e.kind === "delegationPending" && e.agentLabel === agentLabel) return i;
+    if (e.kind === "delegationPending" && e.taskKey === taskKey) return i;
   }
   return -1;
 }

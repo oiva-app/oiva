@@ -5,10 +5,10 @@ import type { ClosedBy } from "../ports/progress-reporter";
 
 export type ActivityLogEntry =
   | { kind: "milestone"; label: string }
-  | { kind: "delegationPending"; agentLabel: string }
+  | { kind: "delegationPending"; taskKey: string }
   | {
       kind: "delegationCompleted";
-      agentLabel: string;
+      taskKey: string;
       durationMs: number;
       success: boolean;
       headline?: string;

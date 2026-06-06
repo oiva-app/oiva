@@ -44,12 +44,16 @@ export interface ProgressReporter {
   // ── Activity log ───────────────────────────────────────────────────
   /** Append a one-off completed line, e.g. "Alert verified". */
   milestone(incidentId: string, label: string): Promise<void>;
-  /** Append an in-progress line for a starting sub-agent. */
-  delegationStarted(incidentId: string, agentLabel: string): Promise<void>;
+  /**
+   * Append an in-progress line for a starting task. `taskKey` is a stable
+   * identifier (e.g. "telemetry-agent", "report"); the adapter maps it to
+   * present/past phrasing.
+   */
+  delegationStarted(incidentId: string, taskKey: string): Promise<void>;
   /** Finalize the in-progress line with duration, headline, and outcome. */
   delegationCompleted(
     incidentId: string,
-    agentLabel: string,
+    taskKey: string,
     outcome: DelegationOutcome,
   ): Promise<void>;
 
