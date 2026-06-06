@@ -4,8 +4,7 @@ import {
   buildErrorBlocks,
   renderFullReportMarkdown,
   buildRatingConfirmationBlock,
-  buildStatusBadgeBlock,
-  buildIncidentHeaderBlocks,
+  buildIncidentPhaseBlock,
   buildActivityLogBlock,
   buildAttachCounterBlock,
   buildIncidentFailedBlocks,
@@ -332,41 +331,78 @@ describe("buildRatingConfirmationBlock", () => {
 });
 
 describe("incident root message blocks", () => {
-  it("status badge renders emoji + label per status", () => {
-    const block = buildStatusBadgeBlock("investigating");
-    expect(block.type).toBe("context");
-    expect(JSON.stringify(block)).toContain("🟡");
-    expect(JSON.stringify(block)).toContain("Investigating");
+  it("phase block renders the full incident id + phase per status", () => {
+    const id = "a1b2c3d4-0000-0000-0000-000000000000";
+    const block = buildIncidentPhaseBlock(id, "investigating");
+    expect(block.type).toBe("section");
+    // Full id, monospace, so it's an exact-matchable copy target.
+    expect(JSON.stringify(block)).toContain(`\`${id}\``);
+    expect(JSON.stringify(block)).toContain("Investigation in progress");
+  });
+
+  it("phase block reads Report ready once a report exists", () => {
+    const block = buildIncidentPhaseBlock("a1b2c3d4-xxxx", "report_generated");
+    expect(JSON.stringify(block)).toContain("Report ready");
+  });
+
+  it("phase block prefixes a glyph for the failed state only", () => {
+    expect(
+      JSON.stringify(buildIncidentPhaseBlock("a1b2c3d4-xxxx", "investigating")),
+    ).not.toMatch(/⚠️/);
+    expect(
+      JSON.stringify(buildIncidentPhaseBlock("a1b2c3d4-xxxx", "failed")),
+    ).toContain("⚠️");
+  });
+
+  it("renders a still-pending task as a spinner, or interrupted once terminal", () => {
+    const entries: ActivityLogEntry[] = [
+      { kind: "delegationPending", taskKey: "report" },
+    ];
+    const live = buildActivityLogBlock(entries) as { text: { text: string } };
+    expect(live.text.text).toMatch(/🔄 Writing report…/);
+
+    const terminal = buildActivityLogBlock(entries, true) as {
+      text: { text: string };
+    };
+    expect(terminal.text.text).toMatch(/❌ Writing report - interrupted/);
   });
 
   it("activity log omits when empty, renders mixed entries in order", () => {
     expect(buildActivityLogBlock([])).toBeNull();
     const entries: ActivityLogEntry[] = [
       { kind: "milestone", label: "Alert verified" },
-      { kind: "delegationPending", agentLabel: "Telemetry investigator" },
+      { kind: "delegationPending", taskKey: "telemetry-agent" },
       {
         kind: "delegationCompleted",
-        agentLabel: "Codebase reviewer",
+        taskKey: "codebase-agent",
         durationMs: 15_000,
         success: true,
         headline: "Likely the failing migration",
       },
       {
         kind: "delegationCompleted",
-        agentLabel: "Flaky tool",
+        taskKey: "report",
         durationMs: 2_000,
+        success: true,
+      },
+      {
+        kind: "delegationCompleted",
+        taskKey: "telemetry-agent",
+        durationMs: 3_000,
         success: false,
       },
     ];
     const block = buildActivityLogBlock(entries);
     expect(block).not.toBeNull();
     const text = (block as { text: { text: string } }).text.text;
-    expect(text).toMatch(/✓ Alert verified/);
-    expect(text).toMatch(/⏳ Telemetry investigator/);
+    expect(text).toMatch(/✅ Alert verified/);
+    expect(text).toMatch(/🔄 Investigating telemetry…/);
     expect(text).toMatch(
-      /✓ Codebase reviewer — Likely the failing migration - 15s/,
+      /✅ Examined codebase - Likely the failing migration - 15s/,
     );
-    expect(text).toMatch(/✕ Flaky tool - No Discovery - 2s/);
+    // No headline → no finding segment, just past-tense label + duration.
+    expect(text).toMatch(/✅ Report written - 2s/);
+    expect(text).toMatch(/❌ Investigated telemetry - 3s/);
   });
 
   it("attach counter omits at zero, pluralizes correctly", () => {
@@ -387,14 +423,44 @@ describe("incident root message blocks", () => {
     expect(actionIds).toContain("incident_close");
   });
 
-  it("closed attribution distinguishes user vs reaper", () => {
+  it("failed render flips the header, reconciles spinners, keeps actions", () => {
+    const baseAlert = {
+      triggerName: "checkout-latency",
+      description: "p99 over 2s",
+      environment: "production",
+      alert: { timestamp: "2026-06-03T12:00:00Z" },
+      resultUrl: "https://ui.honeycomb.io/x",
+    } as unknown as IncidentRenderInputs["alert"];
+
+    const blocks = buildIncidentMessageBlocks(
+      {
+        status: "failed",
+        alert: baseAlert,
+        log: [
+          { kind: "milestone", label: "Alert verified" },
+          { kind: "delegationPending", taskKey: "telemetry-agent" },
+        ],
+        attachCount: 0,
+        failure: { reason: "reaper: stuck in investigating past deadline" },
+      },
+      "inc_123",
+    );
+    const rendered = JSON.stringify(blocks);
+    expect(rendered).toContain("⚠️"); // failed phase header
+    expect(rendered).toContain("❌ Investigating telemetry - interrupted");
+    expect(rendered).toContain("incident_retry"); // Retry stays on a failed card
+  });
+
+  it("closed attribution carries a lock for both user and reaper", () => {
     const user = buildIncidentClosedAttributionBlock({
       kind: "user",
       userId: "U123",
     });
+    expect(JSON.stringify(user)).toContain("🔒");
     expect(JSON.stringify(user)).toContain("<@U123>");
     const reaper = buildIncidentClosedAttributionBlock({ kind: "reaper" });
     expect(JSON.stringify(reaper)).toContain("🔒");
+    expect(JSON.stringify(reaper)).toContain("Auto-closed");
   });
 
   it("orchestrator: alert header replaced by report summary once report present", () => {

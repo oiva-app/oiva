@@ -22,7 +22,7 @@ describe("DelegationProgressTracker", () => {
     primitiveId,
   });
 
-  it("emits started then completed with the same label", async () => {
+  it("emits started then completed with the same task key", async () => {
     await tracker.started(startCtx("inc-1", "call-1"));
     await tracker.completed({
       toolCallId: "call-1",
@@ -36,12 +36,12 @@ describe("DelegationProgressTracker", () => {
       {
         type: "delegationStarted",
         incidentId: "inc-1",
-        agentLabel: "Codebase agent",
+        taskKey: "codebase-agent",
       },
       {
         type: "delegationCompleted",
         incidentId: "inc-1",
-        agentLabel: "Codebase agent",
+        taskKey: "codebase-agent",
         outcome: {
           durationMs: 4200,
           success: true,

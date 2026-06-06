@@ -34,10 +34,6 @@ export interface IncidentRepository {
   create(input?: { status?: IncidentStatus }): Promise<Incident>;
   findById(id: string): Promise<Incident | null>;
   updateStatus(id: string, next: IncidentStatus): Promise<Incident>;
-  /**
-   * Returns active incidents whose latest alert tuple matches (triggerName, dataset, queryId) and arrived after `since`.
-   * Used by the correlation step in the workflow.
-   */
   findActiveCandidates(opts: CorrelationLookup): Promise<Incident[]>;
   attachSlackThread(
     id: string,

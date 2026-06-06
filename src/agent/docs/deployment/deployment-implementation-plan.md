@@ -87,24 +87,24 @@ The ECS service is always running, but ECS still stops tasks during deployments,
 
 When ECS stops a task, it sends `SIGTERM`, waits the configured container stop timeout, and then sends `SIGKILL`.
 
-For Fargate, configure the app container with the maximum supported stop timeout:
+For Fargate, configure the app container with a short cleanup timeout:
 
 ```hcl
-stop_timeout = 120
+stop_timeout = 60
 ```
 
 Required app behavior:
 
-- On `SIGTERM`, stop accepting new work if the server framework supports it.
-- Let active work finish until the process is forced to exit.
-- Log active investigation IDs during shutdown.
-- Ensure interrupted investigations leave durable status in Postgres.
+- On `SIGTERM`, set process-local shutdown state.
+- Return `503` for new actionable Honeycomb alerts during shutdown before persistence or workflow dispatch.
+- Skip Slack retry workflow dispatch during shutdown.
+- Do not intentionally drain active investigations for this step.
 
 Current limitation:
 
-- A 2-minute stop timeout may not be enough for a 2-5 minute investigation.
-- Because webhook receipt is already written to Postgres before `202`, the durable intake path is safe.
-- In-flight investigation resumability can be added later for incidents stuck in `investigating` or `report_in_process`.
+- A 60-second stop timeout is for routine request and connection cleanup, not for completing 2-5 minute investigations.
+- Post-`SIGTERM` actionable alerts are rejected instead of persisted as triggered incidents.
+- Interrupted in-flight investigations are left in their existing durable statuses and can be handled by cleanup tooling.
 
 ### 4. Create The Production Docker Image
 

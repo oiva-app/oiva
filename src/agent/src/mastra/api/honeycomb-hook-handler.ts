@@ -12,6 +12,7 @@ import { failIncident } from "../services/incident-service";
 import { correlate } from "../domain/correlation";
 import { env } from "../config/env";
 import { z } from "zod";
+import { isShuttingDown } from "../services/shutdown-state";
 
 const SOURCE = "honeycomb";
 /**
@@ -74,6 +75,9 @@ export async function alertHookHandler(c: Context) {
     );
   }
   // verdict.kind === "actionable" — only path that continues.
+  if (isShuttingDown()) {
+    return c.json({ error: "shutting-down" }, 503);
+  }
 
   // 4. Normalize
   const alertContext = normalizeAlert(parsed.data);
