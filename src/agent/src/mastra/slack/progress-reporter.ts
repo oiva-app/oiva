@@ -112,21 +112,18 @@ export class SlackProgressReporter implements ProgressReporter {
     });
   }
 
-  async delegationStarted(
-    incidentId: string,
-    agentLabel: string,
-  ): Promise<void> {
+  async delegationStarted(incidentId: string, taskKey: string): Promise<void> {
     return this.safe("delegationStarted", incidentId, async () => {
       const state = this.states.get(incidentId);
       if (!state) return;
-      state.log.push({ kind: "delegationPending", agentLabel });
+      state.log.push({ kind: "delegationPending", taskKey });
       this.scheduleFlush(incidentId);
     });
   }
 
   async delegationCompleted(
     incidentId: string,
-    agentLabel: string,
+    taskKey: string,
     outcome: DelegationOutcome,
   ): Promise<void> {
     return this.safe("delegationCompleted", incidentId, async () => {
@@ -134,14 +131,14 @@ export class SlackProgressReporter implements ProgressReporter {
       if (!state) return;
       const completed: ActivityLogEntry = {
         kind: "delegationCompleted",
-        agentLabel,
+        taskKey,
         durationMs: outcome.durationMs,
         success: outcome.success,
         headline: outcome.headline,
       };
       // Replace the most recent matching pending entry in place so visual
       // ordering doesn't shift; if no pending exists (out-of-order), append.
-      const idx = findLastPendingIndex(state.log, agentLabel);
+      const idx = findLastPendingIndex(state.log, taskKey);
       if (idx !== -1) state.log.splice(idx, 1, completed);
       else state.log.push(completed);
       this.scheduleFlush(incidentId);
@@ -200,6 +197,8 @@ export class SlackProgressReporter implements ProgressReporter {
 
   async incidentClosed(incidentId: string, by: ClosedBy): Promise<void> {
     return this.safe("incidentClosed", incidentId, async () => {
+      // Closing is surfaced the same way regardless of who closed it (user or
+      // reaper): a threaded reply, leaving the root message as it last rendered.
       const persisted = await this.incidents.findById(incidentId);
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
 
@@ -224,7 +223,6 @@ export class SlackProgressReporter implements ProgressReporter {
     state.attachCount = 0;
     state.report = undefined;
     state.failure = undefined;
-    state.closedBy = undefined;
   }
 
   private scheduleFlush(incidentId: string): void {
@@ -263,7 +261,6 @@ export class SlackProgressReporter implements ProgressReporter {
 
   private fallbackTextFor(state: RenderState): string {
     const trigger = state.alert.triggerName;
-    if (state.closedBy) return `Closed: ${trigger}`;
     if (state.failure) return `Failed: ${trigger}`;
     if (state.report) return `Report ready: ${trigger}`;
     return `Investigating: ${trigger}`;
@@ -289,11 +286,11 @@ export class SlackProgressReporter implements ProgressReporter {
 
 function findLastPendingIndex(
   log: ActivityLogEntry[],
-  agentLabel: string,
+  taskKey: string,
 ): number {
   for (let i = log.length - 1; i >= 0; i--) {
     const e = log[i];
-    if (e.kind === "delegationPending" && e.agentLabel === agentLabel) return i;
+    if (e.kind === "delegationPending" && e.taskKey === taskKey) return i;
   }
   return -1;
 }
