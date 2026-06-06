@@ -50,8 +50,17 @@ const migrationsDir = process.env.MIGRATIONS_DIR
   : path.resolve(process.cwd(), "src/mastra/db/migrations");
 
 const RETRYABLE_CODES = new Set(["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"]);
-const MIGRATE_CONNECT_MAX_ATTEMPTS = parseInt(
-  process.env.MIGRATE_CONNECT_MAX_ATTEMPTS ?? "10",
+function parsePositiveInteger(value: string | undefined, fallback: number) {
+  if (value === undefined) return fallback;
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) return fallback;
+
+  return parsed;
+}
+
+const MIGRATE_CONNECT_MAX_ATTEMPTS = parsePositiveInteger(
+  process.env.MIGRATE_CONNECT_MAX_ATTEMPTS,
   10,
 );
 const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
