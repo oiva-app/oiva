@@ -7,20 +7,6 @@
  *   1. report_delivered + quiet      → closed  (investigation done; tidy up)
  *   2. failed + quiet                → closed  (un-retried, un-acked; give up)
  *   3. working state + past deadline → failed  (the run died or hung)
- *
- * Every transition goes through the idempotent closeIncident / failIncident
- * services, so a sweep racing a human action or a finishing workflow is a no-op
- * rather than a conflict. Per-incident failures are collected, not thrown — one
- * bad row never aborts the sweep (partial failure is expected). Returns a
- * summary for the caller to emit as one structured event.
- *
- * Ordering note: sweep 3 stamps freshly-failed incidents at `now`, so sweep 2's
- * cutoff (now - failedQuiet) never catches them in the same run — they get a
- * full failedQuiet window (and the Retry button) before auto-close.
- *
- * CAUTION: sweep 3 marks a *live but slow* investigation as failed, and the
- * running workflow then discards its result on its next state transition. Set
- * stuckDeadlineMs comfortably above the slowest legitimate investigation.
  */
 import type {
   IncidentRepository,
