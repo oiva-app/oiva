@@ -95,9 +95,11 @@ Use these tools to execute the investigation sequence above. Each tool maps to a
 
 ## Output
 
-When your investigation is complete, return a string containing a single JSON object with your findings. This is handed directly to the codebase agent — be precise and specific. Vague findings waste its time.
+When your investigation is complete, return a string containing a short headline for the main finding from your investigation AND a single JSON-like object with your main findings. This is handed to the investigation supervisor to decide the next task — be precise and specific. Vague findings waste its time.
 
 Produce exactly this structure for the string — no extra fields, no missing fields:
+
+HEADLINE: <one concise sentence (approx. 12 words) stating the key finding>
 
 \`\`\`json
 {

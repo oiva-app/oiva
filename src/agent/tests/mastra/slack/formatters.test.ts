@@ -379,7 +379,7 @@ describe("incident root message blocks", () => {
   });
 
   it("failed render includes retry and close actions", () => {
-    const blocks = buildIncidentFailedBlocks("git pull timed out");
+    const blocks = buildIncidentFailedBlocks("git pull timed out", "inc_123");
     const actions = blocks.find((b) => b.type === "actions");
     expect(actions).toBeDefined();
     const actionIds = JSON.stringify(actions);
@@ -407,12 +407,15 @@ describe("incident root message blocks", () => {
       // …fill in remaining AlertContext required fields per the test helper pattern
     } as unknown as IncidentRenderInputs["alert"];
 
-    const withoutReport = buildIncidentMessageBlocks({
-      status: "investigating",
-      alert: baseAlert,
-      log: [],
-      attachCount: 0,
-    });
+    const withoutReport = buildIncidentMessageBlocks(
+      {
+        status: "investigating",
+        alert: baseAlert,
+        log: [],
+        attachCount: 0,
+      },
+      "inc_123",
+    );
     expect(JSON.stringify(withoutReport)).toContain("checkout-latency");
 
     // Once a report is present, expect the summary header text instead.

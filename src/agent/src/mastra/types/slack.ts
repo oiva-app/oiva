@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const slackRatingPayloadSchema = z.object({
+export const slackInteractionPayloadSchema = z.object({
   type: z.literal("block_actions"),
   user: z.object({
     id: z.string(),
@@ -15,14 +15,16 @@ export const slackRatingPayloadSchema = z.object({
   actions: z
     .array(
       z.object({
-        action_id: z.enum(["positive_rating", "negative_rating"]),
+        action_id: z.string(),
         value: z.string(),
       }),
     )
     .min(1),
 });
 
-export type SlackRatingPayload = z.infer<typeof slackRatingPayloadSchema>;
+export type SlackInteractionPayload = z.infer<
+  typeof slackInteractionPayloadSchema
+>;
 
 export const slackThreadDataSchema = z.object({
   ts: z.string(),

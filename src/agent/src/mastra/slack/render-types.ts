@@ -22,5 +22,4 @@ export interface IncidentRenderInputs {
   report?: { report: IncidentReport; resultUrl: string };
   failure?: { reason: string };
   closedBy?: ClosedBy;
-  incidentId?: string;
 }

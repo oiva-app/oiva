@@ -7,7 +7,8 @@
     "dev": "mastra dev",
     "build": "mastra build",
     "start": "mastra start",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "db:migrate": "tsx scripts/migrate.ts",
+    "reap": "tsx scripts/cleanup-reap.ts"
   },
   "keywords": [],
   "author": "",

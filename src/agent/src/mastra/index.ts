@@ -27,13 +27,14 @@ import { codebaseAgent } from "./agents/codebase-agent";
 // } from "./scorers/weather-scorer";
 import { registerApiRoute } from "@mastra/core/server";
 import { alertHookHandler } from "./api/honeycomb-hook-handler";
-import { slackRatingHandler } from "./api/slack-rating-handler";
+import { slackInteractionHandler } from "./api/slack-interaction-handler";
 import { env } from "./config/env";
 import {
   alertEnrich,
   contextualizeUsingHoneycombMCP,
 } from "./workflows/alert-enrich";
 import { testAgent } from "./agents/test-agent";
+import { startCleanupReaper } from "./services/cleanup-service-scheduler";
 
 export const mastra = new Mastra({
   workflows: {
@@ -59,9 +60,9 @@ export const mastra = new Mastra({
         method: "POST",
         handler: alertHookHandler,
       }),
-      registerApiRoute("/hook/slack/rating", {
+      registerApiRoute("/hook/slack/interaction", {
         method: "POST",
-        handler: slackRatingHandler,
+        handler: slackInteractionHandler,
       }),
     ],
   },
@@ -102,3 +103,5 @@ export const mastra = new Mastra({
     },
   }),
 });
+
+startCleanupReaper({ logger: mastra.getLogger() });

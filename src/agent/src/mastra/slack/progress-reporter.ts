@@ -71,7 +71,7 @@ export class SlackProgressReporter implements ProgressReporter {
         attachCount: 0,
       };
       const { ts, channel } = await postIncidentRoot({
-        blocks: buildIncidentMessageBlocks(initialInputs),
+        blocks: buildIncidentMessageBlocks(initialInputs, incidentId),
         fallbackText: `Investigating: ${alert.triggerName}`,
       });
       this.states.set(incidentId, {
@@ -251,7 +251,7 @@ export class SlackProgressReporter implements ProgressReporter {
     await updateIncidentMessage({
       channel: state.channelId,
       ts: state.threadTs,
-      blocks: buildIncidentMessageBlocks(state),
+      blocks: buildIncidentMessageBlocks(state, incidentId),
       fallbackText: this.fallbackTextFor(state),
     });
   }

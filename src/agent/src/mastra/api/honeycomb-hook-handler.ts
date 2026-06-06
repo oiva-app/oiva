@@ -7,6 +7,8 @@ import {
   extractQueryId,
 } from "../adapters/honeycomb-adapter";
 import { incidentRepository, alertRepository } from "../repositories";
+import { progressReporter } from "../slack";
+import { failIncident } from "../services/incident-service";
 import { correlate } from "../domain/correlation";
 import { env } from "../config/env";
 import { z } from "zod";
@@ -150,8 +152,25 @@ export async function alertHookHandler(c: Context) {
       inputData: { incidentId: incident.id, alertContext },
     })
     .catch((err: unknown) => {
+      const reason = err instanceof Error ? err.message : String(err);
       mastra.getLogger().error("workflow run failed", {
         runId: run.runId,
+        incidentId: incident.id,
+        reason,
+      });
+      // Boundary safety net: the per-step catches handle investigate/report
+      // failures, but announce, send-report, and framework-level failures
+      // escape to here. Idempotent — a no-op if a step already failed it.
+      return failIncident(incident.id, reason, {
+        incidents: incidentRepository,
+        reporter: progressReporter,
+      });
+    })
+    .catch((err: unknown) => {
+      // The failure handler itself failed (e.g. DB write). Last-resort log so
+      // this never surfaces as an unhandled rejection.
+      mastra.getLogger().error("boundary failIncident failed", {
+        incidentId: incident.id,
         err,
       });
     });
