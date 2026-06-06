@@ -200,16 +200,19 @@ export function buildRatingConfirmationBlock(
   };
 }
 
-const STATUS_BADGES: Record<IncidentStatus, { emoji: string; label: string }> =
-  {
-    triggered: { emoji: "⚪", label: "Triggered" },
-    investigating: { emoji: "🟡", label: "Investigating" },
-    report_in_process: { emoji: "🟡", label: "Generating report" },
-    report_generated: { emoji: "🟡", label: "Report ready" },
-    report_delivered: { emoji: "🟢", label: "Delivered" },
-    failed: { emoji: "🔴", label: "Failed" },
-    closed: { emoji: "⚫", label: "Closed" },
-  };
+const PHASE_LABELS: Record<IncidentStatus, string> = {
+  triggered: "Investigation in progress",
+  investigating: "Investigation in progress",
+  report_in_process: "Writing report",
+  report_generated: "Report ready",
+  report_delivered: "Report ready",
+  failed: "Investigation failed",
+  closed: "Closed",
+};
+
+const PHASE_GLYPHS: Partial<Record<IncidentStatus, string>> = {
+  failed: "⚠️ ",
+};
 
 const HEADER_TEXT_LIMIT = 150;
 
@@ -218,11 +221,16 @@ function truncateForHeader(text: string): string {
   return text.slice(0, HEADER_TEXT_LIMIT - 1) + "…";
 }
 
-export function buildStatusBadgeBlock(status: IncidentStatus): KnownBlock {
-  const { emoji, label } = STATUS_BADGES[status];
+export function buildIncidentPhaseBlock(
+  incidentId: string,
+  status: IncidentStatus,
+): KnownBlock {
   return {
-    type: "context",
-    elements: [{ type: "mrkdwn", text: `${emoji} *${label}*` }],
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: `*${PHASE_GLYPHS[status] ?? ""}Incident* \`${incidentId}\` — *${PHASE_LABELS[status]}*`,
+    },
   };
 }
 
@@ -261,32 +269,57 @@ export function buildIncidentHeaderBlocks(
   ];
 }
 
-function renderActivityLine(entry: ActivityLogEntry): string {
+const TASK_PHRASING: Record<string, { present: string; past: string }> = {
+  "telemetry-agent": {
+    present: "Investigating telemetry",
+    past: "Investigated telemetry",
+  },
+  "codebase-agent": {
+    present: "Examining codebase",
+    past: "Examined codebase",
+  },
+  report: { present: "Writing report", past: "Report written" },
+};
+
+function phrasingFor(taskKey: string): { present: string; past: string } {
+  return TASK_PHRASING[taskKey] ?? { present: taskKey, past: taskKey };
+}
+
+/**
+ * `interrupted` is set once the incident reaches a terminal state (failed or
+ * closed): any still-pending task never finished, so it's rendered as a failed
+ * line rather than a live spinner.
+ */
+function renderActivityLine(
+  entry: ActivityLogEntry,
+  interrupted: boolean,
+): string {
   switch (entry.kind) {
     case "milestone":
-      return `✓ ${entry.label}`;
+      return `✅ ${entry.label}`;
     case "delegationPending":
-      return `⏳ ${entry.agentLabel}…`;
+      return interrupted
+        ? `❌ ${phrasingFor(entry.taskKey).present} - interrupted`
+        : `🔄 ${phrasingFor(entry.taskKey).present}…`;
     case "delegationCompleted": {
-      const icon = entry.success ? "✓" : "✕";
+      const icon = entry.success ? "✅" : "❌";
       const dur = formatDuration(entry.durationMs);
-      const tail = entry.headline
-        ? `— ${toMrkdwn(entry.headline)}`
-        : "- No Discovery";
-      return `${icon} ${entry.agentLabel} ${tail} - ${dur}`;
+      const finding = entry.headline ? ` - ${toMrkdwn(entry.headline)}` : "";
+      return `${icon} ${phrasingFor(entry.taskKey).past}${finding} - ${dur}`;
     }
   }
 }
 
 export function buildActivityLogBlock(
   entries: ReadonlyArray<ActivityLogEntry>,
+  interrupted = false,
 ): KnownBlock | null {
   if (entries.length === 0) return null;
   return {
     type: "section",
     text: {
       type: "mrkdwn",
-      text: ["*Activity*", ...entries.map(renderActivityLine)].join("\n"),
+      text: entries.map((e) => renderActivityLine(e, interrupted)).join("\n"),
     },
   };
 }
@@ -336,7 +369,7 @@ export function buildIncidentFailedBlocks(
 export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
   const text =
     by.kind === "user"
-      ? `Closed by <@${by.userId}>`
+      ? `🔒 Closed by <@${by.userId}>`
       : "🔒 Auto-closed (no activity)";
   return {
     type: "context",
@@ -344,19 +377,18 @@ export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
   };
 }
 
-/**
- * Composition: badge → (report summary OR alert header) → activity log →
- * attach counter → (failed banner + actions IF failed) → (closed attribution
- * IF closed).
- */
 export function buildIncidentMessageBlocks(
   inputs: IncidentRenderInputs,
   incidentId: string,
 ): (Block | KnownBlock)[] {
-  const blocks: (Block | KnownBlock)[] = [buildStatusBadgeBlock(inputs.status)];
+  const blocks: (Block | KnownBlock)[] = [
+    buildIncidentPhaseBlock(incidentId, inputs.status),
+  ];
 
-  const activity = buildActivityLogBlock(inputs.log);
-  if (activity) blocks.push({ type: "divider" }, activity);
+  const activity = buildActivityLogBlock(inputs.log, inputs.failure != null);
+  if (activity) blocks.push(activity);
+
+  blocks.push({ type: "divider" });
 
   if (inputs.report) {
     blocks.push(

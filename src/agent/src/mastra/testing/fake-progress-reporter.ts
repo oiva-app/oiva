@@ -20,11 +20,11 @@ export type ProgressEvent =
   | { type: "incidentOpened"; incidentId: string; alert: AlertContext }
   | { type: "statusChanged"; incidentId: string; status: IncidentStatus }
   | { type: "milestone"; incidentId: string; label: string }
-  | { type: "delegationStarted"; incidentId: string; agentLabel: string }
+  | { type: "delegationStarted"; incidentId: string; taskKey: string }
   | {
       type: "delegationCompleted";
       incidentId: string;
-      agentLabel: string;
+      taskKey: string;
       outcome: DelegationOutcome;
     }
   | { type: "alertAttached"; incidentId: string }
@@ -77,22 +77,19 @@ export class FakeProgressReporter implements ProgressReporter {
     this.events.push({ type: "milestone", incidentId, label });
   }
 
-  async delegationStarted(
-    incidentId: string,
-    agentLabel: string,
-  ): Promise<void> {
-    this.events.push({ type: "delegationStarted", incidentId, agentLabel });
+  async delegationStarted(incidentId: string, taskKey: string): Promise<void> {
+    this.events.push({ type: "delegationStarted", incidentId, taskKey });
   }
 
   async delegationCompleted(
     incidentId: string,
-    agentLabel: string,
+    taskKey: string,
     outcome: DelegationOutcome,
   ): Promise<void> {
     this.events.push({
       type: "delegationCompleted",
       incidentId,
-      agentLabel,
+      taskKey,
       outcome,
     });
   }
