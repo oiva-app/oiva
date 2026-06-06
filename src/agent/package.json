@@ -6,8 +6,12 @@
     "test": "vitest",
     "dev": "mastra dev",
     "build": "mastra build",
+    "build:migrate": "tsc -p tsconfig.migrations.json",
+    "build:prod": "npm run build && npm run build:migrate",
     "start": "mastra start",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "start:prod": "node .mastra/output/index.mjs",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:migrate:prod": "node dist/scripts/migrate.js"
   },
   "keywords": [],
   "author": "",

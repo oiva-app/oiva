@@ -13,11 +13,10 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
-import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres";
+import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres.js";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -46,8 +45,37 @@ try {
   process.exit(1);
 }
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const migrationsDir = path.resolve(scriptDir, "../src/mastra/db/migrations");
+const migrationsDir = process.env.MIGRATIONS_DIR
+  ? path.resolve(process.env.MIGRATIONS_DIR)
+  : path.resolve(process.cwd(), "src/mastra/db/migrations");
+
+const RETRYABLE_CODES = new Set(["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"]);
+const MIGRATE_CONNECT_MAX_ATTEMPTS = parseInt(
+  process.env.MIGRATE_CONNECT_MAX_ATTEMPTS ?? "10",
+  10,
+);
+const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
+
+async function connectWithRetry(client: pg.Client): Promise<void> {
+  for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
+    try {
+      await client.connect();
+      return;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      const isRetryable = code !== undefined && RETRYABLE_CODES.has(code);
+      if (!isRetryable || attempt === MIGRATE_CONNECT_MAX_ATTEMPTS) {
+        throw err;
+      }
+      console.log(
+        `waiting for database (attempt ${attempt}/${MIGRATE_CONNECT_MAX_ATTEMPTS}): ${(err as Error).message}`,
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, MIGRATE_CONNECT_RETRY_DELAY_MS),
+      );
+    }
+  }
+}
 
 const OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE = 0x4f495641; // OIVA
 const OIVA_SCHEMA_MIGRATION_LOCK_RESOURCE = 0x4d494752; // MIGR
@@ -74,7 +102,7 @@ async function main() {
   let lockAcquired = false;
 
   try {
-    await client.connect();
+    await connectWithRetry(client);
     connected = true;
 
     await client.query("SELECT pg_advisory_lock($1, $2)", [

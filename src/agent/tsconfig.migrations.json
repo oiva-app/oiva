@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "outDir": "dist",
+    "paths": {},
+    "rootDir": ".",
+    "sourceMap": false
+  },
+  "include": [
+    "scripts/migrate.ts",
+    "src/mastra/config/postgres.ts"
+  ]
+}
