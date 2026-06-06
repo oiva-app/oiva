@@ -56,12 +56,20 @@ const MIGRATE_CONNECT_MAX_ATTEMPTS = parseInt(
 );
 const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
 
-async function connectWithRetry(client: pg.Client): Promise<void> {
+async function connectWithRetry(connectionString: string): Promise<pg.Client> {
   for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
+    const client = new pg.Client({ connectionString });
+
     try {
       await client.connect();
-      return;
+      return client;
     } catch (err) {
+      try {
+        await client.end();
+      } catch {
+        // Ignore cleanup failures for clients that never connected.
+      }
+
       const code = (err as NodeJS.ErrnoException).code;
       const isRetryable = code !== undefined && RETRYABLE_CODES.has(code);
       if (!isRetryable || attempt === MIGRATE_CONNECT_MAX_ATTEMPTS) {
@@ -75,6 +83,8 @@ async function connectWithRetry(client: pg.Client): Promise<void> {
       );
     }
   }
+
+  throw new Error("failed to connect to database");
 }
 
 const OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE = 0x4f495641; // OIVA
@@ -97,12 +107,12 @@ async function releaseMigrationLock(client: pg.Client) {
 }
 
 async function main() {
-  const client = new pg.Client({ connectionString: databaseUrl });
+  let client: pg.Client | undefined;
   let connected = false;
   let lockAcquired = false;
 
   try {
-    await connectWithRetry(client);
+    client = await connectWithRetry(databaseUrl);
     connected = true;
 
     await client.query("SELECT pg_advisory_lock($1, $2)", [
@@ -181,7 +191,7 @@ async function main() {
       `migrations complete (${appliedCount} applied, ${files.length} total)`,
     );
   } finally {
-    if (connected) {
+    if (connected && client !== undefined) {
       if (lockAcquired) {
         try {
           await releaseMigrationLock(client);
