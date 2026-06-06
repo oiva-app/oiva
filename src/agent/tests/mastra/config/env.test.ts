@@ -15,6 +15,7 @@ const requiredEnv = {
   APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
   NODE_ENV: "development",
   KNOWLEDGE_BASE_S3_BUCKET: "test-bucket",
+  KNOWLEDGE_BASE_S3_PREFIX: "test-prefix",
   AWS_REGION: "us-east-1",
   SLACK_BOT_TOKEN: "slack-token",
   SLACK_CHANNEL_ID: "slack-channel",
@@ -98,12 +99,10 @@ describe("env config", () => {
     await expect(importEnv()).rejects.toThrow("AWS_REGION");
   });
 
-  it("defaults the S3 prefix to an empty string", async () => {
+  it("requires the S3 prefix", async () => {
     stubRequiredEnv({ KNOWLEDGE_BASE_S3_PREFIX: undefined });
 
-    const { env } = await importEnv();
-
-    expect(env.KNOWLEDGE_BASE_S3_PREFIX).toBe("");
+    await expect(importEnv()).rejects.toThrow("KNOWLEDGE_BASE_S3_PREFIX");
   });
 
 });
