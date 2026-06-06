@@ -121,6 +121,30 @@ describe("SlackProgressReporter", () => {
     });
   });
 
+  describe("incidentFailed", () => {
+    it("edits the root: warning header, interrupted spinner, failure banner", async () => {
+      const incident = await repo.create();
+      mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+      await reporter.incidentOpened(incident.id, alert);
+      await reporter.delegationStarted(incident.id, "telemetry-agent");
+      await vi.runAllTimersAsync();
+      mockFns.update.mockClear();
+
+      await reporter.incidentFailed(incident.id, {
+        reason: "supervisor crashed",
+      });
+
+      expect(mockFns.update).toHaveBeenCalledTimes(1);
+      const args = mockFns.update.mock.calls[0][0];
+      expect(args).toMatchObject({ channel: "C-default", ts: "T1" });
+      const rendered = JSON.stringify(args.blocks);
+      expect(rendered).toContain("⚠️"); // failed phase header
+      expect(rendered).toContain("❌ Investigating telemetry - interrupted");
+      expect(rendered).toContain("supervisor crashed"); // failure banner
+      expect(rendered).toContain("incident_retry"); // Retry stays available
+    });
+  });
+
   describe("incidentClosed", () => {
     it("reaper-close posts a threaded reply, does not chat.update the root", async () => {
       const incident = await repo.create();

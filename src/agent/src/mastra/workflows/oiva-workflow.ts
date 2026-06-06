@@ -40,7 +40,7 @@ const oivaWorkflowInputSchema = z.object({
   alertContext: alertContextSchema,
 });
 
-const oivaWorkflowStateSchema = z.object({
+export const oivaWorkflowStateSchema = z.object({
   incidentId: z.uuid().optional(),
   alertContext: alertContextSchema.optional(),
   investigationTrace: investigationTraceSchema.default([]),
@@ -80,7 +80,7 @@ async function failIncident(incidentId: string, reason: string): Promise<void> {
   });
 }
 
-const announce = createStep({
+export const announce = createStep({
   id: "announce",
   stateSchema: oivaWorkflowStateSchema,
   inputSchema: oivaWorkflowInputSchema,
