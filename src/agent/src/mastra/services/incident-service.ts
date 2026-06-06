@@ -11,7 +11,7 @@
  * be exercised against fakes; the wiring layer (route handlers, the reaper)
  * binds the real singletons.
  */
-import { assertTransition } from "../domain/incident-state";
+import { assertTransition, canTransition } from "../domain/incident-state";
 import type { IncidentRepository } from "../ports/incident-repository";
 import type { ClosedBy, ProgressReporter } from "../ports/progress-reporter";
 import type { AlertContext } from "../types/alert-context";
@@ -96,4 +96,28 @@ export async function retryIncident(
   }
 
   await dispatch(id, alert);
+}
+
+export interface FailIncidentDeps {
+  incidents: IncidentRepository;
+  reporter: ProgressReporter;
+}
+
+export async function failIncident(
+  id: string,
+  reason: string,
+  deps: FailIncidentDeps,
+): Promise<void> {
+  const { incidents, reporter } = deps;
+
+  const incident = await incidents.findById(id);
+  if (!incident) {
+    return;
+  }
+  if (!canTransition(incident.status, "failed")) {
+    return;
+  }
+
+  await incidents.updateStatus(id, "failed");
+  await reporter.incidentFailed(id, { reason });
 }

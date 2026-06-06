@@ -1,10 +1,15 @@
 import type { Context } from "hono";
+import type { Mastra } from "@mastra/core/mastra";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "../config/env";
 import { postRatingConfirmation } from "../slack/client";
 import {
-  slackRatingPayloadSchema,
-  type SlackRatingPayload,
+  handleIncidentClose,
+  handleIncidentRetry,
+} from "./incident-action-handler";
+import {
+  slackInteractionPayloadSchema,
+  type SlackInteractionPayload,
 } from "../types/slack";
 import type { Block, KnownBlock } from "@slack/web-api";
 import { reportRepository } from "../repositories";
@@ -27,7 +32,9 @@ function isVerifiedSlackSignature(
   return timingSafeEqual(expectedBuffer, signatureBuffer);
 }
 
-async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
+async function handleRatingAction(
+  payload: SlackInteractionPayload,
+): Promise<void> {
   const { actions, user, message, channel } = payload;
   const actionId = actions[0].action_id;
 
@@ -55,7 +62,7 @@ async function handleRatingAction(payload: SlackRatingPayload): Promise<void> {
   );
 }
 
-export async function slackRatingHandler(c: Context) {
+export async function slackInteractionHandler(c: Context) {
   let rawBody: string;
 
   try {
@@ -87,11 +94,39 @@ export async function slackRatingHandler(c: Context) {
     return c.json({ error: "invalid-payload" }, 400);
   }
 
-  const parsedPayload = slackRatingPayloadSchema.safeParse(payloadJson);
+  const parsedPayload = slackInteractionPayloadSchema.safeParse(payloadJson);
   if (!parsedPayload.success) {
     return c.json({ error: "invalid-payload" }, 400);
   }
+  // Ack within 3s; run the action in the background (best-effort, logs its own errors).
+  const mastra = c.get("mastra") as Mastra;
+  void dispatchAction(parsedPayload.data, mastra).catch((err) =>
+    console.error("slackInteractionHandler: action failed", {
+      actionId: parsedPayload.data.actions[0].action_id,
+      err,
+    }),
+  );
 
-  await handleRatingAction(parsedPayload.data);
+  // await handleRatingAction(parsedPayload.data);
   return c.json({}, 200);
+}
+
+async function dispatchAction(
+  payload: SlackInteractionPayload,
+  mastra: Mastra,
+): Promise<void> {
+  const { action_id, value } = payload.actions[0];
+  switch (action_id) {
+    case "positive_rating":
+    case "negative_rating":
+      return handleRatingAction(payload);
+    case "incident_close":
+      return handleIncidentClose(value, payload.user.id);
+    case "incident_retry":
+      return handleIncidentRetry(value, mastra);
+    default:
+      console.warn("slackInteractionHandler: unhandled action_id", {
+        action_id,
+      });
+  }
 }

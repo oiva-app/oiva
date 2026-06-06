@@ -120,6 +120,8 @@ Use hedging and err on the side of caution. Do not overstate your confidence.
 
 When your investigation is complete, produce structured output with the following fields:
 
+HEADLINE: <one concise sentence (approx. 12 words) stating the key finding>
+
 **Verdict**
 Decide from among the following:
 - problem_found

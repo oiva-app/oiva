@@ -12,6 +12,9 @@ import {
 } from "@/types/investigation";
 import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
 
+const DEFAULT_PROMPT =
+  "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.";
+
 function extractQueryUrl(toolOutput: unknown): string {
   const parsed = ResourceLinkSchema.safeParse(toolOutput);
   if (!parsed.success) return "";
@@ -19,47 +22,56 @@ function extractQueryUrl(toolOutput: unknown): string {
   const textBlock = parsed.data.content.find(
     (c): c is McpTextContent => c.type === "text",
   );
-  // Metadata section has a line: query_url: "https://ui.honeycomb.io/.../result/..."
-  const match = textBlock?.text.match(/query_url:.+?"(.+?)"/);
-  return match?.[1] ?? "";
+  const text = textBlock?.text;
+  if (!text) return "";
+
+  // Regex must be careful to avoid selecting an adjacent URL, e.g.
+  // '... query_url: null  evil_url: "http://don't select me by accident.com"...'
+  const queryUrl = text.match(/query_url:\s*\\*"(.+?)\\*"/);
+  const traceUrl = text.match(/trace_link:\s*\\*"(.+?)\\*"/);
+  const resultUrl = text.match(/result_url:\s*\\*"(.+?)\\*"/);
+  const bubbleupUrl = text.match(/bubble_up_url:\s*\\*"(.+?)\\*"/);
+  return (
+    queryUrl?.[1] || traceUrl?.[1] || resultUrl?.[1] || bubbleupUrl?.[1] || ""
+  );
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Additional properties to be added to the wrapped tool
-
-const questionProperty = {
-  type: "string",
-  description:
-    // REMEMBER: the description is passed to the LLM.
-    // Changing the description may change agent behavior.
-    "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.",
-} as const;
-
-/*
-Todo: refactor to make function pure, remove closure, and accept multiple properties (not just one)
-*/
-function wrapInputSchema(
-  inputSchema: StandardSchemaWithJSON | undefined,
-): JSONSchema7 {
-  const baseJson: JSONSchema7 = inputSchema
-    ? (standardSchemaToJSONSchema(inputSchema) as JSONSchema7)
-    : { type: "object", properties: {} };
-
-  return {
-    ...baseJson,
-    type: "object",
-    properties: { ...baseJson.properties, question: questionProperty },
-    required: [...(baseJson.required ?? []), "question"],
-  };
-}
-///////////////////////////////////////////////////////////////////////////////
 
 /**
-  Remember: the investigationTrace is NOT OTel instrumentation
+  Returns a 'wrapped' MCP tool in order to add the 
+  tool-use intent to the investigationTrace
+
+  Remember: the investigationTrace is NOT OTel instrumentation!
+  @param tool the tool you wish to wrap
+  @param toolUseIntent LLM prompt used to generate the toolUseIntent description
  */
 export function investigationToolWrapper<T extends Record<string, any>, K>(
   tool: Tool<T, K>,
+  toolUseIntent: string = DEFAULT_PROMPT,
 ) {
+  /*
+  Todo: refactor to make function pure, remove closure, and accept multiple properties (not just one)
+  */
+  function wrapInputSchema(
+    inputSchema: StandardSchemaWithJSON | undefined,
+  ): JSONSchema7 {
+    const baseJson: JSONSchema7 = inputSchema
+      ? (standardSchemaToJSONSchema(inputSchema) as JSONSchema7)
+      : { type: "object", properties: {} };
+
+    return {
+      ...baseJson,
+      type: "object",
+      properties: {
+        ...baseJson.properties,
+        toolUseIntent: {
+          type: "string",
+          description: toolUseIntent,
+        },
+      },
+      required: [...(baseJson.required ?? []), "toolUseIntent"],
+    };
+  }
+
   const inputSchema: JSONSchema7 = wrapInputSchema(tool.inputSchema);
 
   return createTool({
@@ -83,12 +95,12 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
             toolDescription: tool.description,
           },
           input: toolInput,
-          metadata: { toolId: tool.id, question },
+          metadata: { toolId: tool.id, toolUseIntent },
         });
       }
 
       // Extract the wrapper-only field(s) before handing off to the real tool
-      const { question, ...toolInput } = inputData as any;
+      const { toolUseIntent, ...toolInput } = inputData as any;
 
       try {
         const investigationTrace = getInvestigationTrace();
@@ -102,7 +114,7 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
 
           const toolTrace = investigationToolCallSchema.parse({
             toolName: tool.id,
-            question,
+            toolUseIntent,
             toolInput,
             toolOutput,
             error: false,
@@ -142,4 +154,23 @@ export function investigationToolWrapper<T extends Record<string, any>, K>(
       }
     },
   });
+}
+export function wrapTools(
+  tools: Record<string, Tool<any, any> | undefined>,
+  toolUseIntent: string = DEFAULT_PROMPT,
+) {
+  const wrappedTools: Record<
+    string,
+    ReturnType<typeof investigationToolWrapper>
+  > = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    if (!tool) {
+      console.warn(
+        `[wrapTools] skipping wrap: "${key}" not provided by the tool source`,
+      );
+      continue;
+    }
+    wrappedTools[key] = investigationToolWrapper(tool, toolUseIntent);
+  }
+  return wrappedTools;
 }

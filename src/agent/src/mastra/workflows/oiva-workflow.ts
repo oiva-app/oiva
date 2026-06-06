@@ -3,14 +3,12 @@ import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
 import { alertContextSchema } from "../types/alert-context";
-import { investigationTraceSchema, supervisorAgentOutputSchema } from "../types/investigation";
-import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import {
-  postReportSummary,
-  uploadFileToThread,
-  postErrorMessage,
-  postErrorToThread,
-} from "../slack/client";
+  investigationTraceSchema,
+  supervisorAgentOutputSchema,
+} from "../types/investigation";
+import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
+import { progressReporter } from "@/slack";
 import { formatInvestigationSteps } from "../slack/formatters";
 import {
   alertRepository,
@@ -19,7 +17,9 @@ import {
 } from "../repositories";
 import { assertTransition } from "../domain/incident-state";
 import { incidentDurationMs } from "../domain/incident-duration";
+import { threadIdForIncident } from "../domain/incident-thread";
 import type { IncidentStatus } from "../ports/incident-repository";
+import { failIncident as failIncidentService } from "../services/incident-service";
 import { env } from "../config/env";
 import {
   cleanupCodebaseAgentWorkspace,
@@ -43,7 +43,7 @@ const oivaWorkflowInputSchema = z.object({
 const oivaWorkflowStateSchema = z.object({
   incidentId: z.uuid().optional(),
   alertContext: alertContextSchema.optional(),
-  investigationTrace: investigationTraceSchema.default([])
+  investigationTrace: investigationTraceSchema.default([]),
 });
 
 const RESOURCE_ID = `${env.OBSERVED_APP_NAME}:investigation`;
@@ -66,7 +66,32 @@ async function transitionIncident(
   }
   assertTransition(incident.status, to);
   await incidentRepository.updateStatus(incident.id, to);
+  await progressReporter.statusChanged(incidentId, to);
 }
+
+function failureReason(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+async function failIncident(incidentId: string, reason: string): Promise<void> {
+  await failIncidentService(incidentId, reason, {
+    incidents: incidentRepository,
+    reporter: progressReporter,
+  });
+}
+
+const announce = createStep({
+  id: "announce",
+  stateSchema: oivaWorkflowStateSchema,
+  inputSchema: oivaWorkflowInputSchema,
+  outputSchema: oivaWorkflowInputSchema,
+  execute: async ({ inputData }) => {
+    const { incidentId, alertContext } = inputData;
+
+    await progressReporter.incidentOpened(incidentId, alertContext);
+    return inputData;
+  },
+});
 
 const investigate = createStep({
   id: "investigate",
@@ -75,7 +100,7 @@ const investigate = createStep({
   outputSchema: supervisorAgentOutputSchema,
   execute: async ({ inputData, mastra, setState }) => {
     const { incidentId, alertContext } = inputData;
-    const threadId = `incident:${incidentId}`;
+    const threadId = threadIdForIncident(incidentId);
     const requestContext = new RequestContext();
     requestContext.set("incidentId", incidentId);
     requestContext.set("alertContext", alertContext);
@@ -114,6 +139,9 @@ const investigate = createStep({
       });
 
       return response.object;
+    } catch (err) {
+      await failIncident(incidentId, failureReason(err));
+      throw err;
     } finally {
       try {
         const memory = await supervisorAgent.getMemory();
@@ -164,11 +192,10 @@ const generateReport = createStep({
       if (!response.object) {
         throw new Error("generateReport: invalid agent output");
       }
-    } catch (e) {
-      console.error(e);
-      await postErrorMessage(state.alertContext);
-      // TODO: mark incident row as failed (no report row will be created)? how to handle?
-      throw e;
+    } catch (err) {
+      console.error(err);
+      await failIncident(state.incidentId, failureReason(err));
+      throw err;
     }
 
     const report = response.object;
@@ -184,7 +211,7 @@ const generateReport = createStep({
       });
     } catch (err) {
       console.error("generateReport: failed to insert report", err);
-      await postErrorMessage(state.alertContext);
+      await failIncident(state.incidentId, failureReason(err));
       throw err;
     }
 
@@ -195,7 +222,12 @@ const generateReport = createStep({
 
     await transitionIncident(state.incidentId, "report_generated");
 
-    return { id: persistedReport.id, durationMs, ...report, investigationSteps };
+    return {
+      id: persistedReport.id,
+      durationMs,
+      ...report,
+      investigationSteps,
+    };
   },
 });
 
@@ -211,34 +243,30 @@ const sendReportToSlack = createStep({
       );
     }
 
+    const incidentId = state.incidentId;
     const resultUrl = state.alertContext.resultUrl;
-    const threadData = await postReportSummary(inputData, resultUrl);
-    const { ts, channel } = threadData;
 
-    try {
-      await reportRepository.attachSlackMessage(inputData.id, {
-        slackMessageId: ts,
-        slackChannelId: channel,
-      });
-    } catch (err) {
-      console.error("sendReportToSlack: failed to persist slack ids", {
-        reportId: inputData.id,
-        ts,
-        err,
-      });
+    await transitionIncident(incidentId, "report_delivered");
+
+    await progressReporter.reportReady(incidentId, inputData, resultUrl);
+    await progressReporter.attachReportFile(incidentId, inputData);
+
+    const incident = await incidentRepository.findById(incidentId);
+    if (incident?.slackThreadTs && incident.slackChannelId) {
+      try {
+        await reportRepository.attachSlackMessage(inputData.id, {
+          slackMessageId: incident.slackThreadTs,
+          slackChannelId: incident.slackChannelId,
+        });
+      } catch (err) {
+        console.error("sendReportToSlack: failed to persist slack ids", {
+          reportId: inputData.id,
+          err,
+        });
+      }
     }
 
-    try {
-      await uploadFileToThread(ts, inputData);
-      console.log(`Full report uploaded to thread, ts: ${ts}`);
-    } catch (e) {
-      console.error(e);
-      await postErrorToThread(ts);
-    }
-
-    await transitionIncident(state.incidentId, "report_delivered");
-
-    return ts;
+    return incident?.slackThreadTs ?? "";
   },
 });
 
@@ -248,6 +276,7 @@ export const oivaWorkflow = createWorkflow({
   inputSchema: oivaWorkflowInputSchema,
   outputSchema: z.string(),
 })
+  .then(announce)
   .then(investigate)
   .then(generateReport)
   .then(sendReportToSlack)

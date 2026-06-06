@@ -11,7 +11,8 @@
     "start": "mastra start",
     "start:prod": "node .mastra/output/index.mjs",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:migrate:prod": "node dist/scripts/migrate.js"
+    "db:migrate:prod": "node dist/scripts/migrate.js",
+    "reap": "tsx scripts/cleanup-reap.ts"
   },
   "keywords": [],
   "author": "",
