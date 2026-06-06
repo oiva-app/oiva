@@ -5,7 +5,6 @@ import {
   renderFullReportMarkdown,
   buildRatingConfirmationBlock,
   buildIncidentPhaseBlock,
-  buildIncidentHeaderBlocks,
   buildActivityLogBlock,
   buildAttachCounterBlock,
   buildIncidentFailedBlocks,
@@ -332,13 +331,12 @@ describe("buildRatingConfirmationBlock", () => {
 });
 
 describe("incident root message blocks", () => {
-  it("phase block renders short incident id + phase per status", () => {
-    const block = buildIncidentPhaseBlock(
-      "a1b2c3d4-0000-0000-0000-000000000000",
-      "investigating",
-    );
+  it("phase block renders the full incident id + phase per status", () => {
+    const id = "a1b2c3d4-0000-0000-0000-000000000000";
+    const block = buildIncidentPhaseBlock(id, "investigating");
     expect(block.type).toBe("section");
-    expect(JSON.stringify(block)).toContain("Incident #a1b2c3d4");
+    // Full id, monospace, so it's an exact-matchable copy target.
+    expect(JSON.stringify(block)).toContain(`\`${id}\``);
     expect(JSON.stringify(block)).toContain("Investigation in progress");
   });
 
@@ -347,16 +345,13 @@ describe("incident root message blocks", () => {
     expect(JSON.stringify(block)).toContain("Report ready");
   });
 
-  it("phase block prefixes a glyph for terminal states only", () => {
+  it("phase block prefixes a glyph for the failed state only", () => {
     expect(
       JSON.stringify(buildIncidentPhaseBlock("a1b2c3d4-xxxx", "investigating")),
-    ).not.toMatch(/⚠️|🔒/);
+    ).not.toMatch(/⚠️/);
     expect(
       JSON.stringify(buildIncidentPhaseBlock("a1b2c3d4-xxxx", "failed")),
     ).toContain("⚠️");
-    expect(
-      JSON.stringify(buildIncidentPhaseBlock("a1b2c3d4-xxxx", "closed")),
-    ).toContain("🔒");
   });
 
   it("renders a still-pending task as a spinner, or interrupted once terminal", () => {
@@ -428,15 +423,7 @@ describe("incident root message blocks", () => {
     expect(actionIds).toContain("incident_close");
   });
 
-  it("failed render omits actions when includeActions is false", () => {
-    const blocks = buildIncidentFailedBlocks("torn down", "inc_123", {
-      includeActions: false,
-    });
-    expect(blocks.find((b) => b.type === "actions")).toBeUndefined();
-    expect(JSON.stringify(blocks)).toContain("torn down");
-  });
-
-  it("closed render reconciles spinners, drops actions, adds attribution", () => {
+  it("failed render flips the header, reconciles spinners, keeps actions", () => {
     const baseAlert = {
       triggerName: "checkout-latency",
       description: "p99 over 2s",
@@ -447,7 +434,7 @@ describe("incident root message blocks", () => {
 
     const blocks = buildIncidentMessageBlocks(
       {
-        status: "closed",
+        status: "failed",
         alert: baseAlert,
         log: [
           { kind: "milestone", label: "Alert verified" },
@@ -455,25 +442,25 @@ describe("incident root message blocks", () => {
         ],
         attachCount: 0,
         failure: { reason: "reaper: stuck in investigating past deadline" },
-        closedBy: { kind: "reaper" },
       },
       "inc_123",
     );
     const rendered = JSON.stringify(blocks);
-    expect(rendered).toContain("🔒"); // closed phase header
+    expect(rendered).toContain("⚠️"); // failed phase header
     expect(rendered).toContain("❌ Investigating telemetry - interrupted");
-    expect(rendered).not.toContain("incident_retry"); // actions dropped
-    expect(rendered).toContain("Auto-closed"); // attribution
+    expect(rendered).toContain("incident_retry"); // Retry stays on a failed card
   });
 
-  it("closed attribution distinguishes user vs reaper", () => {
+  it("closed attribution carries a lock for both user and reaper", () => {
     const user = buildIncidentClosedAttributionBlock({
       kind: "user",
       userId: "U123",
     });
+    expect(JSON.stringify(user)).toContain("🔒");
     expect(JSON.stringify(user)).toContain("<@U123>");
     const reaper = buildIncidentClosedAttributionBlock({ kind: "reaper" });
     expect(JSON.stringify(reaper)).toContain("🔒");
+    expect(JSON.stringify(reaper)).toContain("Auto-closed");
   });
 
   it("orchestrator: alert header replaced by report summary once report present", () => {

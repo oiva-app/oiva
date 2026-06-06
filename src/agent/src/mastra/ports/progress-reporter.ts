@@ -76,10 +76,11 @@ export interface ProgressReporter {
     failure: { reason: string },
   ): Promise<void>;
   /**
-   * Render the closed state. For `by.kind === "user"` the root message is
-   * updated in place (controls stripped, attribution added); for
-   * `by.kind === "reaper"` the adapter posts a threaded reply instead, since
-   * the reaper runs cold with no in-memory render state (Option A).
+   * Surface that the incident was closed. Both closers — `by.kind === "user"`
+   * and `by.kind === "reaper"` — are handled the same way: a threaded reply with
+   * attribution, leaving the root message as it last rendered. (The activity log
+   * is in-memory only, so a cold reaper run couldn't rebuild the root anyway;
+   * keeping both paths to a reply keeps the close notification consistent.)
    */
   incidentClosed(incidentId: string, by: ClosedBy): Promise<void>;
 }

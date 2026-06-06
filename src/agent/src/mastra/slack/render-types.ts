@@ -1,7 +1,6 @@
 import type { AlertContext } from "../types/alert-context";
 import type { IncidentReport } from "../types/report";
 import type { IncidentStatus } from "../ports/incident-repository";
-import type { ClosedBy } from "../ports/progress-reporter";
 
 export type ActivityLogEntry =
   | { kind: "milestone"; label: string }
@@ -21,5 +20,4 @@ export interface IncidentRenderInputs {
   attachCount: number;
   report?: { report: IncidentReport; resultUrl: string };
   failure?: { reason: string };
-  closedBy?: ClosedBy;
 }

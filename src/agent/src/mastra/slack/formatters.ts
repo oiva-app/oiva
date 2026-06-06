@@ -200,30 +200,19 @@ export function buildRatingConfirmationBlock(
   };
 }
 
-/**
- * Phase label for the incident header line. Collapses the finer-grained status
- * machine into the user-facing phases of the live card.
- */
 const PHASE_LABELS: Record<IncidentStatus, string> = {
   triggered: "Investigation in progress",
   investigating: "Investigation in progress",
-  report_in_process: "Investigation in progress",
+  report_in_process: "Writing report",
   report_generated: "Report ready",
   report_delivered: "Report ready",
   failed: "Investigation failed",
   closed: "Closed",
 };
 
-/** Leading glyph for terminal phases only; running phases stay text-only. */
 const PHASE_GLYPHS: Partial<Record<IncidentStatus, string>> = {
   failed: "⚠️ ",
-  closed: "🔒 ",
 };
-
-/** First segment of the incident UUID — a short, readable handle. */
-function shortIncidentId(incidentId: string): string {
-  return incidentId.slice(0, 8);
-}
 
 const HEADER_TEXT_LIMIT = 150;
 
@@ -240,7 +229,7 @@ export function buildIncidentPhaseBlock(
     type: "section",
     text: {
       type: "mrkdwn",
-      text: `*${PHASE_GLYPHS[status] ?? ""}Incident #${shortIncidentId(incidentId)} — ${PHASE_LABELS[status]}*`,
+      text: `*${PHASE_GLYPHS[status] ?? ""}Incident* \`${incidentId}\` — *${PHASE_LABELS[status]}*`,
     },
   };
 }
@@ -280,12 +269,6 @@ export function buildIncidentHeaderBlocks(
   ];
 }
 
-/**
- * Present/past phrasing per task key. The activity log carries a stable key
- * (e.g. "telemetry-agent") so the same task can read "Investigating telemetry…"
- * while in flight and "Investigated telemetry" once done. Unknown keys fall
- * back to the key itself for both tenses.
- */
 const TASK_PHRASING: Record<string, { present: string; past: string }> = {
   "telemetry-agent": {
     present: "Investigating telemetry",
@@ -353,9 +336,8 @@ export function buildAttachCounterBlock(count: number): KnownBlock | null {
 export function buildIncidentFailedBlocks(
   reason: string,
   incidentId: string,
-  opts: { includeActions?: boolean } = {},
 ): (Block | KnownBlock)[] {
-  const blocks: (Block | KnownBlock)[] = [
+  return [
     {
       type: "section",
       text: {
@@ -363,12 +345,7 @@ export function buildIncidentFailedBlocks(
         text: `*Investigation failed*\n${toMrkdwn(reason)}`,
       },
     },
-  ];
-
-  // Retry/Close are moot once the incident is closed, so the closed render
-  // drops them.
-  if (opts.includeActions !== false) {
-    blocks.push({
+    {
       type: "actions",
       elements: [
         {
@@ -385,16 +362,14 @@ export function buildIncidentFailedBlocks(
           value: incidentId,
         },
       ],
-    });
-  }
-
-  return blocks;
+    },
+  ];
 }
 
 export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
   const text =
     by.kind === "user"
-      ? `Closed by <@${by.userId}>`
+      ? `🔒 Closed by <@${by.userId}>`
       : "🔒 Auto-closed (no activity)";
   return {
     type: "context",
@@ -402,26 +377,15 @@ export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
   };
 }
 
-/**
- * Composition: phase header → activity log → (report summary OR alert header) →
- * attach counter → (failed banner IF failed, with Retry/Close actions unless
- * already closed) → (closed attribution IF closed).
- *
- * A terminal incident (failed or closed) reconciles any still-pending activity
- * line into a failed line rather than a live spinner.
- */
 export function buildIncidentMessageBlocks(
   inputs: IncidentRenderInputs,
   incidentId: string,
 ): (Block | KnownBlock)[] {
-  const closed = inputs.closedBy != null;
-  const interrupted = closed || inputs.failure != null;
-
   const blocks: (Block | KnownBlock)[] = [
     buildIncidentPhaseBlock(incidentId, inputs.status),
   ];
 
-  const activity = buildActivityLogBlock(inputs.log, interrupted);
+  const activity = buildActivityLogBlock(inputs.log, inputs.failure != null);
   if (activity) blocks.push(activity);
 
   blocks.push({ type: "divider" });
@@ -440,14 +404,8 @@ export function buildIncidentMessageBlocks(
   if (inputs.failure) {
     blocks.push(
       { type: "divider" },
-      ...buildIncidentFailedBlocks(inputs.failure.reason, incidentId, {
-        includeActions: !closed,
-      }),
+      ...buildIncidentFailedBlocks(inputs.failure.reason, incidentId),
     );
-  }
-
-  if (inputs.closedBy) {
-    blocks.push(buildIncidentClosedAttributionBlock(inputs.closedBy));
   }
 
   return blocks;

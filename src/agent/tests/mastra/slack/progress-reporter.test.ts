@@ -139,7 +139,7 @@ describe("SlackProgressReporter", () => {
     });
   });
 
-  it("user-close edits the root in place when render state is live", async () => {
+  it("user-close posts a threaded reply with a lock + attribution", async () => {
     const incident = await repo.create();
     mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
     await reporter.incidentOpened(incident.id, alert);
@@ -152,13 +152,13 @@ describe("SlackProgressReporter", () => {
       userId: "U123",
     });
 
-    expect(mockFns.postMessage).not.toHaveBeenCalled();
-    expect(mockFns.update).toHaveBeenCalledTimes(1);
-    const args = mockFns.update.mock.calls[0][0];
-    expect(args).toMatchObject({ channel: "C-default", ts: "T1" });
+    expect(mockFns.update).not.toHaveBeenCalled();
+    expect(mockFns.postMessage).toHaveBeenCalledTimes(1);
+    const args = mockFns.postMessage.mock.calls[0][0];
+    expect(args).toMatchObject({ channel: "C-default", thread_ts: "T1" });
     const rendered = JSON.stringify(args.blocks);
     expect(rendered).toContain("<@U123>");
-    expect(rendered).toContain("🔒"); // closed phase header glyph
+    expect(rendered).toContain("🔒"); // lock on the close reply
   });
 
   describe("safe wrapper", () => {

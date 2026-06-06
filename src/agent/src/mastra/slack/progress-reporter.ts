@@ -197,21 +197,8 @@ export class SlackProgressReporter implements ProgressReporter {
 
   async incidentClosed(incidentId: string, by: ClosedBy): Promise<void> {
     return this.safe("incidentClosed", incidentId, async () => {
-      // Warm path: render state is still live (the common same-process case,
-      // including the in-process reaper). Edit the root in place so dangling
-      // spinners reconcile and the header flips to "Closed", then drop state.
-      const state = this.states.get(incidentId);
-      if (state) {
-        state.status = "closed";
-        state.closedBy = by;
-        await this.flushNow(incidentId);
-        this.dropState(incidentId);
-        return;
-      }
-
-      // Cold fallback (e.g. after a server restart): the activity log lives only
-      // in memory, so there's nothing to rebuild the root from — post a threaded
-      // note instead.
+      // Closing is surfaced the same way regardless of who closed it (user or
+      // reaper): a threaded reply, leaving the root message as it last rendered.
       const persisted = await this.incidents.findById(incidentId);
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
 
@@ -222,6 +209,8 @@ export class SlackProgressReporter implements ProgressReporter {
         fallbackText:
           by.kind === "user" ? "Incident closed" : "Incident auto-closed",
       });
+
+      this.dropState(incidentId);
     });
   }
 
@@ -234,7 +223,6 @@ export class SlackProgressReporter implements ProgressReporter {
     state.attachCount = 0;
     state.report = undefined;
     state.failure = undefined;
-    state.closedBy = undefined;
   }
 
   private scheduleFlush(incidentId: string): void {
@@ -273,7 +261,6 @@ export class SlackProgressReporter implements ProgressReporter {
 
   private fallbackTextFor(state: RenderState): string {
     const trigger = state.alert.triggerName;
-    if (state.closedBy) return `Closed: ${trigger}`;
     if (state.failure) return `Failed: ${trigger}`;
     if (state.report) return `Report ready: ${trigger}`;
     return `Investigating: ${trigger}`;
@@ -297,7 +284,10 @@ export class SlackProgressReporter implements ProgressReporter {
   }
 }
 
-function findLastPendingIndex(log: ActivityLogEntry[], taskKey: string): number {
+function findLastPendingIndex(
+  log: ActivityLogEntry[],
+  taskKey: string,
+): number {
   for (let i = log.length - 1; i >= 0; i--) {
     const e = log[i];
     if (e.kind === "delegationPending" && e.taskKey === taskKey) return i;
