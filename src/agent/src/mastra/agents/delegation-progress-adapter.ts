@@ -29,14 +29,10 @@ export class DelegationProgressTracker {
     const incidentId = this.incidents.get(ctx.toolCallId);
     if (!incidentId) return;
     this.incidents.delete(ctx.toolCallId);
-    await this.reporter.delegationCompleted(
-      incidentId,
-      labelFor(ctx.primitiveId),
-      {
-        durationMs: ctx.duration,
-        success: ctx.success,
-        headline: parseHeadline(ctx.result?.text) ?? ctx.error?.message,
-      },
-    );
+    await this.reporter.delegationCompleted(incidentId, ctx.primitiveId, {
+      durationMs: ctx.duration,
+      success: ctx.success,
+      headline: parseHeadline(ctx.result?.text) ?? ctx.error?.message,
+    });
   }
 }
