@@ -35,6 +35,9 @@ import {
 } from "./workflows/alert-enrich";
 import { testAgent } from "./agents/test-agent";
 import { startCleanupReaper } from "./services/cleanup-service-scheduler";
+import { installShutdownSignalHandlers } from "./services/shutdown-state";
+
+installShutdownSignalHandlers();
 
 export const mastra = new Mastra({
   workflows: {

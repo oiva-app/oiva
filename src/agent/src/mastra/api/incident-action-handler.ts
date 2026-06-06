@@ -5,6 +5,7 @@ import { progressReporter } from "../slack";
 import { normalizeAlert } from "../adapters/honeycomb-adapter";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import type { AlertContext } from "../types/alert-context";
+import { isShuttingDown } from "../services/shutdown-state";
 
 export async function handleIncidentClose(
   incidentId: string,
@@ -50,6 +51,14 @@ async function dispatchInvestigation(
   incidentId: string,
   alertContext: AlertContext,
 ): Promise<void> {
+  if (isShuttingDown()) {
+    mastra.getLogger().warn("retry workflow dispatch skipped", {
+      incidentId,
+      reason: "shutting-down",
+    });
+    return;
+  }
+
   const run = await mastra.getWorkflow("oivaWorkflow").createRun();
   void run
     .start({ inputData: { incidentId, alertContext } })
