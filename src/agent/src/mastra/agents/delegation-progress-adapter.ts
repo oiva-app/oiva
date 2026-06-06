@@ -33,7 +33,7 @@ export class DelegationProgressTracker {
     primitiveId: string;
     duration: number;
     success: boolean;
-    result: { text: string };
+    result?: { text: string };
     error?: Error;
   }): Promise<void> {
     const incidentId = this.incidents.get(ctx.toolCallId);
@@ -45,7 +45,7 @@ export class DelegationProgressTracker {
       {
         durationMs: ctx.duration,
         success: ctx.success,
-        headline: parseHeadline(ctx.result.text) ?? ctx.error?.message,
+        headline: parseHeadline(ctx.result?.text) ?? ctx.error?.message,
       },
     );
   }
