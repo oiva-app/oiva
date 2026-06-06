@@ -27,7 +27,7 @@ export const codebaseAgent: SubAgent = new Agent({
     },
   }),
   inputProcessors: [
-     new ToolCallFilter({
+    new ToolCallFilter({
       filterAfterToolSteps: 8,
       preserveModelOutput: true,
     }),
