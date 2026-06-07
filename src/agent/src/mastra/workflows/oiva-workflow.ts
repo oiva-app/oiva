@@ -262,20 +262,6 @@ const sendReportToSlack = createStep({
     await progressReporter.attachReportFile(incidentId, inputData);
 
     const incident = await incidentRepository.findById(incidentId);
-    if (incident?.slackThreadTs && incident.slackChannelId) {
-      try {
-        await reportRepository.attachSlackMessage(inputData.id, {
-          slackMessageId: incident.slackThreadTs,
-          slackChannelId: incident.slackChannelId,
-        });
-      } catch (err) {
-        console.error("sendReportToSlack: failed to persist slack ids", {
-          reportId: inputData.id,
-          err,
-        });
-      }
-    }
-
     return incident?.slackThreadTs ?? "";
   },
 });
