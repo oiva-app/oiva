@@ -1,0 +1,214 @@
+variable "deployment_name" {
+  description = "Short lowercase name used to name Oiva AWS resources."
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region where Oiva will run."
+  type        = string
+}
+
+variable "agent_image" {
+  description = "Container image URI for the oiva-agent container."
+  type        = string
+}
+
+variable "domain_name" {
+  description = "Full public DNS name for the Oiva service, such as oiva.example.com."
+  type        = string
+}
+
+variable "hosted_zone_id" {
+  description = "Route 53 hosted zone ID for DNS records and ACM validation."
+  type        = string
+  default     = null
+}
+
+variable "create_route53_record" {
+  description = "Whether Terraform should create the Route 53 alias record for domain_name."
+  type        = bool
+  default     = true
+}
+
+variable "certificate_arn" {
+  description = "Existing ACM certificate ARN. Required when create_route53_record is false."
+  type        = string
+  default     = null
+}
+
+variable "create_vpc" {
+  description = "Whether Terraform should create a dedicated VPC, subnets, routes, and NAT Gateway."
+  type        = bool
+  default     = true
+}
+
+variable "vpc_id" {
+  description = "Existing VPC ID when create_vpc is false."
+  type        = string
+  default     = null
+}
+
+variable "public_subnet_ids" {
+  description = "Existing public subnet IDs for the ALB when create_vpc is false."
+  type        = list(string)
+  default     = []
+}
+
+variable "private_subnet_ids" {
+  description = "Existing private subnet IDs for ECS and RDS when create_vpc is false."
+  type        = list(string)
+  default     = []
+}
+
+variable "observed_app_name" {
+  description = "Name of the app Oiva observes."
+  type        = string
+}
+
+variable "app_github_https_url" {
+  description = "HTTPS URL of the GitHub repo Oiva should inspect."
+  type        = string
+}
+
+variable "slack_channel_id" {
+  description = "Slack channel ID where Oiva posts investigation updates and reports."
+  type        = string
+}
+
+variable "task_cpu" {
+  description = "Fargate task CPU units."
+  type        = number
+  default     = 1024
+}
+
+variable "task_memory" {
+  description = "Fargate task memory in MiB."
+  type        = number
+  default     = 2048
+}
+
+variable "ephemeral_storage_gib" {
+  description = "Fargate task ephemeral storage size in GiB."
+  type        = number
+  default     = 50
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "CloudWatch log retention in days."
+  type        = number
+  default     = 30
+}
+
+variable "postgres_instance_class" {
+  description = "RDS Postgres instance class."
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "postgres_allocated_storage" {
+  description = "RDS allocated storage in GiB."
+  type        = number
+  default     = 20
+}
+
+variable "postgres_backup_retention" {
+  description = "RDS backup retention period in days."
+  type        = number
+  default     = 7
+}
+
+variable "create_knowledge_base_bucket" {
+  description = "Whether Terraform should create a private knowledge-base S3 bucket."
+  type        = bool
+  default     = true
+}
+
+variable "knowledge_base_s3_bucket" {
+  description = "Existing knowledge-base S3 bucket name when create_knowledge_base_bucket is false."
+  type        = string
+  default     = null
+}
+
+variable "knowledge_base_s3_prefix" {
+  description = "S3 prefix containing Oiva knowledge-base files."
+  type        = string
+  default     = ""
+}
+
+variable "knowledge_base_force_destroy" {
+  description = "Whether Terraform may delete the managed knowledge-base bucket even when it contains objects."
+  type        = bool
+  default     = true
+}
+
+variable "supervisor_max_steps" {
+  description = "Maximum supervisor agent steps."
+  type        = number
+  default     = 30
+}
+
+variable "subagent_max_steps" {
+  description = "Maximum subagent steps."
+  type        = number
+  default     = 20
+}
+
+variable "telemetry_max_steps" {
+  description = "Maximum telemetry agent steps."
+  type        = number
+  default     = 20
+}
+
+variable "codebase_max_steps" {
+  description = "Maximum codebase agent steps."
+  type        = number
+  default     = 20
+}
+
+variable "correlation_window_minutes" {
+  description = "Correlation window for incident grouping."
+  type        = number
+  default     = 30
+}
+
+variable "openai_api_key_secret_arn" {
+  description = "Existing Secrets Manager ARN for OPENAI_API_KEY."
+  type        = string
+  default     = null
+}
+
+variable "hc_mcp_key_secret_arn" {
+  description = "Existing Secrets Manager ARN for HC_MCP_KEY."
+  type        = string
+  default     = null
+}
+
+variable "hc_shared_secret_secret_arn" {
+  description = "Existing Secrets Manager ARN for HC_SHARED_SECRET."
+  type        = string
+  default     = null
+}
+
+variable "github_pat_secret_arn" {
+  description = "Existing Secrets Manager ARN for GITHUB_PAT."
+  type        = string
+  default     = null
+}
+
+variable "slack_bot_token_secret_arn" {
+  description = "Existing Secrets Manager ARN for SLACK_BOT_TOKEN."
+  type        = string
+  default     = null
+}
+
+variable "slack_signing_secret_secret_arn" {
+  description = "Existing Secrets Manager ARN for SLACK_SIGNING_SECRET."
+  type        = string
+  default     = null
+}
+
+variable "honeycomb_api_key_secret_arn" {
+  description = "Existing Secrets Manager ARN for HONEYCOMB_API_KEY."
+  type        = string
+  default     = null
+}

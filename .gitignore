@@ -177,3 +177,11 @@ SKILL.md
 src/agent/src/mastra/public/reports/
 
 scratch-docs/
+
+# Terraform local state and local variable files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!.tfvars.example
