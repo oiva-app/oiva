@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildSummaryBlocks,
+  buildReportBlocks,
   buildErrorBlocks,
   renderFullReportMarkdown,
   buildRatingConfirmationBlock,
@@ -20,6 +20,22 @@ import type {
 } from "../../../src/mastra/slack/render-types";
 import type { InvestigationStep } from "../../../src/mastra/types/investigation";
 
+const mockNextStep = {
+  action:
+    "Use Honeycomb to isolate the 502 period for POST /api/orders and break it down by upstream.reachable, upstream.status, http.host, and user_agent.",
+  rationale:
+    "Narrows whether the failures originated upstream or inside the gateway itself.",
+  priority: "immediate" as const,
+};
+
+const mockInvestigationStep: InvestigationStep = {
+  toolName: "honeycomb_get_query_results",
+  toolUseIntent: "Inspect alert query metadata for anomaly window",
+  queryUrl:
+    "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/result/HwVZ4E1hbwr",
+  error: false,
+};
+
 const mockReport: IncidentReport = {
   id: "d5f259b7-a84e-4ece-9659-8dec496c03af",
   durationMs: null,
@@ -28,12 +44,19 @@ const mockReport: IncidentReport = {
     "Over a 24-hour period, the gateway in the homelab environment experienced repeated HTTP errors for POST /api/orders, indicating a potential issue with the upstream service rather than a gateway internal fault.",
   alertOverview:
     "The alert monitors HTTP status requests, notifying when there are excessive 400 or 500 level errors. In this instance, the count exceeded expected thresholds for the /api/orders route. The alert was triggered at 2026-05-22T00:00:00Z, affecting the gateway dataset. The groups triggered included the HTTP route /api/orders. [View in Honeycomb](https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/result/4cyiskbS8py/a/Aox3eDb6T5i?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook).",
-  hypothesis:
-    "The most likely cause is instability or incorrect behavior in the upstream path behind the gateway's /api/orders route. *Note: no recent deployments found.* **Key finding:** upstream returned 502s.",
-  findings: "_Relevant raw findings not yet available._",
-  nextSteps:
-    "**Immediate**\n- Use Honeycomb to isolate the 502 period for POST /api/orders and break it down by upstream.reachable, upstream.status, http.host, and user_agent.",
-  investigationSteps: "_Investigation trace not yet available._",
+  hypothesis: {
+    paragraph:
+      "The most likely cause is instability or incorrect behavior in the upstream path behind the gateway's /api/orders route. *Note: no recent deployments found.* **Key finding:** upstream returned 502s.",
+    evidenceFor: [
+      "Telemetry: 249 error spans out of 3436 in the alert window (7.25%).",
+      "Codebase: `services/gateway/src/http/routes.ts` converts upstream errors into HTTP 502.",
+    ],
+    evidenceAgainst: [
+      "Codebase: the `POST /api/orders` route is explicitly defined, so not a routing miss.",
+    ],
+  },
+  nextSteps: [mockNextStep],
+  investigationSteps: [mockInvestigationStep],
 };
 
 const mockAlertContext: AlertContext = {
@@ -53,9 +76,27 @@ const mockAlertContext: AlertContext = {
   instanceId: "534bcf91-8070-41ec-808b-abe472a239e7",
 };
 
-describe("buildSummaryBlocks", () => {
+describe("buildReportBlocks", () => {
+  type TextBlock = { type: string; text: { text: string } };
+  const sectionContaining = (
+    blocks: ReturnType<typeof buildReportBlocks>,
+    marker: string,
+  ): TextBlock =>
+    blocks.find(
+      (b) =>
+        b.type === "section" &&
+        (b as TextBlock).text?.text?.includes(marker),
+    ) as TextBlock;
+  const richTextContaining = (
+    blocks: ReturnType<typeof buildReportBlocks>,
+    marker: string,
+  ) =>
+    blocks.find(
+      (b) => b.type === "rich_text" && JSON.stringify(b).includes(marker),
+    );
+
   it("sets the report title as the header text", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
+    const blocks = buildReportBlocks(mockReport);
     expect(blocks[0]).toEqual({
       type: "header",
       text: { type: "plain_text", text: mockReport.title, emoji: false },
@@ -63,8 +104,8 @@ describe("buildSummaryBlocks", () => {
   });
 
   it("uses report.id as the value for both rating buttons", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const actions = blocks[10] as {
+    const blocks = buildReportBlocks(mockReport);
+    const actions = blocks.find((b) => b.type === "actions") as {
       type: string;
       elements: { value: string }[];
     };
@@ -72,30 +113,51 @@ describe("buildSummaryBlocks", () => {
     expect(actions.elements[1].value).toBe(mockReport.id);
   });
 
-  it("renders the Honeycomb link with the provided resultUrl", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const linkBlock = blocks[8] as { type: string; text: { text: string } };
-    expect(linkBlock.text.text).toContain(mockAlertContext.resultUrl);
+  it("carries the Honeycomb link inside the alert overview section", () => {
+    const blocks = buildReportBlocks(mockReport);
+    const overview = sectionContaining(blocks, "Alert Overview");
+    // toMrkdwn linkifies [text](url) to Slack's <url|text> form, escaping & -> &amp;.
+    expect(overview.text.text).toContain("result/4cyiskbS8py");
+    expect(overview.text.text).toContain("|View in Honeycomb>");
   });
 
-  it("converts markdown bold to mrkdwn in the next steps section", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const nextStepsBlock = blocks[6] as {
-      type: string;
-      text: { text: string };
-    };
-    expect(nextStepsBlock.text.text).toContain("*Immediate*");
+  it("renders next steps as a priority-grouped rich_text block", () => {
+    const blocks = buildReportBlocks(mockReport);
+    const nextSteps = richTextContaining(blocks, "Next Steps");
+    expect(nextSteps).toBeDefined();
+    const json = JSON.stringify(nextSteps);
+    expect(json).toContain("Immediate");
+    expect(json).toContain(mockNextStep.action);
+    expect(json).toContain(mockNextStep.rationale);
+  });
+
+  it("renders investigation steps as a rich_text list linking the query", () => {
+    const blocks = buildReportBlocks(mockReport);
+    const investigation = richTextContaining(blocks, "Investigation Steps");
+    expect(investigation).toBeDefined();
+    const json = JSON.stringify(investigation);
+    expect(json).toContain(mockInvestigationStep.toolUseIntent);
+    expect(json).toContain(mockInvestigationStep.queryUrl);
   });
 
   it("converts markdown italic to mrkdwn in the hypothesis section", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const hypothesisBlock = blocks[4] as {
-      type: string;
-      text: { text: string };
-    };
-    expect(hypothesisBlock.text.text).toContain(
+    const blocks = buildReportBlocks(mockReport);
+    const hypothesis = sectionContaining(blocks, "Hypothesis");
+    expect(hypothesis.text.text).toContain(
       "_Note: no recent deployments found._",
     );
+  });
+
+  it("renders hypothesis evidence as a rich_text block with inline code", () => {
+    const blocks = buildReportBlocks(mockReport);
+    const evidence = richTextContaining(blocks, "Supporting evidence");
+    expect(evidence).toBeDefined();
+    const json = JSON.stringify(evidence);
+    expect(json).toContain("Against / ruled out");
+    // backtick spans become code-styled text with the backticks stripped
+    expect(json).toContain("services/gateway/src/http/routes.ts");
+    expect(json).toContain('"code":true');
+    expect(json).not.toContain("`services/gateway");
   });
 
   it("converts markdown links to mrkdwn format in the summary section", () => {
@@ -103,11 +165,8 @@ describe("buildSummaryBlocks", () => {
       ...mockReport,
       summary: "See [Honeycomb](https://ui.honeycomb.io/test) for details.",
     };
-    const blocks = buildSummaryBlocks(
-      reportWithLink,
-      mockAlertContext.resultUrl,
-    );
-    const summaryBlock = blocks[2] as { type: string; text: { text: string } };
+    const blocks = buildReportBlocks(reportWithLink);
+    const summaryBlock = blocks[2] as TextBlock;
     expect(summaryBlock.text.text).toContain(
       "<https://ui.honeycomb.io/test|Honeycomb>",
     );
@@ -118,48 +177,36 @@ describe("buildSummaryBlocks", () => {
       ...mockReport,
       summary: "latency < 200ms & errors > threshold",
     };
-    const blocks = buildSummaryBlocks(
-      reportWithSpecialChars,
-      mockAlertContext.resultUrl,
-    );
-    const summaryBlock = blocks[2] as { type: string; text: { text: string } };
+    const blocks = buildReportBlocks(reportWithSpecialChars);
+    const summaryBlock = blocks[2] as TextBlock;
     expect(summaryBlock.text.text).toContain(
       "latency &lt; 200ms &amp; errors &gt; threshold",
     );
   });
 
   it("converts both bold and italic in the same string successfully", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
-    const hypothesisBlock = blocks[4] as {
-      type: string;
-      text: { text: string };
-    };
+    const blocks = buildReportBlocks(mockReport);
+    const hypothesis = sectionContaining(blocks, "Hypothesis");
     // ** -> * (bold) and * -> _ (italic), both preserved in one pass
-    expect(hypothesisBlock.text.text).toContain("*Key finding:*");
-    expect(hypothesisBlock.text.text).toContain(
+    expect(hypothesis.text.text).toContain("*Key finding:*");
+    expect(hypothesis.text.text).toContain(
       "_Note: no recent deployments found._",
     );
   });
 
   it("renders empty string for an empty report field", () => {
-    const blocks = buildSummaryBlocks(
-      { ...mockReport, summary: "" },
-      mockAlertContext.resultUrl,
-    );
-    const summaryBlock = blocks[2] as { type: string; text: { text: string } };
+    const blocks = buildReportBlocks({ ...mockReport, summary: "" });
+    const summaryBlock = blocks[2] as TextBlock;
     expect(summaryBlock.text.text).toBe("");
   });
 
   it("omits the duration context block when durationMs is null", () => {
-    const blocks = buildSummaryBlocks(mockReport, mockAlertContext.resultUrl);
+    const blocks = buildReportBlocks(mockReport);
     expect(JSON.stringify(blocks)).not.toContain("Time to report");
   });
 
   it("includes the duration context block when durationMs is set", () => {
-    const blocks = buildSummaryBlocks(
-      { ...mockReport, durationMs: 65000 },
-      mockAlertContext.resultUrl,
-    );
+    const blocks = buildReportBlocks({ ...mockReport, durationMs: 65000 });
     const contextBlock = blocks[2] as {
       type: string;
       elements: { text: string }[];
@@ -219,7 +266,6 @@ describe("renderFullReportMarkdown", () => {
     expect(markdown).toContain("## Summary");
     expect(markdown).toContain("## Alert Overview");
     expect(markdown).toContain("## Hypothesis");
-    expect(markdown).toContain("## Findings");
     expect(markdown).toContain("## Next Steps");
     expect(markdown).toContain("## Investigation Steps");
   });
@@ -233,10 +279,11 @@ describe("renderFullReportMarkdown", () => {
     const markdown = renderFullReportMarkdown(mockReport);
     expect(markdown).toContain(mockReport.summary);
     expect(markdown).toContain(mockReport.alertOverview);
-    expect(markdown).toContain(mockReport.hypothesis);
-    expect(markdown).toContain(mockReport.findings);
-    expect(markdown).toContain(mockReport.nextSteps);
-    expect(markdown).toContain(mockReport.investigationSteps);
+    expect(markdown).toContain(mockReport.hypothesis.paragraph);
+    expect(markdown).toContain(mockReport.hypothesis.evidenceFor[0]);
+    expect(markdown).toContain(mockNextStep.action);
+    expect(markdown).toContain(mockNextStep.rationale);
+    expect(markdown).toContain(mockInvestigationStep.toolUseIntent);
   });
 });
 

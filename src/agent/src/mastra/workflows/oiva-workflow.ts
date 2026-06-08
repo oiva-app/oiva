@@ -9,7 +9,7 @@ import {
 } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import { progressReporter } from "@/slack";
-import { formatInvestigationSteps } from "../slack/formatters";
+import type { InvestigationStep } from "../types/investigation";
 import {
   alertRepository,
   incidentRepository,
@@ -209,9 +209,14 @@ const generateReport = createStep({
     });
 
     const report = response.object;
-    const investigationSteps = formatInvestigationSteps(
-      state.investigationTrace ?? [],
-    );
+    const investigationSteps: InvestigationStep[] = (
+      state.investigationTrace ?? []
+    ).map((step) => ({
+      toolName: step.toolName,
+      toolUseIntent: step.toolUseIntent,
+      error: step.error,
+      queryUrl: step.queryUrl,
+    }));
 
     let persistedReport;
     try {
@@ -262,20 +267,6 @@ const sendReportToSlack = createStep({
     await progressReporter.attachReportFile(incidentId, inputData);
 
     const incident = await incidentRepository.findById(incidentId);
-    if (incident?.slackThreadTs && incident.slackChannelId) {
-      try {
-        await reportRepository.attachSlackMessage(inputData.id, {
-          slackMessageId: incident.slackThreadTs,
-          slackChannelId: incident.slackChannelId,
-        });
-      } catch (err) {
-        console.error("sendReportToSlack: failed to persist slack ids", {
-          reportId: inputData.id,
-          err,
-        });
-      }
-    }
-
     return incident?.slackThreadTs ?? "";
   },
 });
