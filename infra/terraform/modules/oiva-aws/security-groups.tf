@@ -87,13 +87,3 @@ resource "aws_security_group_rule" "rds_ingress_postgres" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.ecs.id
 }
-
-resource "aws_security_group_rule" "rds_egress_default" {
-  type              = "egress"
-  description       = "Default outbound"
-  security_group_id = aws_security_group.rds.id
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
