@@ -16,6 +16,7 @@ resource "aws_db_instance" "postgres" {
 
   allocated_storage = var.postgres_allocated_storage
   storage_type      = var.postgres_storage_type
+  storage_encrypted = true
 
   db_name  = var.postgres_database_name
   username = var.postgres_username
