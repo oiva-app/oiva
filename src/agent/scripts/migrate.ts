@@ -17,7 +17,11 @@ import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
 import { createPostgresConnectionConfig } from "../src/mastra/config/postgres.js";
-import { createPostgresSslConfig } from "../src/mastra/db/postgres-ssl.js";
+import {
+  createPostgresSslConfig,
+  parsePostgresSslNodeEnv,
+  type PostgresSslNodeEnv,
+} from "../src/mastra/db/postgres-ssl.js";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -38,8 +42,10 @@ if (envPath) {
 }
 
 let postgresConfig: pg.ClientConfig;
+let nodeEnv: PostgresSslNodeEnv;
 try {
   postgresConfig = createPostgresConnectionConfig(process.env);
+  nodeEnv = parsePostgresSslNodeEnv(process.env.NODE_ENV);
 } catch (err) {
   const message = err instanceof Error ? err.message : String(err);
   console.error(message);
@@ -70,7 +76,7 @@ async function connectWithRetry(config: pg.ClientConfig): Promise<pg.Client> {
   for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
     const client = new pg.Client({
       ...config,
-      ssl: createPostgresSslConfig(process.env.NODE_ENV),
+      ssl: createPostgresSslConfig(nodeEnv),
     });
 
     try {
