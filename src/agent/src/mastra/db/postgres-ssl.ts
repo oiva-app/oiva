@@ -2,6 +2,8 @@ import fs from "node:fs";
 
 const RDS_GLOBAL_CA_BUNDLE_PATH = "/etc/ssl/certs/rds-global-bundle.pem";
 
+let caBundle: string | undefined;
+
 export type PostgresSslNodeEnv = "development" | "production";
 
 export function parsePostgresSslNodeEnv(
@@ -18,7 +20,19 @@ export function parsePostgresSslNodeEnv(
 export function createPostgresSslConfig(nodeEnv: PostgresSslNodeEnv) {
   if (nodeEnv !== "production") return undefined;
 
+  if (caBundle === undefined) {
+    try {
+      caBundle = fs.readFileSync(RDS_GLOBAL_CA_BUNDLE_PATH, "utf8");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+
+      throw new Error(
+        `Failed to read RDS CA bundle at ${RDS_GLOBAL_CA_BUNDLE_PATH}. Ensure the file is present in production: ${message}`,
+      );
+    }
+  }
+
   return {
-    ca: fs.readFileSync(RDS_GLOBAL_CA_BUNDLE_PATH, "utf8"),
+    ca: caBundle,
   };
 }
