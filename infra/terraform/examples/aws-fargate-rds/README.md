@@ -35,6 +35,7 @@ terraform apply
 ```
 
 Terraform creates placeholder Secrets Manager secrets unless you provide existing secret ARNs.
+These placeholders intentionally do not include secret values. During the first apply, ECS may try to start the service and fail task provisioning because required secrets do not have current values yet. This is expected until you populate the secrets and force a new deployment.
 
 Populate the secret values after apply. The `secret_arns` output shows the secret IDs to update.
 For the default `deployment_name = "oiva"`, the OpenAI API key placeholder is:

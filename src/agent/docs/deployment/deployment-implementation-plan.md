@@ -196,6 +196,14 @@ Terraform should manage:
 - Security groups.
 - Knowledge-base S3 bucket by default, with an option to use an existing bucket.
 
+Existing VPC caveat:
+
+- The managed VPC path should enable VPC DNS support and hostnames, and ECS tasks should use the VPC's AmazonProvidedDNS / Route 53 Resolver behavior.
+- Security groups do not block DNS queries to or from AmazonProvidedDNS, so the managed VPC path does not need explicit UDP/TCP `53` egress for normal public DNS resolution.
+- When `create_vpc = false`, users can supply VPCs with custom DHCP options, custom DNS servers, Route 53 Resolver forwarding, or stricter network ACLs. That path must document that DNS resolution and private-subnet internet egress are caller responsibilities.
+- For existing VPCs that use custom DNS resolvers, users may need outbound UDP/TCP `53` from ECS task subnets/security groups to the resolver IPs, plus route-table/NAT/firewall rules that allow HTTPS egress to OpenAI, GitHub, Slack, Honeycomb, AWS APIs, and other configured integrations.
+- Do not replace the least-privilege ECS egress rules with allow-all outbound solely to cover custom existing-VPC DNS setups. Prefer documenting the requirement or adding an explicit optional custom-DNS egress input if this becomes a common need.
+
 ### 7. Wire Runtime Config And Secrets
 
 Separate non-secret configuration from secrets.
@@ -233,6 +241,8 @@ DATABASE_URL or database credentials
 Preferred self-hosting behavior:
 
 - Terraform can create empty secret placeholders.
+- Placeholder secrets should not get Terraform-managed dummy versions. Missing secret values should prevent ECS tasks from starting instead of allowing the app to boot with fake credentials.
+- The self-hosting docs should call out that the first `terraform apply` may create an ECS service that fails task provisioning until users populate all required secret values and force a new deployment.
 - Users can populate secrets after `terraform apply`.
 - Advanced users can pass existing secret ARNs.
 
