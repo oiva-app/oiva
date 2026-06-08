@@ -33,7 +33,5 @@ export interface ReportRow {
   incident_id: string;
   generated_at: Date;
   report_json: unknown;
-  slack_message_id: string | null;
-  slack_channel_id: string | null;
   feedback: string | null;
 }
