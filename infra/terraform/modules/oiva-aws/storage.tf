@@ -9,6 +9,16 @@ resource "aws_s3_bucket" "knowledge_base" {
   })
 }
 
+resource "aws_s3_bucket_versioning" "knowledge_base" {
+  count = var.create_knowledge_base_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.knowledge_base[0].id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "knowledge_base" {
   count = var.create_knowledge_base_bucket ? 1 : 0
 
