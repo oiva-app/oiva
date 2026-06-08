@@ -20,6 +20,10 @@ observed_app_name    = "replace-me"
 app_github_https_url = "https://github.com/example/repo"
 slack_channel_id     = "C0123456789"
 
+# --------------------------------------------------------------------------------
+# Optional escape hatches below: defaults are shown, and you can uncomment values
+# to override them or provide ARNs/IDs/names for existing resources.
+
 # Task sizing defaults.
 # task_cpu              = 1024
 # task_memory           = 2048
