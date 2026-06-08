@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import * as z from "zod";
-import { resolvePostgresDatabaseUrl } from "./postgres";
+import { createPostgresConnectionConfig } from "./postgres";
 
 const EnvSchema = z
   .object({
@@ -49,17 +49,11 @@ const EnvSchema = z
     */
     RUN_OIVA_SV_MCP_INTEGRATION_TESTS: z.stringbool().default(false),
 
-    // Postgres connection. DATABASE_URL is supported for compatibility;
-    // split POSTGRES_* variables are preferred for deployment.
+    // Postgres connection. DATABASE_URL is intentionally unsupported; use
+    // split POSTGRES_* variables for local dev and deployment.
     DATABASE_URL: z.preprocess(
       (val) => (val === "" ? undefined : val),
-      z
-        .string()
-        .regex(
-          /^postgres(ql)?:\/\//,
-          "DATABASE_URL must be a postgres:// or postgresql:// connection string",
-        )
-        .optional(),
+      z.string().optional(),
     ),
     POSTGRES_HOST: z.string().optional(),
     POSTGRES_PORT: z.string().optional(),
@@ -100,7 +94,10 @@ const findEnvUpward = (start: string): string | undefined => {
 const rootEnv = findEnvUpward(process.cwd());
 
 if (rootEnv) {
-  dotenv.config({ path: rootEnv });
+  const dotenvResult = dotenv.config({ path: rootEnv });
+  if (dotenvResult.parsed?.NODE_ENV) {
+    process.env.NODE_ENV = dotenvResult.parsed.NODE_ENV;
+  }
 }
 
 /**
@@ -121,16 +118,19 @@ ${Object.entries(parsedEnv.error.flatten().fieldErrors)
   }
 
   try {
+    const { DATABASE_URL: _databaseUrl, ...envWithoutDatabaseUrl } =
+      parsedEnv.data;
+
     return {
-      ...parsedEnv.data,
-      DATABASE_URL: resolvePostgresDatabaseUrl(parsedEnv.data),
+      ...envWithoutDatabaseUrl,
+      POSTGRES_CONFIG: createPostgresConnectionConfig(parsedEnv.data),
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     throw new Error(
       `env.ts -> Invalid env provided.
 The following variables are missing or invalid:
-- DATABASE_URL: ${message}
+- POSTGRES_CONFIG: ${message}
 `,
     );
   }

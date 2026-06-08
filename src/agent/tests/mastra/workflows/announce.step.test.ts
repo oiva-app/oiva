@@ -5,7 +5,13 @@ import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
 // Importing the workflow module pulls in repositories (pg.Pool) and the knowledge-base sync (S3Client) 
 vi.mock("@/config/env", () => ({
   env: {
-    DATABASE_URL: "postgres://test",
+    POSTGRES_CONFIG: {
+      host: "localhost",
+      port: 5432,
+      user: "oiva",
+      password: "password",
+      database: "oiva",
+    },
     AWS_REGION: "us-east-1",
     OBSERVED_APP_NAME: "test-app",
     KNOWLEDGE_BASE_S3_BUCKET: "test-bucket",

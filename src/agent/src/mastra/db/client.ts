@@ -9,7 +9,7 @@ import { env } from "../config/env";
 import { createPostgresSslConfig } from "./postgres-ssl";
 
 export const pool = new pg.Pool({
-  connectionString: env.DATABASE_URL,
+  ...env.POSTGRES_CONFIG,
   ssl: createPostgresSslConfig(env.NODE_ENV),
   max: 10,
 });
