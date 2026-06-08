@@ -34,7 +34,7 @@ type RichInlineText = {
  * Splits a string into rich_text elements, rendering `backtick` spans as inline
  * code. `bold` applies to the non-code text (code spans stay code-styled).
  *
- * The split regex captures `…` spans; with a capturing group, split() keeps the
+ * The split regex with a capturing group: split() keeps the
  * delimiters, yielding alternating plain-text and code chunks (plus the empty
  * strings filtered out below). Unbalanced/empty backticks simply fall through as
  * literal text.
@@ -72,11 +72,6 @@ function toMrkdwn(markdown: string | undefined | null): string {
     .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>");
 }
 
-/**
- * Priority-grouped next steps as a rich_text block: a bold group heading
- * followed by a bulleted list. Each bullet bolds the action and continues
- * inline with its rationale; a blank line separates the priority groups.
- */
 export function buildNextStepsBlock(
   steps: readonly NextStep[],
 ): RichTextBlock | null {
@@ -117,11 +112,6 @@ export function buildNextStepsBlock(
   return { type: "rich_text", elements };
 }
 
-/**
- * The investigation trace as a numbered rich_text list: the step's intent in
- * bold, followed by the tool name (linked to its Honeycomb query when one was
- * captured).
- */
 export function buildInvestigationStepsBlock(
   steps: readonly InvestigationStep[],
 ): RichTextBlock | null {
@@ -154,11 +144,6 @@ export function buildInvestigationStepsBlock(
   };
 }
 
-/**
- * The hypothesis evidence as a rich_text block: a bold "Supporting evidence"
- * heading + bulleted list, then "Against / ruled out" + list, with a blank line
- * between the two groups. The prose paragraph is rendered separately as mrkdwn.
- */
 export function buildHypothesisEvidenceBlock(
   hypothesis: Hypothesis,
 ): RichTextBlock | null {
@@ -295,7 +280,7 @@ export function formatInvestigationSteps(
     .join("\n\n");
 }
 
-/** Priority-grouped next steps as markdown, mirroring the Slack rich_text block. */
+// Next steps as markdown
 export function formatNextSteps(steps: readonly NextStep[]): string {
   if (steps.length === 0) return "_No next steps provided._";
 
@@ -311,7 +296,7 @@ export function formatNextSteps(steps: readonly NextStep[]): string {
   return lines.join("\n");
 }
 
-/** Hypothesis as markdown — prose paragraph + the two evidence lists. */
+// Hypothesis as markdown
 export function formatHypothesis(hypothesis: Hypothesis): string {
   const lines = [hypothesis.paragraph];
   if (hypothesis.evidenceFor.length > 0) {
