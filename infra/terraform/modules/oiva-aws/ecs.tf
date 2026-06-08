@@ -91,11 +91,11 @@ resource "aws_ecs_service" "oiva" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
-  enable_execute_command             = false
-  health_check_grace_period_seconds  = 60
-  wait_for_steady_state              = false
-  enable_ecs_managed_tags            = true
-  propagate_tags                     = "SERVICE"
+  enable_execute_command            = false
+  health_check_grace_period_seconds = 60
+  wait_for_steady_state             = false
+  enable_ecs_managed_tags           = true
+  propagate_tags                    = "SERVICE"
 
   deployment_circuit_breaker {
     enable   = true
