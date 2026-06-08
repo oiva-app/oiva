@@ -1,7 +1,7 @@
 import { WebClient, Block, KnownBlock } from "@slack/web-api";
 import { env } from "../config/env";
 import {
-  buildSummaryBlocks,
+  buildReportBlocks,
   renderFullReportMarkdown,
   buildErrorBlocks,
   buildRatingConfirmationBlock,
@@ -17,9 +17,8 @@ const client = new WebClient(env.SLACK_BOT_TOKEN, {
 
 export async function postReportSummary(
   report: IncidentReport,
-  resultUrl: string,
 ): Promise<SlackThreadData> {
-  const blocks = buildSummaryBlocks(report, resultUrl);
+  const blocks = buildReportBlocks(report);
 
   const result = await client.chat.postMessage({
     channel: env.SLACK_CHANNEL_ID,

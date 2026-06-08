@@ -9,7 +9,7 @@ import {
 } from "../types/investigation";
 import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
 import { progressReporter } from "@/slack";
-import { formatInvestigationSteps } from "../slack/formatters";
+import type { InvestigationStep } from "../types/investigation";
 import {
   alertRepository,
   incidentRepository,
@@ -209,9 +209,14 @@ const generateReport = createStep({
     });
 
     const report = response.object;
-    const investigationSteps = formatInvestigationSteps(
-      state.investigationTrace ?? [],
-    );
+    const investigationSteps: InvestigationStep[] = (
+      state.investigationTrace ?? []
+    ).map((step) => ({
+      toolName: step.toolName,
+      toolUseIntent: step.toolUseIntent,
+      error: step.error,
+      queryUrl: step.queryUrl,
+    }));
 
     let persistedReport;
     try {

@@ -1,11 +1,60 @@
-import type { Block, KnownBlock } from "@slack/web-api";
-import type { IncidentReport } from "../types/report";
+import type {
+  Block,
+  KnownBlock,
+  RichTextBlock,
+  RichTextSection,
+} from "@slack/web-api";
+import type { IncidentReport, Hypothesis } from "../types/report";
 import type { AlertContext } from "../types/alert-context";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
 import type { ClosedBy } from "../ports/progress-reporter";
 import type { IncidentStatus } from "../ports/incident-repository";
-import type { InvestigationStep } from "../types/investigation";
+import type { InvestigationStep, NextStep } from "../types/investigation";
 import { formatDuration } from "../domain/incident-duration";
+
+const NEXT_STEP_GROUPS = [
+  { key: "immediate", label: "Immediate" },
+  { key: "short_term", label: "Short-term" },
+  { key: "follow_up", label: "Follow-up" },
+] as const;
+
+function textEl(text: string, bold = false) {
+  return bold
+    ? ({ type: "text", text, style: { bold: true } } as const)
+    : ({ type: "text", text } as const);
+}
+
+type RichInlineText = {
+  type: "text";
+  text: string;
+  style?: { bold?: boolean; code?: boolean };
+};
+
+/**
+ * Splits a string into rich_text elements, rendering `backtick` spans as inline
+ * code. `bold` applies to the non-code text (code spans stay code-styled).
+ *
+ * The split regex with a capturing group: split() keeps the
+ * delimiters, yielding alternating plain-text and code chunks (plus the empty
+ * strings filtered out below). Unbalanced/empty backticks simply fall through as
+ * literal text.
+ */
+function inlineElements(text: string, bold = false): RichInlineText[] {
+  const parts = text.split(/(`[^`]+`)/g).filter((p) => p !== "");
+  if (parts.length === 0) return [{ type: "text", text }];
+
+  return parts.map((part) => {
+    const isCode =
+      part.length >= 2 && part.startsWith("`") && part.endsWith("`");
+    const content = isCode ? part.slice(1, -1) : part;
+    const style: RichInlineText["style"] = {};
+    if (bold) style.bold = true;
+    if (isCode) style.code = true;
+    return Object.keys(style).length > 0
+      ? { type: "text", text: content, style }
+      : { type: "text", text: content };
+  });
+}
 
 function toMrkdwn(markdown: string | undefined | null): string {
   if (!markdown) return "";
@@ -23,11 +72,116 @@ function toMrkdwn(markdown: string | undefined | null): string {
     .replace(/\[([^\]]+)\]\(((?:[^()]+|\([^()]*\))+)\)/g, "<$2|$1>");
 }
 
-export function buildSummaryBlocks(
+export function buildNextStepsBlock(
+  steps: readonly NextStep[],
+): RichTextBlock | null {
+  if (steps.length === 0) return null;
+
+  const elements: RichTextBlock["elements"] = [
+    { type: "rich_text_section", elements: [textEl("📋 Next Steps", true)] },
+  ];
+
+  let firstGroup = true;
+  for (const { key, label } of NEXT_STEP_GROUPS) {
+    const group = steps.filter((s) => s.priority === key);
+    if (group.length === 0) continue;
+
+    // Blank line before each group heading (after the first) for breathing room.
+    if (!firstGroup) {
+      elements.push({ type: "rich_text_section", elements: [textEl("\n")] });
+    }
+    firstGroup = false;
+
+    elements.push({
+      type: "rich_text_section",
+      elements: [textEl(label, true)],
+    });
+    elements.push({
+      type: "rich_text_list",
+      style: "bullet",
+      elements: group.map((s) => ({
+        type: "rich_text_section" as const,
+        elements: [
+          ...inlineElements(s.action, true),
+          ...inlineElements(` ${s.rationale}`),
+        ],
+      })),
+    });
+  }
+
+  return { type: "rich_text", elements };
+}
+
+export function buildInvestigationStepsBlock(
+  steps: readonly InvestigationStep[],
+): RichTextBlock | null {
+  if (steps.length === 0) return null;
+
+  const items = steps.map((step) => {
+    const elements: RichTextSection["elements"] = [
+      textEl(step.toolUseIntent || step.toolName, true),
+    ];
+    if (step.error) {
+      elements.push(textEl("\n(invalid tool call)"));
+    } else if (step.queryUrl) {
+      elements.push(textEl("\nTool use: "));
+      elements.push({ type: "link", url: step.queryUrl, text: step.toolName });
+    } else {
+      elements.push(textEl(`\nTool use: ${step.toolName}`));
+    }
+    return { type: "rich_text_section" as const, elements };
+  });
+
+  return {
+    type: "rich_text",
+    elements: [
+      {
+        type: "rich_text_section",
+        elements: [textEl("🐾 Investigation Steps", true)],
+      },
+      { type: "rich_text_list", style: "ordered", elements: items },
+    ],
+  };
+}
+
+export function buildHypothesisEvidenceBlock(
+  hypothesis: Hypothesis,
+): RichTextBlock | null {
+  const { evidenceFor, evidenceAgainst } = hypothesis;
+  if (evidenceFor.length === 0 && evidenceAgainst.length === 0) return null;
+
+  const elements: RichTextBlock["elements"] = [];
+
+  const pushGroup = (label: string, items: readonly string[]) => {
+    if (items.length === 0) return;
+    // Blank line between the two groups for breathing room.
+    if (elements.length > 0) {
+      elements.push({ type: "rich_text_section", elements: [textEl("\n")] });
+    }
+    elements.push({
+      type: "rich_text_section",
+      elements: [textEl(label, true)],
+    });
+    elements.push({
+      type: "rich_text_list",
+      style: "bullet",
+      elements: items.map((item) => ({
+        type: "rich_text_section" as const,
+        elements: inlineElements(item),
+      })),
+    });
+  };
+
+  pushGroup("Supporting evidence", evidenceFor);
+  pushGroup("Against / ruled out", evidenceAgainst);
+
+  return { type: "rich_text", elements };
+}
+
+export function buildReportBlocks(
   report: IncidentReport,
-  resultUrl: string,
 ): (Block | KnownBlock)[] {
-  return [
+  const blocks: (Block | KnownBlock)[] = [
     {
       type: "header",
       text: { type: "plain_text", text: report.title, emoji: false },
@@ -55,7 +209,7 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*🔍 Hypothesis*\n${toMrkdwn(report.hypothesis)}`,
+        text: `*🔔 Alert Overview*\n${toMrkdwn(report.alertOverview)}`,
       },
     },
     { type: "divider" },
@@ -63,17 +217,21 @@ export function buildSummaryBlocks(
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*📋 Next Steps*\n${toMrkdwn(report.nextSteps)}`,
+        text: `*🔍 Hypothesis*\n${toMrkdwn(report.hypothesis.paragraph)}`,
       },
     },
-    { type: "divider" },
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `<${resultUrl}|View Result Query in Honeycomb>`,
-      },
-    },
+  ];
+
+  const evidence = buildHypothesisEvidenceBlock(report.hypothesis);
+  if (evidence) blocks.push(evidence);
+
+  const nextSteps = buildNextStepsBlock(report.nextSteps);
+  if (nextSteps) blocks.push({ type: "divider" }, nextSteps);
+
+  const investigation = buildInvestigationStepsBlock(report.investigationSteps);
+  if (investigation) blocks.push({ type: "divider" }, investigation);
+
+  blocks.push(
     { type: "divider" },
     {
       type: "actions",
@@ -92,7 +250,9 @@ export function buildSummaryBlocks(
         },
       ],
     },
-  ];
+  );
+
+  return blocks;
 }
 
 export function formatInvestigationSteps(
@@ -120,15 +280,44 @@ export function formatInvestigationSteps(
     .join("\n\n");
 }
 
+// Next steps as markdown
+export function formatNextSteps(steps: readonly NextStep[]): string {
+  if (steps.length === 0) return "_No next steps provided._";
+
+  const lines: string[] = [];
+  for (const { key, label } of NEXT_STEP_GROUPS) {
+    const group = steps.filter((s) => s.priority === key);
+    if (group.length === 0) continue;
+    lines.push(`**${label}**`);
+    for (const s of group) {
+      lines.push(`- **${s.action}** — ${s.rationale}`);
+    }
+  }
+  return lines.join("\n");
+}
+
+// Hypothesis as markdown
+export function formatHypothesis(hypothesis: Hypothesis): string {
+  const lines = [hypothesis.paragraph];
+  if (hypothesis.evidenceFor.length > 0) {
+    lines.push("", "**Supporting evidence**");
+    lines.push(...hypothesis.evidenceFor.map((e) => `- ${e}`));
+  }
+  if (hypothesis.evidenceAgainst.length > 0) {
+    lines.push("", "**Against / ruled out**");
+    lines.push(...hypothesis.evidenceAgainst.map((e) => `- ${e}`));
+  }
+  return lines.join("\n");
+}
+
 export function renderFullReportMarkdown(report: IncidentReport): string {
   return [
     `# ${report.title}`,
     `## Summary\n${report.summary}`,
     `## Alert Overview\n${report.alertOverview}`,
-    `## Hypothesis\n${report.hypothesis}`,
-    `## Findings\n${report.findings}`,
-    `## Next Steps\n${report.nextSteps}`,
-    `## Investigation Steps\n${report.investigationSteps}`,
+    `## Hypothesis\n${formatHypothesis(report.hypothesis)}`,
+    `## Next Steps\n${formatNextSteps(report.nextSteps)}`,
+    `## Investigation Steps\n${formatInvestigationSteps(report.investigationSteps)}`,
   ].join("\n\n");
 }
 
@@ -391,9 +580,7 @@ export function buildIncidentMessageBlocks(
   blocks.push({ type: "divider" });
 
   if (inputs.report) {
-    blocks.push(
-      ...buildSummaryBlocks(inputs.report.report, inputs.report.resultUrl),
-    );
+    blocks.push(...buildReportBlocks(inputs.report.report));
   } else {
     blocks.push(...buildIncidentHeaderBlocks(inputs.alert));
   }
