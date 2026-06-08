@@ -118,12 +118,20 @@ ${Object.entries(parsedEnv.error.flatten().fieldErrors)
   }
 
   try {
-    const { DATABASE_URL: _databaseUrl, ...envWithoutDatabaseUrl } =
-      parsedEnv.data;
+    const postgresConfig = createPostgresConnectionConfig(parsedEnv.data);
+    const {
+      DATABASE_URL: _databaseUrl,
+      POSTGRES_HOST: _postgresHost,
+      POSTGRES_PORT: _postgresPort,
+      POSTGRES_USER: _postgresUser,
+      POSTGRES_PASSWORD: _postgresPassword,
+      POSTGRES_DB: _postgresDb,
+      ...envWithoutRawPostgres
+    } = parsedEnv.data;
 
     return {
-      ...envWithoutDatabaseUrl,
-      POSTGRES_CONFIG: createPostgresConnectionConfig(parsedEnv.data),
+      ...envWithoutRawPostgres,
+      POSTGRES_CONFIG: postgresConfig,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

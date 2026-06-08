@@ -72,6 +72,11 @@ describe("env config", () => {
       database: "oiva",
     });
     expect("DATABASE_URL" in env).toBe(false);
+    expect("POSTGRES_HOST" in env).toBe(false);
+    expect("POSTGRES_PORT" in env).toBe(false);
+    expect("POSTGRES_USER" in env).toBe(false);
+    expect("POSTGRES_PASSWORD" in env).toBe(false);
+    expect("POSTGRES_DB" in env).toBe(false);
   });
 
   it("loads .env when present", async () => {
