@@ -43,11 +43,16 @@ slack_channel_id     = "C0123456789"
 # knowledge_base_force_destroy = true
 
 # Agent runtime tuning.
-# supervisor_max_steps       = 30
-# subagent_max_steps         = 20
-# telemetry_max_steps        = 20
-# codebase_max_steps         = 20
-# correlation_window_minutes = 30
+# supervisor_max_steps           = 30
+# subagent_max_steps             = 20
+# telemetry_max_steps            = 20
+# codebase_max_steps             = 20
+# correlation_window_minutes     = 30
+# reaper_enabled                 = true
+# reaper_interval_minutes        = 10
+# reaper_delivered_quiet_minutes = 1440
+# reaper_failed_quiet_minutes    = 1440
+# reaper_stuck_deadline_minutes  = 60
 
 # Existing infrastructure escape hatches.
 # create_vpc         = false

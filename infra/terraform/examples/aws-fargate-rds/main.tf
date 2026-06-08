@@ -50,11 +50,16 @@ module "oiva" {
   knowledge_base_s3_prefix     = var.knowledge_base_s3_prefix
   knowledge_base_force_destroy = var.knowledge_base_force_destroy
 
-  supervisor_max_steps       = var.supervisor_max_steps
-  subagent_max_steps         = var.subagent_max_steps
-  telemetry_max_steps        = var.telemetry_max_steps
-  codebase_max_steps         = var.codebase_max_steps
-  correlation_window_minutes = var.correlation_window_minutes
+  supervisor_max_steps           = var.supervisor_max_steps
+  subagent_max_steps             = var.subagent_max_steps
+  telemetry_max_steps            = var.telemetry_max_steps
+  codebase_max_steps             = var.codebase_max_steps
+  correlation_window_minutes     = var.correlation_window_minutes
+  reaper_enabled                 = var.reaper_enabled
+  reaper_interval_minutes        = var.reaper_interval_minutes
+  reaper_delivered_quiet_minutes = var.reaper_delivered_quiet_minutes
+  reaper_failed_quiet_minutes    = var.reaper_failed_quiet_minutes
+  reaper_stuck_deadline_minutes  = var.reaper_stuck_deadline_minutes
 
   openai_api_key_secret_arn       = var.openai_api_key_secret_arn
   hc_mcp_key_secret_arn           = var.hc_mcp_key_secret_arn

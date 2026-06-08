@@ -171,6 +171,36 @@ variable "correlation_window_minutes" {
   default     = 30
 }
 
+variable "reaper_enabled" {
+  description = "Whether the cleanup reaper is enabled."
+  type        = bool
+  default     = true
+}
+
+variable "reaper_interval_minutes" {
+  description = "Cleanup reaper sweep interval."
+  type        = number
+  default     = 10
+}
+
+variable "reaper_delivered_quiet_minutes" {
+  description = "Minutes before delivered incidents are eligible for cleanup."
+  type        = number
+  default     = 1440
+}
+
+variable "reaper_failed_quiet_minutes" {
+  description = "Minutes before failed incidents are eligible for cleanup."
+  type        = number
+  default     = 1440
+}
+
+variable "reaper_stuck_deadline_minutes" {
+  description = "Minutes before a stuck investigation is eligible for cleanup."
+  type        = number
+  default     = 60
+}
+
 variable "openai_api_key_secret_arn" {
   description = "Existing Secrets Manager ARN for OPENAI_API_KEY."
   type        = string
