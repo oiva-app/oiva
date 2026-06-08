@@ -1,0 +1,16 @@
+node_modules
+.env
+.env.*
+mastra.db
+mastra.db-*
+mastra.duckdb
+tests
+scratch-docs
+docs
+.git
+.mastra
+dist
+coverage
+*.log
+npm-debug.log*
+.DS_Store

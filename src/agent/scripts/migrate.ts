@@ -13,11 +13,10 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
-import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres";
+import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres.js";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -46,8 +45,56 @@ try {
   process.exit(1);
 }
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const migrationsDir = path.resolve(scriptDir, "../src/mastra/db/migrations");
+const migrationsDir = process.env.MIGRATIONS_DIR
+  ? path.resolve(process.env.MIGRATIONS_DIR)
+  : path.resolve(process.cwd(), "src/mastra/db/migrations");
+
+const RETRYABLE_CODES = new Set(["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"]);
+function parsePositiveInteger(value: string | undefined, fallback: number) {
+  if (value === undefined) return fallback;
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) return fallback;
+
+  return parsed;
+}
+
+const MIGRATE_CONNECT_MAX_ATTEMPTS = parsePositiveInteger(
+  process.env.MIGRATE_CONNECT_MAX_ATTEMPTS,
+  10,
+);
+const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
+
+async function connectWithRetry(connectionString: string): Promise<pg.Client> {
+  for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
+    const client = new pg.Client({ connectionString });
+
+    try {
+      await client.connect();
+      return client;
+    } catch (err) {
+      try {
+        await client.end();
+      } catch {
+        // Ignore cleanup failures for clients that never connected.
+      }
+
+      const code = (err as NodeJS.ErrnoException).code;
+      const isRetryable = code !== undefined && RETRYABLE_CODES.has(code);
+      if (!isRetryable || attempt === MIGRATE_CONNECT_MAX_ATTEMPTS) {
+        throw err;
+      }
+      console.log(
+        `waiting for database (attempt ${attempt}/${MIGRATE_CONNECT_MAX_ATTEMPTS}): ${(err as Error).message}`,
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, MIGRATE_CONNECT_RETRY_DELAY_MS),
+      );
+    }
+  }
+
+  throw new Error("failed to connect to database");
+}
 
 const OIVA_SCHEMA_MIGRATION_LOCK_NAMESPACE = 0x4f495641; // OIVA
 const OIVA_SCHEMA_MIGRATION_LOCK_RESOURCE = 0x4d494752; // MIGR
@@ -69,12 +116,12 @@ async function releaseMigrationLock(client: pg.Client) {
 }
 
 async function main() {
-  const client = new pg.Client({ connectionString: databaseUrl });
+  let client: pg.Client | undefined;
   let connected = false;
   let lockAcquired = false;
 
   try {
-    await client.connect();
+    client = await connectWithRetry(databaseUrl);
     connected = true;
 
     await client.query("SELECT pg_advisory_lock($1, $2)", [
@@ -153,7 +200,7 @@ async function main() {
       `migrations complete (${appliedCount} applied, ${files.length} total)`,
     );
   } finally {
-    if (connected) {
+    if (connected && client !== undefined) {
       if (lockAcquired) {
         try {
           await releaseMigrationLock(client);
