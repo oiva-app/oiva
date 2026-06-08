@@ -101,12 +101,15 @@ export const investigationToolCallSchema = z.object({
 export const investigationTraceSchema = z.array(investigationToolCallSchema);
 export type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 
-// Type acrobatics to deal with mismatch btw input and output types
-// TODO - is there a better way?
-export type InvestigationStep = Pick<
-  InvestigationTrace[number],
-  "toolName" | "toolUseIntent" | "error"
-> & { queryUrl?: string };
+// The slimmed-down trace shape persisted on the report and rendered in Slack /
+// the .md file: just enough to show what each step asked and link to its query.
+export const investigationStepSchema = z.object({
+  toolName: z.string(),
+  toolUseIntent: z.string(),
+  error: z.boolean(),
+  queryUrl: z.string().optional(),
+});
+export type InvestigationStep = z.infer<typeof investigationStepSchema>;
 
 export { telemetryFindingsSchema, telemetryStepOutputSchema };
 export type TelemetryFindings = z.infer<typeof telemetryFindingsSchema>;
@@ -146,6 +149,19 @@ export const codebaseInvestigatorOutputSchema = z.object({
   recommended_fix: recommendedFixSchema,
 });
 
+export const nextStepSchema = z.object({
+  action: z
+    .string()
+    .describe(
+      "A specific, actionable recommendation for the engineer to further investigate or resolve the issue.",
+    ),
+  rationale: z.string().describe("An explanation for why this step matters."),
+  priority: z
+    .enum(["immediate", "short_term", "follow_up"])
+    .describe("A categorization of how urgent the suggested step is."),
+});
+export type NextStep = z.infer<typeof nextStepSchema>;
+
 export const supervisorAgentOutputSchema = z.object({
   summary: z
     .string()
@@ -183,21 +199,7 @@ export const supervisorAgentOutputSchema = z.object({
         "Findings that weigh against alternative explanations, including negative results like 'no recent deployments found'.",
       ),
   }),
-  next_steps: z.array(
-    z.object({
-      action: z
-        .string()
-        .describe(
-          "A specific, actionable recommendation for the engineer to further investigate or resolve the issue.",
-        ),
-      rationale: z
-        .string()
-        .describe("An explanation for why this step matters."),
-      priority: z
-        .enum(["immediate", "short_term", "follow_up"])
-        .describe("A categorization of how urgent the suggested step is."),
-    }),
-  ),
+  next_steps: z.array(nextStepSchema),
 });
 
 export type SupervisorAgentOutput = z.infer<typeof supervisorAgentOutputSchema>;

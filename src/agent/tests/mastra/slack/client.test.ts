@@ -54,10 +54,26 @@ const mockReport: IncidentReport = {
   summary:
     "Over a 24-hour period, the gateway experienced repeated HTTP errors for POST /api/orders.",
   alertOverview: "The alert monitors HTTP status requests.",
-  hypothesis: "The most likely cause is instability in the upstream path.",
-  findings: "_Relevant raw findings not yet available._",
-  nextSteps: "**Immediate**\n- Use Honeycomb to isolate the 502 period.",
-  investigationSteps: "_Investigation trace not yet available._",
+  hypothesis: {
+    paragraph: "The most likely cause is instability in the upstream path.",
+    evidenceFor: ["Telemetry: 7.25% error rate during the alert window."],
+    evidenceAgainst: [],
+  },
+  nextSteps: [
+    {
+      action: "Use Honeycomb to isolate the 502 period.",
+      rationale: "Confirms whether the failures originated upstream.",
+      priority: "immediate",
+    },
+  ],
+  investigationSteps: [
+    {
+      toolName: "honeycomb_get_query_results",
+      toolUseIntent: "Inspect alert query metadata",
+      queryUrl: "https://ui.honeycomb.io/x/result/abc",
+      error: false,
+    },
+  ],
 };
 
 const mockAlertContext: AlertContext = {
@@ -96,10 +112,7 @@ describe("slack client", () => {
         ts: "mock-ts-123",
         channel: "mock-channel-id",
       });
-      const threadData = await postReportSummary(
-        mockReport,
-        mockAlertContext.resultUrl,
-      );
+      const threadData = await postReportSummary(mockReport);
       expect(mockFns.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({ channel: "mock-channel-id" }),
       );
@@ -111,9 +124,9 @@ describe("slack client", () => {
 
     it("throws if the Slack API does not return a timestamp", async () => {
       mockFns.postMessage.mockResolvedValue({ ts: undefined });
-      await expect(
-        postReportSummary(mockReport, mockAlertContext.resultUrl),
-      ).rejects.toThrow("Slack API did not return a message timestamp.");
+      await expect(postReportSummary(mockReport)).rejects.toThrow(
+        "Slack API did not return a message timestamp.",
+      );
     });
 
     it("throws if the Slack API does not return a channel", async () => {
@@ -121,9 +134,9 @@ describe("slack client", () => {
         ts: "mock-ts-123",
         channel: undefined,
       });
-      await expect(
-        postReportSummary(mockReport, mockAlertContext.resultUrl),
-      ).rejects.toThrow("Slack API did not return a channel");
+      await expect(postReportSummary(mockReport)).rejects.toThrow(
+        "Slack API did not return a channel",
+      );
     });
   });
 
