@@ -67,7 +67,13 @@ const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
 
 async function connectWithRetry(connectionString: string): Promise<pg.Client> {
   for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
-    const client = new pg.Client({ connectionString });
+    const client = new pg.Client({
+      connectionString,
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: false }
+          : undefined,
+    });
 
     try {
       await client.connect();

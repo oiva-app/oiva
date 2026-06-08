@@ -34,7 +34,7 @@ slack_channel_id     = "C0123456789"
 # postgres_backup_retention  = 7
 
 # Knowledge-base S3 defaults. knowledge_base_force_destroy=true lets
-# terraform destroy delete uploaded knowledge-base files in the beginner setup.
+# `terraform destroy` delete uploaded knowledge-base files in the beginner setup.
 # knowledge_base_s3_prefix     = ""
 # knowledge_base_force_destroy = true
 

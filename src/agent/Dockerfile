@@ -32,8 +32,8 @@ COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN chmod +x ./docker-entrypoint.sh \
   && rm -f ./.mastra/output/mastra.db* ./.mastra/output/mastra.duckdb* \
-  && mkdir -p /tmp/workspaces \
-  && chown -R node:node /app /tmp/workspaces
+  && mkdir -p /tmp/workspaces /tmp/mastra \
+  && chown -R node:node /tmp/workspaces /tmp/mastra
 
 USER node
 
