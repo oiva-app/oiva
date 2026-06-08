@@ -18,7 +18,10 @@ ENV NODE_ENV=production
 ENV COLLECTOR_ENDPOINT=http://localhost:4318/v1/traces
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends git ca-certificates \
+  && apt-get install -y --no-install-recommends git ca-certificates curl \
+  && curl -fsSL https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
+    -o /etc/ssl/certs/rds-global-bundle.pem \
+  && apt-get purge -y --auto-remove curl \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./

@@ -17,6 +17,7 @@ import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
 import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres.js";
+import { createPostgresSslConfig } from "../src/mastra/db/postgres-ssl.js";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -69,10 +70,7 @@ async function connectWithRetry(connectionString: string): Promise<pg.Client> {
   for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
     const client = new pg.Client({
       connectionString,
-      ssl:
-        process.env.NODE_ENV === "production"
-          ? { rejectUnauthorized: false }
-          : undefined,
+      ssl: createPostgresSslConfig(process.env.NODE_ENV),
     });
 
     try {

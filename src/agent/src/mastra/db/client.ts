@@ -6,13 +6,11 @@
 
 import pg from "pg";
 import { env } from "../config/env";
+import { createPostgresSslConfig } from "./postgres-ssl";
 
 export const pool = new pg.Pool({
   connectionString: env.DATABASE_URL,
-  ssl:
-    env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : undefined,
+  ssl: createPostgresSslConfig(env.NODE_ENV),
   max: 10,
 });
 
