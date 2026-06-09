@@ -9,9 +9,10 @@ This is the recommended production self-hosting setup for Oiva.
 - [What This Deploys](#what-this-deploys)
 - [Before You Start](#before-you-start)
 - [Required AWS Permissions](#required-aws-permissions)
-- [Choose Your Domain And DNS Setup](#choose-your-domain-and-dns-setup)
 - [Build And Push The App Image](#build-and-push-the-app-image)
 - [Configure Terraform Variables](#configure-terraform-variables)
+  - [Choose Your Domain And DNS Setup](#choose-your-domain-and-dns-setup)
+  - [Set Remaining Variables](#set-remaining-variables)
 - [Create The Infrastructure](#create-the-infrastructure)
 - [Populate Secrets](#populate-secrets)
 - [Verify The Deployment](#verify-the-deployment)
@@ -114,120 +115,6 @@ For production team environments, you may prefer a more restricted IAM role. Tha
 
 If Terraform fails with an `AccessDenied` error, the AWS identity from `aws sts get-caller-identity` is missing permission for the service or action shown in the error.
 
-## Choose Your Domain And DNS Setup
-
-Oiva needs a public HTTPS URL because Honeycomb and Slack call Oiva through webhooks. In this deployment, public traffic reaches Oiva through an AWS Application Load Balancer.
-
-You have three supported domain and certificate paths.
-
-### Option A: Route 53 DNS, Terraform-created certificate
-
-Use this path when your domain's DNS is managed in Route 53 and you want Terraform to create the TLS certificate for you.
-
-In Route 53, a hosted zone is the AWS container for a domain's DNS records. For example, a hosted zone for `example.com` can contain records for `example.com`, `www.example.com`, and `oiva.example.com`.
-
-If you do not already have a hosted zone, create a public hosted zone for your domain:
-
-```bash
-aws route53 create-hosted-zone \
-  --name example.com \
-  --caller-reference "$(date +%s)"
-```
-
-If you registered your domain outside AWS, creating a Route 53 hosted zone is not enough by itself. You also need to tell your domain registrar to use the Route 53 name servers for the domain. This is called DNS delegation.
-
-After you create or find the Route 53 hosted zone, get its name servers:
-
-```bash
-aws route53 get-hosted-zone \
-  --id Z123... \
-  --query 'DelegationSet.NameServers' \
-  --output text
-```
-
-Replace `Z123...` with your hosted zone ID. AWS returns several name servers, usually four. In the website where you registered the domain, replace the domain's existing authoritative name servers with the Route 53 name servers returned by AWS.
-
-You can also list your hosted zones if you do not know the hosted zone ID:
-
-```bash
-aws route53 list-hosted-zones \
-  --query 'HostedZones[].{Name:Name,Id:Id}' \
-  --output table
-```
-
-Set:
-
-```hcl
-domain_name           = "oiva.example.com"
-hosted_zone_id        = "Z123..."
-create_route53_record = true
-certificate_arn       = null
-```
-
-Terraform creates:
-
-- an ACM certificate for `oiva.example.com`
-- Route 53 DNS validation records for the certificate
-- a Route 53 `A` alias record that points `oiva.example.com` to the load balancer
-
-This is the recommended beginner path because Terraform can manage both HTTPS certificate validation and the final DNS record.
-
-### Option B: Route 53 DNS, existing certificate
-
-Use this path when your domain's DNS is managed in Route 53, but you already have an ACM certificate for the Oiva hostname.
-
-If the domain was registered outside AWS, make sure the domain registrar is using the name servers from your Route 53 hosted zone. You can get them with:
-
-```bash
-aws route53 get-hosted-zone \
-  --id Z123... \
-  --query 'DelegationSet.NameServers' \
-  --output text
-```
-
-Set:
-
-```hcl
-domain_name           = "oiva.example.com"
-hosted_zone_id        = "Z123..."
-create_route53_record = true
-certificate_arn       = "arn:aws:acm:..."
-```
-
-Terraform creates:
-
-- a Route 53 `A` alias record that points `oiva.example.com` to the load balancer
-
-Terraform does not create or validate a new certificate because you supplied one.
-
-### Option C: External DNS, existing certificate
-
-Use this path when your DNS is managed outside Route 53, such as Cloudflare, DNSimple, GoDaddy DNS, or company-managed DNS.
-
-Set:
-
-```hcl
-domain_name           = "oiva.example.com"
-create_route53_record = false
-certificate_arn       = "arn:aws:acm:..."
-```
-
-Terraform creates:
-
-- an HTTPS listener on the load balancer using your existing ACM certificate
-
-Terraform does not create DNS records. After `terraform apply`, create a DNS record in your DNS provider that points your Oiva hostname to the load balancer DNS name from the Terraform outputs.
-
-For example:
-
-```text
-oiva.example.com -> <ALB DNS name from Terraform output>
-```
-
-In many DNS providers this is a `CNAME` record. Some providers use an `ALIAS`, `ANAME`, or "flattened CNAME" record for hostnames at the root of a domain.
-
-The ACM certificate must be in the same AWS region as the load balancer. For this example, that means the certificate must be in `aws_region`.
-
 ## Build And Push The App Image
 
 Terraform creates the AWS infrastructure, but it does not build the Oiva app image. ECS needs a container image URI it can pull when it starts the Fargate task.
@@ -306,16 +193,138 @@ This repository's `.gitignore` ignores `*.tfvars`, `*.tfvars.json`, and Terrafor
 
 Do not put raw secret values in `terraform.tfvars`. This deployment uses Secrets Manager for secret values. The `.tfvars` file should contain resource names, IDs, ARNs, public URLs, and non-secret configuration.
 
-Set these required values:
+Edit `terraform.tfvars` in two passes:
 
+1. Choose the domain, DNS, and certificate values.
+2. Set the remaining Oiva deployment values.
+
+### Choose Your Domain And DNS Setup
+
+Oiva needs a public HTTPS URL because Honeycomb and Slack call Oiva through webhooks. In this deployment, public traffic reaches Oiva through an AWS Application Load Balancer.
+
+You have three supported domain and certificate paths.
+
+#### Option A: Route 53 DNS, Terraform-created certificate
+
+Use this path when your domain's DNS is managed in Route 53 and you want Terraform to create the TLS certificate for you.
+
+In Route 53, a hosted zone is the AWS container for a domain's DNS records. For example, a hosted zone for `example.com` can contain records for `example.com`, `www.example.com`, and `oiva.example.com`.
+
+If you do not already have a hosted zone, create a public hosted zone for your domain:
+
+```bash
+aws route53 create-hosted-zone \
+  --name example.com \
+  --caller-reference "$(date +%s)"
+```
+
+If you registered your domain outside AWS, creating a Route 53 hosted zone is not enough by itself. You also need to tell your domain registrar to use the Route 53 name servers for the domain. This is called DNS delegation.
+
+After you create or find the Route 53 hosted zone, get its name servers:
+
+```bash
+aws route53 get-hosted-zone \
+  --id Z123... \
+  --query 'DelegationSet.NameServers' \
+  --output text
+```
+
+Replace `Z123...` with your hosted zone ID. AWS returns several name servers, usually four. In the website where you registered the domain, replace the domain's existing authoritative name servers with the Route 53 name servers returned by AWS.
+
+You can also list your hosted zones if you do not know the hosted zone ID:
+
+```bash
+aws route53 list-hosted-zones \
+  --query 'HostedZones[].{Name:Name,Id:Id}' \
+  --output table
+```
+
+Set:
+
+```hcl
+domain_name           = "oiva.example.com"
+hosted_zone_id        = "Z123..."
+create_route53_record = true
+# Leave certificate_arn unset for this option.
+```
+
+Terraform creates:
+
+- an ACM certificate for `oiva.example.com`
+- Route 53 DNS validation records for the certificate
+- a Route 53 `A` alias record that points `oiva.example.com` to the load balancer
+
+This is the recommended beginner path because Terraform can manage both HTTPS certificate validation and the final DNS record.
+
+#### Option B: Route 53 DNS, existing certificate
+
+Use this path when your domain's DNS is managed in Route 53, but you already have an ACM certificate for the Oiva hostname.
+
+If the domain was registered outside AWS, make sure the domain registrar is using the name servers from your Route 53 hosted zone. You can get them with:
+
+```bash
+aws route53 get-hosted-zone \
+  --id Z123... \
+  --query 'DelegationSet.NameServers' \
+  --output text
+```
+
+Set:
+
+```hcl
+domain_name           = "oiva.example.com"
+hosted_zone_id        = "Z123..."
+create_route53_record = true
+certificate_arn       = "arn:aws:acm:..."
+```
+
+Terraform creates:
+
+- a Route 53 `A` alias record that points `oiva.example.com` to the load balancer
+
+Terraform does not create or validate a new certificate because you supplied one.
+
+#### Option C: External DNS, existing certificate
+
+Use this path when your DNS is managed outside Route 53, such as Cloudflare, DNSimple, GoDaddy DNS, or company-managed DNS.
+
+Set:
+
+```hcl
+domain_name           = "oiva.example.com"
+create_route53_record = false
+certificate_arn       = "arn:aws:acm:..."
+# Leave hosted_zone_id unset for this option.
+```
+
+Terraform creates:
+
+- an HTTPS listener on the load balancer using your existing ACM certificate
+
+Terraform does not create DNS records. After `terraform apply`, create a DNS record in your DNS provider that points your Oiva hostname to the load balancer DNS name from the Terraform outputs.
+
+For example:
+
+```text
+oiva.example.com -> <ALB DNS name from Terraform output>
+```
+
+In many DNS providers this is a `CNAME` record. Some providers use an `ALIAS`, `ANAME`, or "flattened CNAME" record for hostnames at the root of a domain.
+
+The ACM certificate must be in the same AWS region as the load balancer. For this example, that means the certificate must be in `aws_region`.
+
+### Set Remaining Variables
+
+After choosing one domain option, set the remaining required values:
+
+- `deployment_name`
+- `aws_region`
 - `agent_image`
-- `domain_name`
-- `hosted_zone_id`, unless you use external DNS with `create_route53_record = false`
 - `observed_app_name`
 - `app_github_repositories`
 - `slack_channel_id`
 
-For example:
+For example, with the recommended Route 53 DNS option:
 
 ```hcl
 deployment_name = "oiva"
