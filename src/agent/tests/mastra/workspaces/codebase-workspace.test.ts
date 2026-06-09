@@ -71,6 +71,17 @@ function setExecFileSuccess() {
   });
 }
 
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+
+  return { promise, resolve, reject };
+}
+
 function createRequestContext(incidentId?: string) {
   const requestContext = new RequestContext();
   if (incidentId) requestContext.set("incidentId", incidentId);
@@ -235,6 +246,114 @@ describe("codebase workspace", () => {
     expect(mocks.execFile).toHaveBeenCalledTimes(2);
     expect(mocks.Workspace).not.toHaveBeenCalled();
     await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
+  });
+
+  it("aborts sibling repository clones before cleaning up when one clone fails", async () => {
+    let apiCloneAborted = false;
+
+    mocks.execFile.mockImplementation((_cmd, args, options, callback) => {
+      if (args.includes("https://github.com/acme/orders-api.git")) {
+        options.signal.addEventListener("abort", () => {
+          apiCloneAborted = true;
+          callback(new Error("clone aborted"), "", "");
+        });
+        return;
+      }
+
+      callback(new Error("clone failed"), "", "");
+    });
+
+    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
+    const incidentSandboxPath = path.join(
+      workspaceBasePath,
+      "incident-clone-failure",
+    );
+
+    await expect(
+      prepareCodebaseAgentWorkspace("incident-clone-failure"),
+    ).rejects.toThrow("clone failed");
+
+    expect(apiCloneAborted).toBe(true);
+    expect(mocks.Workspace).not.toHaveBeenCalled();
+    await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
+  });
+
+  it("cleanup aborts in-progress initialization and prevents a stale workspace", async () => {
+    mocks.execFile.mockImplementation((_cmd, _args, options, callback) => {
+      options.signal.addEventListener("abort", () => {
+        callback(new Error("clone aborted"), "", "");
+      });
+    });
+
+    const {
+      prepareCodebaseAgentWorkspace,
+      cleanupCodebaseAgentWorkspace,
+      getCodebaseAgentWorkspace,
+    } = await importWorkspaceModule();
+    const preparePromise = prepareCodebaseAgentWorkspace("incident-123");
+
+    await vi.waitFor(() => {
+      expect(mocks.execFile).toHaveBeenCalled();
+    });
+
+    await cleanupCodebaseAgentWorkspace("incident-123");
+
+    await expect(preparePromise).rejects.toThrow(
+      "Codebase workspace initialization was cancelled for incidentId incident-123",
+    );
+    expect(mocks.Workspace).not.toHaveBeenCalled();
+    expect(() =>
+      getCodebaseAgentWorkspace({
+        requestContext: createRequestContext("incident-123"),
+      }),
+    ).toThrow(
+      "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-123",
+    );
+    await expect(
+      fs.access(path.join(workspaceBasePath, "incident-123")),
+    ).rejects.toThrow();
+  });
+
+  it("does not publish a workspace that finishes initializing after cleanup", async () => {
+    const initDeferred = deferred<void>();
+
+    mocks.Workspace.mockImplementation(function (config) {
+      const workspace = {
+        config,
+        init: vi.fn().mockReturnValue(initDeferred.promise),
+        destroy: vi.fn().mockResolvedValue(undefined),
+      };
+      mocks.workspaces.push(workspace);
+      return workspace;
+    });
+
+    const {
+      prepareCodebaseAgentWorkspace,
+      cleanupCodebaseAgentWorkspace,
+      getCodebaseAgentWorkspace,
+    } = await importWorkspaceModule();
+    const preparePromise = prepareCodebaseAgentWorkspace("incident-123");
+
+    await vi.waitFor(() => {
+      expect(mocks.Workspace).toHaveBeenCalledTimes(1);
+    });
+
+    const cleanupPromise = cleanupCodebaseAgentWorkspace("incident-123");
+    initDeferred.resolve();
+
+    await cleanupPromise;
+    await expect(preparePromise).rejects.toThrow(
+      "Codebase workspace initialization was cancelled for incidentId incident-123",
+    );
+
+    expect(mocks.workspaces[0].destroy).toHaveBeenCalledTimes(1);
+    expect(() =>
+      getCodebaseAgentWorkspace({
+        requestContext: createRequestContext("incident-123"),
+      }),
+    ).toThrow(
+      "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-123",
+    );
   });
 
   it("rejects repository names that escape the codebase root before cloning", async () => {
