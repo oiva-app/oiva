@@ -140,6 +140,20 @@ describe("env config", () => {
     await expect(importEnv()).rejects.toThrow("CODEBASE_AGENT_MODEL");
   });
 
+  it("rejects model ids with empty router segments", async () => {
+    stubRequiredEnv({
+      SUPERVISOR_AGENT_MODEL: "openai//gpt-4o",
+    });
+
+    await expect(importEnv()).rejects.toThrow("SUPERVISOR_AGENT_MODEL");
+
+    stubRequiredEnv({
+      SUPERVISOR_AGENT_MODEL: "openai/gpt-4o/",
+    });
+
+    await expect(importEnv()).rejects.toThrow("SUPERVISOR_AGENT_MODEL");
+  });
+
   it("requires the S3 bucket", async () => {
     stubRequiredEnv({ KNOWLEDGE_BASE_S3_BUCKET: undefined });
 

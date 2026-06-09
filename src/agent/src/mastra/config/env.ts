@@ -9,7 +9,7 @@ import path from "node:path";
 import * as z from "zod";
 import { createPostgresConnectionConfig } from "./postgres";
 
-const MastraModelRouterIdSchema = z.string().regex(/^[^/]+\/.+$/, {
+const MastraModelRouterIdSchema = z.string().regex(/^[^/]+(?:\/[^/]+)+$/, {
   message: "must use Mastra model router format: provider/model",
 });
 
