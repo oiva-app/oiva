@@ -81,6 +81,22 @@ async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv }) {
   });
 }
 
+function getContainedClonePath(codebaseRoot: string, repositoryName: string) {
+  const resolvedCodebaseRoot = path.resolve(codebaseRoot);
+  const clonePath = path.resolve(path.join(codebaseRoot, repositoryName));
+
+  if (
+    clonePath === resolvedCodebaseRoot ||
+    !clonePath.startsWith(`${resolvedCodebaseRoot}${path.sep}`)
+  ) {
+    throw new Error(
+      `Repository name escapes codebase root: ${repositoryName}`,
+    );
+  }
+
+  return clonePath;
+}
+
 function createWorkspace(incidentId: string) {
   const codebaseRoot = getCodebaseRoot(incidentId);
 
@@ -121,15 +137,20 @@ async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorksp
       const shallowSince = getSixMonthsAgoDate();
 
       await Promise.all(
-        env.APP_GITHUB_REPOSITORIES.map((repository) =>
-          runGit([
+        env.APP_GITHUB_REPOSITORIES.map((repository) => {
+          const clonePath = getContainedClonePath(
+            codebaseRoot,
+            repository.name,
+          );
+
+          return runGit([
             "clone",
             "--shallow-since",
             shallowSince,
             repository.url,
-            path.join(codebaseRoot, repository.name),
-          ], { env: gitEnv }),
-        ),
+            clonePath,
+          ], { env: gitEnv });
+        }),
       );
     });
 

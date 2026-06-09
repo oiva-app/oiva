@@ -81,6 +81,14 @@ variable "app_github_repositories" {
   }
 
   validation {
+    condition = alltrue([
+      for repository in var.app_github_repositories :
+      !contains([".", ".."], repository.name)
+    ])
+    error_message = "Repository names must not be '.' or '..'."
+  }
+
+  validation {
     condition     = length(var.app_github_repositories) > 0
     error_message = "app_github_repositories must contain at least one repository."
   }

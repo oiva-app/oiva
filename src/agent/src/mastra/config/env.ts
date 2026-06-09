@@ -16,6 +16,9 @@ const GitHubRepositorySchema = z.object({
     .regex(/^[A-Za-z0-9._-]+$/, {
       message:
         "must contain only letters, numbers, periods, underscores, and hyphens",
+    })
+    .refine((name) => name !== "." && name !== "..", {
+      message: "must not be '.' or '..'",
     }),
   url: z.url(),
 });
@@ -41,9 +44,12 @@ const GitHubRepositoriesEnvSchema = z
       .safeParse(parsed);
 
     if (!repositories.success) {
-      for (const issue of repositories.error.issues) {
-        ctx.addIssue(issue);
-      }
+      ctx.addIssue({
+        code: "custom",
+        message: repositories.error.issues
+          .map((issue) => issue.message)
+          .join("; "),
+      });
       return z.NEVER;
     }
 

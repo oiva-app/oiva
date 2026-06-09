@@ -162,6 +162,44 @@ describe("env config", () => {
     await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
   });
 
+  it("rejects current directory repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: ".", url: "https://github.com/acme/orders-api.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects parent directory repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "..", url: "https://github.com/acme/orders-api.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("accepts safe repository name punctuation", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+        { name: "frontend.web", url: "https://github.com/acme/frontend.git" },
+        { name: "worker_1", url: "https://github.com/acme/worker.git" },
+      ]),
+    });
+
+    const { env } = await importEnv();
+
+    expect(env.APP_GITHUB_REPOSITORIES.map((repository) => repository.name)).toEqual([
+      "orders-api",
+      "frontend.web",
+      "worker_1",
+    ]);
+  });
+
   it("rejects duplicate repository names", async () => {
     stubRequiredEnv({
       APP_GITHUB_REPOSITORIES: JSON.stringify([

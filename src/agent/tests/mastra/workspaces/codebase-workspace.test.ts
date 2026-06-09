@@ -33,6 +33,21 @@ vi.mock("@mastra/core/workspace", () => ({
 const testRoot = path.join(os.tmpdir(), "oiva-codebase-workspace-test");
 const workspaceBasePath = "/tmp/workspaces";
 
+function mockEnv(repositories = [
+  { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+  {
+    name: "orders-worker",
+    url: "https://github.com/acme/orders-worker.git",
+  },
+]) {
+  vi.doMock("../../../src/mastra/config/env", () => ({
+    env: {
+      APP_GITHUB_REPOSITORIES: repositories,
+      GITHUB_PAT: "test-token",
+    },
+  }));
+}
+
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
     APP_GITHUB_REPOSITORIES: [
@@ -66,6 +81,7 @@ describe("codebase workspace", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
+    mockEnv();
     mocks.workspaces.length = 0;
     mocks.Workspace.mockImplementation(function (config) {
       const workspace = {
@@ -90,6 +106,10 @@ describe("codebase workspace", () => {
       recursive: true,
       force: true,
     });
+    await fs.rm(path.join(workspaceBasePath, "incident-path-escape"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   afterEach(async () => {
@@ -103,6 +123,10 @@ describe("codebase workspace", () => {
       force: true,
     });
     await fs.rm(path.join(workspaceBasePath, "incident-clone-failure"), {
+      recursive: true,
+      force: true,
+    });
+    await fs.rm(path.join(workspaceBasePath, "incident-path-escape"), {
       recursive: true,
       force: true,
     });
@@ -209,6 +233,26 @@ describe("codebase workspace", () => {
     ).rejects.toThrow("clone failed");
 
     expect(mocks.execFile).toHaveBeenCalledTimes(2);
+    expect(mocks.Workspace).not.toHaveBeenCalled();
+    await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
+  });
+
+  it("rejects repository names that escape the codebase root before cloning", async () => {
+    mockEnv([
+      { name: "..", url: "https://github.com/acme/orders-api.git" },
+    ]);
+
+    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
+    const incidentSandboxPath = path.join(
+      workspaceBasePath,
+      "incident-path-escape",
+    );
+
+    await expect(
+      prepareCodebaseAgentWorkspace("incident-path-escape"),
+    ).rejects.toThrow("Repository name escapes codebase root: ..");
+
+    expect(mocks.execFile).not.toHaveBeenCalled();
     expect(mocks.Workspace).not.toHaveBeenCalled();
     await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
   });
