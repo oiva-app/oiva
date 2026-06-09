@@ -166,6 +166,30 @@ variable "codebase_max_steps" {
   default     = 20
 }
 
+variable "supervisor_agent_model" {
+  description = "Mastra model router id for the supervisor agent."
+  type        = string
+  default     = "openai/gpt-5.4"
+}
+
+variable "telemetry_agent_model" {
+  description = "Mastra model router id for the telemetry agent."
+  type        = string
+  default     = "openai/gpt-5.4"
+}
+
+variable "codebase_agent_model" {
+  description = "Mastra model router id for the codebase agent."
+  type        = string
+  default     = "openai/gpt-5.4"
+}
+
+variable "report_agent_model" {
+  description = "Mastra model router id for the report agent."
+  type        = string
+  default     = "openai/gpt-4o-mini"
+}
+
 variable "correlation_window_minutes" {
   description = "Correlation window for incident grouping."
   type        = number

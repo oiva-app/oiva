@@ -27,6 +27,7 @@ vi.mock("@mastra/core/processors", () => ({
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
     CODEBASE_MAX_STEPS: 12,
+    CODEBASE_AGENT_MODEL: "openai/gpt-4o-mini",
   },
 }));
 
@@ -56,7 +57,7 @@ describe("codebaseAgent", () => {
         defaultOptions: {
           maxSteps: 12,
         },
-        model: "openai/gpt-5.4",
+        model: "openai/gpt-4o-mini",
         workspace: getCodebaseAgentWorkspace,
       }),
     });

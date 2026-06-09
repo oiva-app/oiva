@@ -9,6 +9,10 @@ import path from "node:path";
 import * as z from "zod";
 import { createPostgresConnectionConfig } from "./postgres";
 
+const MastraModelRouterIdSchema = z.string().regex(/^[^/]+\/.+$/, {
+  message: "must use Mastra model router format: provider/model",
+});
+
 const GitHubRepositorySchema = z.object({
   name: z
     .string()
@@ -88,6 +92,14 @@ const EnvSchema = z
     SUBAGENT_MAX_STEPS: z.coerce.number().default(20),
     TELEMETRY_MAX_STEPS: z.coerce.number().default(20),
     CODEBASE_MAX_STEPS: z.coerce.number().default(20),
+    SUPERVISOR_AGENT_MODEL:
+      MastraModelRouterIdSchema.default("openai/gpt-5.4"),
+    TELEMETRY_AGENT_MODEL:
+      MastraModelRouterIdSchema.default("openai/gpt-5.4"),
+    CODEBASE_AGENT_MODEL:
+      MastraModelRouterIdSchema.default("openai/gpt-5.4"),
+    REPORT_AGENT_MODEL:
+      MastraModelRouterIdSchema.default("openai/gpt-4o-mini"),
     RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
 
     // Gates HC_SHARED_SECRET enforcement (see .refine below). Defaults to

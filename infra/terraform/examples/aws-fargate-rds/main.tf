@@ -54,6 +54,10 @@ module "oiva" {
   subagent_max_steps             = var.subagent_max_steps
   telemetry_max_steps            = var.telemetry_max_steps
   codebase_max_steps             = var.codebase_max_steps
+  supervisor_agent_model         = var.supervisor_agent_model
+  telemetry_agent_model          = var.telemetry_agent_model
+  codebase_agent_model           = var.codebase_agent_model
+  report_agent_model             = var.report_agent_model
   correlation_window_minutes     = var.correlation_window_minutes
   reaper_enabled                 = var.reaper_enabled
   reaper_interval_minutes        = var.reaper_interval_minutes

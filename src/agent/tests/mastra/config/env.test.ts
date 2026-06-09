@@ -76,6 +76,10 @@ describe("env config", () => {
       password: "password",
       database: "oiva",
     });
+    expect(env.SUPERVISOR_AGENT_MODEL).toBe("openai/gpt-5.4");
+    expect(env.TELEMETRY_AGENT_MODEL).toBe("openai/gpt-5.4");
+    expect(env.CODEBASE_AGENT_MODEL).toBe("openai/gpt-5.4");
+    expect(env.REPORT_AGENT_MODEL).toBe("openai/gpt-4o-mini");
     expect("DATABASE_URL" in env).toBe(false);
     expect("POSTGRES_HOST" in env).toBe(false);
     expect("POSTGRES_PORT" in env).toBe(false);
@@ -110,6 +114,30 @@ describe("env config", () => {
     const { env } = await importEnv();
 
     expect(env.NODE_ENV).toBe("development");
+  });
+
+  it("accepts configured Mastra router model ids", async () => {
+    stubRequiredEnv({
+      SUPERVISOR_AGENT_MODEL: "openai/gpt-4o-mini",
+      TELEMETRY_AGENT_MODEL: "openai/gpt-5.4",
+      CODEBASE_AGENT_MODEL: "openai/gpt-5.4-mini",
+      REPORT_AGENT_MODEL: "openai/gpt-4o",
+    });
+
+    const { env } = await importEnv();
+
+    expect(env.SUPERVISOR_AGENT_MODEL).toBe("openai/gpt-4o-mini");
+    expect(env.TELEMETRY_AGENT_MODEL).toBe("openai/gpt-5.4");
+    expect(env.CODEBASE_AGENT_MODEL).toBe("openai/gpt-5.4-mini");
+    expect(env.REPORT_AGENT_MODEL).toBe("openai/gpt-4o");
+  });
+
+  it("rejects model ids that do not use Mastra router format", async () => {
+    stubRequiredEnv({
+      CODEBASE_AGENT_MODEL: "not-a-router-model",
+    });
+
+    await expect(importEnv()).rejects.toThrow("CODEBASE_AGENT_MODEL");
   });
 
   it("requires the S3 bucket", async () => {

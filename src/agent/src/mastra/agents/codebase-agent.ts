@@ -32,6 +32,6 @@ export const codebaseAgent: SubAgent = new Agent({
       preserveModelOutput: true,
     }),
   ],
-  model: "openai/gpt-5.4",
+  model: env.CODEBASE_AGENT_MODEL,
   workspace: getCodebaseAgentWorkspace,
 });
