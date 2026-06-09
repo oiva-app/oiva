@@ -103,9 +103,30 @@ variable "observed_app_name" {
   type        = string
 }
 
-variable "app_github_https_url" {
-  description = "HTTPS URL of the GitHub repo Oiva should inspect."
-  type        = string
+variable "app_github_repositories" {
+  description = "GitHub repositories Oiva should inspect."
+  type = list(object({
+    name = string
+    url  = string
+  }))
+
+  validation {
+    condition = alltrue([
+      for repository in var.app_github_repositories :
+      can(regex("^[A-Za-z0-9._-]+$", repository.name))
+    ])
+    error_message = "Repository names must contain only letters, numbers, periods, underscores, and hyphens."
+  }
+
+  validation {
+    condition     = length(var.app_github_repositories) > 0
+    error_message = "app_github_repositories must contain at least one repository."
+  }
+
+  validation {
+    condition     = length(distinct([for repository in var.app_github_repositories : repository.name])) == length(var.app_github_repositories)
+    error_message = "Repository names must be unique."
+  }
 }
 
 variable "slack_channel_id" {

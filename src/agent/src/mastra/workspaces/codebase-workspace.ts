@@ -9,7 +9,6 @@ import { promisify } from "node:util";
 
 import { env } from "../config/env";
 import {
-  getCodebaseClonePath,
   getCodebaseRoot,
   getKnowledgeBaseMirrorPath,
   getWorkspaceRoot,
@@ -113,20 +112,25 @@ function createWorkspace(incidentId: string) {
 async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const codebaseRoot = getCodebaseRoot(incidentId);
-  const clonePath = getCodebaseClonePath(incidentId);
 
   try {
     await fs.mkdir(workspaceRoot, { recursive: true });
     await resetSandboxRoot(codebaseRoot);
 
     await withGitAskpass(async (gitEnv) => {
-      await runGit([
-        "clone",
-        "--shallow-since",
-        getSixMonthsAgoDate(),
-        env.APP_GITHUB_HTTPS_URL,
-        clonePath,
-      ], { env: gitEnv });
+      const shallowSince = getSixMonthsAgoDate();
+
+      await Promise.all(
+        env.APP_GITHUB_REPOSITORIES.map((repository) =>
+          runGit([
+            "clone",
+            "--shallow-since",
+            shallowSince,
+            repository.url,
+            path.join(codebaseRoot, repository.name),
+          ], { env: gitEnv }),
+        ),
+      );
     });
 
     const workspace = createWorkspace(incidentId);

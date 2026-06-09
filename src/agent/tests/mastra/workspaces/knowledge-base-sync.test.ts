@@ -20,7 +20,9 @@ vi.mock("@aws-sdk/client-s3", () => ({
 
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
-    APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
+    APP_GITHUB_REPOSITORIES: [
+      { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+    ],
     KNOWLEDGE_BASE_S3_BUCKET: "test-bucket",
     KNOWLEDGE_BASE_S3_PREFIX: "three-services-demo/knowledge-base",
     AWS_REGION: "us-east-1",

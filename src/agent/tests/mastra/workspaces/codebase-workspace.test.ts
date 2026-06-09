@@ -35,7 +35,13 @@ const workspaceBasePath = "/tmp/workspaces";
 
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
-    APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
+    APP_GITHUB_REPOSITORIES: [
+      { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+      {
+        name: "orders-worker",
+        url: "https://github.com/acme/orders-worker.git",
+      },
+    ],
     GITHUB_PAT: "test-token",
   },
 }));
@@ -80,6 +86,10 @@ describe("codebase workspace", () => {
       recursive: true,
       force: true,
     });
+    await fs.rm(path.join(workspaceBasePath, "incident-clone-failure"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   afterEach(async () => {
@@ -92,6 +102,10 @@ describe("codebase workspace", () => {
       recursive: true,
       force: true,
     });
+    await fs.rm(path.join(workspaceBasePath, "incident-clone-failure"), {
+      recursive: true,
+      force: true,
+    });
   });
 
   it("clones and initializes a workspace once for an incident", async () => {
@@ -100,7 +114,9 @@ describe("codebase workspace", () => {
     const workspace = await prepareCodebaseAgentWorkspace("incident-123");
 
     expect(workspace).toBe(mocks.workspaces[0]);
-    expect(mocks.execFile).toHaveBeenCalledWith(
+    expect(mocks.execFile).toHaveBeenCalledTimes(2);
+    expect(mocks.execFile).toHaveBeenNthCalledWith(
+      1,
       "git",
       [
         "clone",
@@ -108,6 +124,30 @@ describe("codebase workspace", () => {
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         "https://github.com/acme/orders-api.git",
         path.join(workspaceBasePath, "incident-123", "codebase", "orders-api"),
+      ],
+      expect.objectContaining({
+        env: expect.objectContaining({
+          GIT_TERMINAL_PROMPT: "0",
+          GITHUB_PAT: "test-token",
+        }),
+        maxBuffer: 1024 * 1024 * 10,
+      }),
+      expect.any(Function),
+    );
+    expect(mocks.execFile).toHaveBeenNthCalledWith(
+      2,
+      "git",
+      [
+        "clone",
+        "--shallow-since",
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+        "https://github.com/acme/orders-worker.git",
+        path.join(
+          workspaceBasePath,
+          "incident-123",
+          "codebase",
+          "orders-worker",
+        ),
       ],
       expect.objectContaining({
         env: expect.objectContaining({
@@ -143,9 +183,34 @@ describe("codebase workspace", () => {
     const secondWorkspace = await prepareCodebaseAgentWorkspace("incident-123");
 
     expect(secondWorkspace).toBe(firstWorkspace);
-    expect(mocks.execFile).toHaveBeenCalledTimes(1);
+    expect(mocks.execFile).toHaveBeenCalledTimes(2);
     expect(mocks.Workspace).toHaveBeenCalledTimes(1);
     expect(mocks.workspaces[0].init).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up the incident workspace when a repository clone fails", async () => {
+    mocks.execFile.mockImplementation((_cmd, args, _options, callback) => {
+      if (args.includes("https://github.com/acme/orders-worker.git")) {
+        callback(new Error("clone failed"), "", "");
+        return;
+      }
+
+      callback(null, "", "");
+    });
+
+    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
+    const incidentSandboxPath = path.join(
+      workspaceBasePath,
+      "incident-clone-failure",
+    );
+
+    await expect(
+      prepareCodebaseAgentWorkspace("incident-clone-failure"),
+    ).rejects.toThrow("clone failed");
+
+    expect(mocks.execFile).toHaveBeenCalledTimes(2);
+    expect(mocks.Workspace).not.toHaveBeenCalled();
+    await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
   });
 
   it("preserves the synced knowledge base when resetting the codebase sandbox", async () => {

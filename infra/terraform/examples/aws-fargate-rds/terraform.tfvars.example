@@ -16,9 +16,14 @@ hosted_zone_id        = "replace-me"
 create_route53_record = true
 
 # App Oiva observes and the Slack channel where it posts.
-observed_app_name    = "replace-me"
-app_github_https_url = "https://github.com/example/repo"
-slack_channel_id     = "C0123456789"
+observed_app_name = "replace-me"
+app_github_repositories = [
+  {
+    name = "example-app"
+    url  = "https://github.com/example/repo.git"
+  }
+]
+slack_channel_id = "C0123456789"
 
 # --------------------------------------------------------------------------------
 # Optional escape hatches below: defaults are shown, and you can uncomment values
