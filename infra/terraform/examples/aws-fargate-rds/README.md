@@ -124,8 +124,8 @@ This guide uses Amazon Elastic Container Registry, or ECR. ECR is AWS's managed 
 From the repository root, choose the AWS region and ECR repository name:
 
 ```bash
-AWS_REGION=us-east-1
-ECR_REPOSITORY=oiva-agent
+export AWS_REGION=us-east-1
+export ECR_REPOSITORY=oiva-agent
 ```
 
 Use the same `AWS_REGION` you plan to use later for `aws_region` in `terraform.tfvars`.
