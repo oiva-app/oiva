@@ -54,6 +54,22 @@ locals {
       value = tostring(var.codebase_max_steps)
     },
     {
+      name  = "SUPERVISOR_AGENT_MODEL"
+      value = var.supervisor_agent_model
+    },
+    {
+      name  = "TELEMETRY_AGENT_MODEL"
+      value = var.telemetry_agent_model
+    },
+    {
+      name  = "CODEBASE_AGENT_MODEL"
+      value = var.codebase_agent_model
+    },
+    {
+      name  = "REPORT_AGENT_MODEL"
+      value = var.report_agent_model
+    },
+    {
       name  = "CORRELATION_WINDOW_MINUTES"
       value = tostring(var.correlation_window_minutes)
     },

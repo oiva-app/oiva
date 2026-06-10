@@ -19,7 +19,7 @@ export const supervisorAgent = new Agent({
   id: "supervisor-agent",
   name: "Supervisor Agent",
   instructions: supervisorPrompt,
-  model: "openai/gpt-5.4",
+  model: env.SUPERVISOR_AGENT_MODEL,
   agents: { codebaseAgent, telemetryAgent },
   memory: new Memory(),
   defaultOptions: {
