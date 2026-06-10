@@ -438,7 +438,15 @@ View the secret ARNs Terraform created:
 terraform output secret_arns
 ```
 
-You can use any of those ARNs directly as `--secret-id`.
+The simplest way to populate them is to run the helper script from this Terraform working directory:
+
+```bash
+../../../utilities/populate_secrets.py
+```
+
+The script prompts for each required secret, writes non-empty values to Secrets Manager, and forces a new ECS deployment after successful updates. Leave a value blank to skip it.
+
+You can also populate secrets manually. Use any ARN from `terraform output secret_arns` directly as `--secret-id`.
 
 If you are using Terraform-created placeholder secrets and want to list their shorter secret names, use the deployment name from `terraform.tfvars`:
 
