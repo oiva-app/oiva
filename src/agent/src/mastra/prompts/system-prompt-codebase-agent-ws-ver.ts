@@ -73,7 +73,7 @@ Use the failure mode from the telemetry summary to guide what you search for. De
 The workspace exposes the codebase through two different path contexts:
 
 - Filesystem tools use virtual workspace paths. The codebase root is \`codebase/\`.
-- Sandbox shell commands run from inside the sandbox working directory, which contains one or more git worktree directories.
+- Sandbox shell commands run from inside the sandbox working directory, which contains one or more cloned git repository directories.
 
 When using filesystem tools, refer to app files under \`codebase/<repo-directory>/...\`.
 
