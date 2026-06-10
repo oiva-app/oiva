@@ -790,3 +790,11 @@ Check the `oiva-agent` startup logs in CloudWatch. Common causes are RDS connect
 ### Re-applying fails because a secret name already exists
 
 Secrets Manager may keep deleted secrets during a recovery window. If you destroyed and recreated the stack with the same `deployment_name`, either wait for the recovery window, restore the pending-deletion secret, or use a different `deployment_name`.
+
+For Terraform-created placeholder secrets, you can also force-delete the pending secrets immediately:
+
+```bash
+./infra/terraform/utilities/force-delete-secrets.sh oiva
+```
+
+The argument must match `deployment_name` from `terraform.tfvars`.
