@@ -199,7 +199,7 @@ variable "correlation_window_minutes" {
 variable "reaper_enabled" {
   description = "Whether the cleanup reaper is enabled."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "reaper_interval_minutes" {
