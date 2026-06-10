@@ -31,9 +31,9 @@ module "oiva" {
   public_subnet_ids  = var.public_subnet_ids
   private_subnet_ids = var.private_subnet_ids
 
-  observed_app_name    = var.observed_app_name
-  app_github_https_url = var.app_github_https_url
-  slack_channel_id     = var.slack_channel_id
+  observed_app_name       = var.observed_app_name
+  app_github_repositories = var.app_github_repositories
+  slack_channel_id        = var.slack_channel_id
 
   task_cpu              = var.task_cpu
   task_memory           = var.task_memory

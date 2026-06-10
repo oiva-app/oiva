@@ -9,7 +9,6 @@ import { promisify } from "node:util";
 
 import { env } from "../config/env";
 import {
-  getCodebaseClonePath,
   getCodebaseRoot,
   getKnowledgeBaseMirrorPath,
   getWorkspaceRoot,
@@ -20,8 +19,14 @@ const execFileAsync = promisify(execFile);
 const KNOWLEDGE_BASE_MOUNT = "/knowledge-base";
 const CODEBASE_MOUNT = "/codebase";
 
+type InitRecord = {
+  promise: Promise<AnyWorkspace>;
+  controller: AbortController;
+  token: symbol;
+};
+
 const workspacesByIncidentId = new Map<string, AnyWorkspace>();
-const inFlight = new Map<string, Promise<AnyWorkspace>>();
+const inFlight = new Map<string, InitRecord>();
 
 function getSixMonthsAgoDate() {
   const now = new Date();
@@ -75,11 +80,86 @@ esac
   }
 }
 
-async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv }) {
+async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv; signal?: AbortSignal }) {
   await execFileAsync("git", args, {
     env: options?.env ?? process.env,
+    signal: options?.signal,
     maxBuffer: 1024 * 1024 * 10,
   });
+}
+
+function assertInitCurrent(
+  incidentId: string,
+  token: symbol,
+  signal: AbortSignal,
+) {
+  if (signal.aborted || inFlight.get(incidentId)?.token !== token) {
+    throw new Error(`Codebase workspace initialization was cancelled for incidentId ${incidentId}`);
+  }
+}
+
+async function cloneRepositories(
+  incidentId: string,
+  token: symbol,
+  codebaseRoot: string,
+  gitEnv: NodeJS.ProcessEnv,
+  controller: AbortController,
+) {
+  assertInitCurrent(incidentId, token, controller.signal);
+
+  const shallowSince = getSixMonthsAgoDate();
+  const clonePromises = env.APP_GITHUB_REPOSITORIES.map((repository) => {
+    assertInitCurrent(incidentId, token, controller.signal);
+    const clonePath = getContainedClonePath(codebaseRoot, repository.name);
+
+    return runGit([
+      "clone",
+      "--shallow-since",
+      shallowSince,
+      repository.url,
+      clonePath,
+    ], {
+      env: gitEnv,
+      signal: controller.signal,
+    });
+  });
+
+  let firstFailure: unknown;
+
+  await Promise.all(
+    clonePromises.map(async (promise) => {
+      try {
+        await promise;
+      } catch (error) {
+        if (!controller.signal.aborted && firstFailure === undefined) {
+          firstFailure = error;
+        }
+        controller.abort();
+      }
+    }),
+  );
+
+  if (firstFailure) {
+    throw firstFailure;
+  }
+
+  assertInitCurrent(incidentId, token, controller.signal);
+}
+
+function getContainedClonePath(codebaseRoot: string, repositoryName: string) {
+  const resolvedCodebaseRoot = path.resolve(codebaseRoot);
+  const clonePath = path.resolve(path.join(codebaseRoot, repositoryName));
+
+  if (
+    clonePath === resolvedCodebaseRoot ||
+    !clonePath.startsWith(`${resolvedCodebaseRoot}${path.sep}`)
+  ) {
+    throw new Error(
+      `Repository name escapes codebase root: ${repositoryName}`,
+    );
+  }
+
+  return clonePath;
 }
 
 function createWorkspace(incidentId: string) {
@@ -110,44 +190,77 @@ function createWorkspace(incidentId: string) {
   );
 }
 
-async function initCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
+async function initCodebaseAgentWorkspace(
+  incidentId: string,
+  token: symbol,
+  controller: AbortController,
+): Promise<AnyWorkspace> {
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const codebaseRoot = getCodebaseRoot(incidentId);
-  const clonePath = getCodebaseClonePath(incidentId);
+  let workspace: AnyWorkspace | undefined;
 
   try {
     await fs.mkdir(workspaceRoot, { recursive: true });
     await resetSandboxRoot(codebaseRoot);
 
     await withGitAskpass(async (gitEnv) => {
-      await runGit([
-        "clone",
-        "--shallow-since",
-        getSixMonthsAgoDate(),
-        env.APP_GITHUB_HTTPS_URL,
-        clonePath,
-      ], { env: gitEnv });
+      await cloneRepositories(
+        incidentId,
+        token,
+        codebaseRoot,
+        gitEnv,
+        controller,
+      );
     });
 
-    const workspace = createWorkspace(incidentId);
+    assertInitCurrent(incidentId, token, controller.signal);
+
+    workspace = createWorkspace(incidentId);
     await workspace.init();
+    assertInitCurrent(incidentId, token, controller.signal);
+
     workspacesByIncidentId.set(incidentId, workspace);
     return workspace;
   } catch (error) {
-    await cleanupCodebaseAgentWorkspace(incidentId);
+    controller.abort();
+    await workspace?.destroy().catch(() => undefined);
+    await fs.rm(workspaceRoot, { recursive: true, force: true });
     throw error;
   }
 }
 
 export function prepareCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
-  if (!inFlight.has(incidentId)) {
-    inFlight.set(incidentId, initCodebaseAgentWorkspace(incidentId));
+  const workspace = workspacesByIncidentId.get(incidentId);
+  if (workspace) {
+    return Promise.resolve(workspace);
   }
-  return inFlight.get(incidentId)!;
+
+  const existing = inFlight.get(incidentId);
+  if (existing) {
+    return existing.promise;
+  }
+
+  const controller = new AbortController();
+  const token = Symbol(incidentId);
+  const promise = initCodebaseAgentWorkspace(incidentId, token, controller)
+    .finally(() => {
+      if (inFlight.get(incidentId)?.token === token) {
+        inFlight.delete(incidentId);
+      }
+    });
+
+  inFlight.set(incidentId, { promise, controller, token });
+  return promise;
 }
 
 export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
-  inFlight.delete(incidentId);
+  const record = inFlight.get(incidentId);
+  if (record) {
+    record.controller.abort();
+    inFlight.delete(incidentId);
+    await record.promise.catch(() => undefined);
+  }
+
   const workspaceRoot = getWorkspaceRoot(incidentId);
   const workspace = workspacesByIncidentId.get(incidentId);
   workspacesByIncidentId.delete(incidentId);

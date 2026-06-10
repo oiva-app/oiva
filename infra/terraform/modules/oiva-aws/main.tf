@@ -22,8 +22,8 @@ locals {
       value = var.observed_app_name
     },
     {
-      name  = "APP_GITHUB_HTTPS_URL"
-      value = var.app_github_https_url
+      name  = "APP_GITHUB_REPOSITORIES"
+      value = jsonencode(var.app_github_repositories)
     },
     {
       name  = "SLACK_CHANNEL_ID"

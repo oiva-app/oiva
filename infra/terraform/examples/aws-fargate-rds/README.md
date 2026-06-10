@@ -22,7 +22,7 @@ Edit `terraform.tfvars` and set at least:
 - `domain_name`
 - `hosted_zone_id`
 - `observed_app_name`
-- `app_github_https_url`
+- `app_github_repositories`
 - `slack_channel_id`
 
 Do not put raw secret values in `terraform.tfvars`.
@@ -77,7 +77,7 @@ After secrets are populated and ECS redeploys:
 - App and ADOT logs appear in the CloudWatch log group.
 - Honeycomb sends alerts to `honeycomb_alert_webhook_url`.
 - Slack sends interactions to `slack_rating_webhook_url`.
-- Oiva can read the GitHub repo and knowledge-base S3 files.
+- Oiva can read the configured GitHub repositories and knowledge-base S3 files.
 - Oiva posts the expected Slack investigation message or report.
 - Oiva traces arrive in Honeycomb through the ADOT sidecar.
 

@@ -9,6 +9,68 @@ import path from "node:path";
 import * as z from "zod";
 import { createPostgresConnectionConfig } from "./postgres";
 
+const GitHubRepositorySchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .regex(/^[A-Za-z0-9._-]+$/, {
+      message:
+        "must contain only letters, numbers, periods, underscores, and hyphens",
+    })
+    .refine((name) => name !== "." && name !== "..", {
+      message: "must not be '.' or '..'",
+    }),
+  url: z.url(),
+});
+
+const GitHubRepositoriesEnvSchema = z
+  .string()
+  .transform((value, ctx) => {
+    let parsed: unknown;
+
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: "must be valid JSON",
+      });
+      return z.NEVER;
+    }
+
+    const repositories = z
+      .array(GitHubRepositorySchema)
+      .min(1, "must contain at least one repository")
+      .safeParse(parsed);
+
+    if (!repositories.success) {
+      ctx.addIssue({
+        code: "custom",
+        message: repositories.error.issues
+          .map((issue) => issue.message)
+          .join("; "),
+      });
+      return z.NEVER;
+    }
+
+    const names = new Set<string>();
+    const duplicate = repositories.data.find((repository) => {
+      if (names.has(repository.name)) return true;
+      names.add(repository.name);
+      return false;
+    });
+
+    if (duplicate) {
+      ctx.addIssue({
+        code: "custom",
+        message: `contains duplicate repository name: ${duplicate.name}`,
+      });
+      return z.NEVER;
+    }
+
+    return repositories.data;
+  });
+
 const EnvSchema = z
   .object({
     OBSERVED_APP_NAME: z.string(),
@@ -16,7 +78,7 @@ const EnvSchema = z
     HC_MCP_KEY: z.string(),
     COLLECTOR_ENDPOINT: z.string(),
     GITHUB_PAT: z.string(),
-    APP_GITHUB_HTTPS_URL: z.url(),
+    APP_GITHUB_REPOSITORIES: GitHubRepositoriesEnvSchema,
 
     // Optional in development (no webhook auth). REQUIRED in production.
     HC_SHARED_SECRET: z.string().optional(),

@@ -12,7 +12,9 @@ const requiredEnv = {
   HC_MCP_KEY: "hc-mcp-key",
   COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces",
   GITHUB_PAT: "github-token",
-  APP_GITHUB_HTTPS_URL: "https://github.com/acme/orders-api.git",
+  APP_GITHUB_REPOSITORIES: JSON.stringify([
+    { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+  ]),
   NODE_ENV: "development",
   KNOWLEDGE_BASE_S3_BUCKET: "test-bucket",
   KNOWLEDGE_BASE_S3_PREFIX: "test-prefix",
@@ -64,6 +66,9 @@ describe("env config", () => {
     const { env } = await importEnv();
 
     expect(env.KNOWLEDGE_BASE_S3_BUCKET).toBe("test-bucket");
+    expect(env.APP_GITHUB_REPOSITORIES).toEqual([
+      { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+    ]);
     expect(env.POSTGRES_CONFIG).toEqual({
       host: "localhost",
       port: 5432,
@@ -117,6 +122,106 @@ describe("env config", () => {
     stubRequiredEnv({ AWS_REGION: undefined });
 
     await expect(importEnv()).rejects.toThrow("AWS_REGION");
+  });
+
+  it("requires APP_GITHUB_REPOSITORIES", async () => {
+    stubRequiredEnv({ APP_GITHUB_REPOSITORIES: undefined });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects invalid APP_GITHUB_REPOSITORIES JSON", async () => {
+    stubRequiredEnv({ APP_GITHUB_REPOSITORIES: "not-json" });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects an empty repository list", async () => {
+    stubRequiredEnv({ APP_GITHUB_REPOSITORIES: "[]" });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects invalid repository URLs", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "orders-api", url: "not-a-url" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects unsafe repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "../orders-api", url: "https://github.com/acme/orders-api.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects current directory repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: ".", url: "https://github.com/acme/orders-api.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("rejects parent directory repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "..", url: "https://github.com/acme/orders-api.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("accepts safe repository name punctuation", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+        { name: "frontend.web", url: "https://github.com/acme/frontend.git" },
+        { name: "worker_1", url: "https://github.com/acme/worker.git" },
+      ]),
+    });
+
+    const { env } = await importEnv();
+
+    expect(env.APP_GITHUB_REPOSITORIES.map((repository) => repository.name)).toEqual([
+      "orders-api",
+      "frontend.web",
+      "worker_1",
+    ]);
+  });
+
+  it("rejects duplicate repository names", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_REPOSITORIES: JSON.stringify([
+        { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+        { name: "orders-api", url: "https://github.com/acme/orders-worker.git" },
+      ]),
+    });
+
+    await expect(importEnv()).rejects.toThrow("APP_GITHUB_REPOSITORIES");
+  });
+
+  it("does not require the old single repository URL", async () => {
+    stubRequiredEnv({
+      APP_GITHUB_HTTPS_URL: undefined,
+    });
+
+    const { env } = await importEnv();
+
+    expect(env.APP_GITHUB_REPOSITORIES).toEqual([
+      { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+    ]);
+    expect("APP_GITHUB_HTTPS_URL" in env).toBe(false);
   });
 
   it("requires the S3 prefix", async () => {

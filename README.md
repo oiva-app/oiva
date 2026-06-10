@@ -8,7 +8,7 @@ Create and edit your .env file from the example
 cp .env.example .env
 ```
 
-Give Oiva access to the Github repo that defines your observed app by including Github PAT(s) in the .env file. If the repo is public you don't need to grant any permissions. More info: [Github Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+Give Oiva access to the GitHub repositories that define your observed app by including a GitHub PAT in the .env file. If the repositories are public you don't need to grant any permissions. More info: [GitHub Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 
 Start the OTel Collector
 
