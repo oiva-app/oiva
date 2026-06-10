@@ -39,6 +39,11 @@ import { installShutdownSignalHandlers } from "./services/shutdown-state";
 
 installShutdownSignalHandlers();
 
+const mastraStorageUrl =
+  env.NODE_ENV === "production" ? "file:/tmp/mastra/mastra.db" : "file:./mastra.db";
+const observabilityStoragePath =
+  env.NODE_ENV === "production" ? "/tmp/mastra/mastra.duckdb" : "mastra.duckdb";
+
 export const mastra = new Mastra({
   workflows: {
     oivaWorkflow,
@@ -73,10 +78,12 @@ export const mastra = new Mastra({
     id: "composite-storage",
     default: new LibSQLStore({
       id: "mastra-storage",
-      url: "file:./mastra.db",
+      url: mastraStorageUrl,
     }),
     domains: {
-      observability: await new DuckDBStore().getStore("observability"),
+      observability: await new DuckDBStore({
+        path: observabilityStoragePath,
+      }).getStore("observability"),
     },
   }),
   logger: new PinoLogger({

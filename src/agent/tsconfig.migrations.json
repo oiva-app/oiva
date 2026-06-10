@@ -12,6 +12,7 @@
   },
   "include": [
     "scripts/migrate.ts",
-    "src/mastra/config/postgres.ts"
+    "src/mastra/config/postgres.ts",
+    "src/mastra/db/postgres-ssl.ts"
   ]
 }

@@ -1,30 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { resolvePostgresDatabaseUrl } from "../../../src/mastra/config/postgres";
+import { createPostgresConnectionConfig } from "../../../src/mastra/config/postgres";
 
-describe("resolvePostgresDatabaseUrl", () => {
-  it("passes through DATABASE_URL when present", () => {
+describe("createPostgresConnectionConfig", () => {
+  it("returns a pg config object from split Postgres variables", () => {
     expect(
-      resolvePostgresDatabaseUrl({
-        DATABASE_URL: "postgresql://oiva:oiva_dev@localhost:5433/oiva",
-      }),
-    ).toBe("postgresql://oiva:oiva_dev@localhost:5433/oiva");
-  });
-
-  it("builds DATABASE_URL from split Postgres variables", () => {
-    expect(
-      resolvePostgresDatabaseUrl({
+      createPostgresConnectionConfig({
         POSTGRES_HOST: "localhost",
         POSTGRES_PORT: "5433",
         POSTGRES_USER: "oiva",
         POSTGRES_PASSWORD: "oiva_dev",
         POSTGRES_DB: "oiva",
       }),
-    ).toBe("postgresql://oiva:oiva_dev@localhost:5433/oiva");
+    ).toEqual({
+      host: "localhost",
+      port: 5433,
+      user: "oiva",
+      password: "oiva_dev",
+      database: "oiva",
+    });
   });
 
-  it("prefers DATABASE_URL when both config shapes are present", () => {
-    expect(
-      resolvePostgresDatabaseUrl({
+  it("rejects DATABASE_URL", () => {
+    expect(() =>
+      createPostgresConnectionConfig({
+        DATABASE_URL: "postgresql://oiva:oiva_dev@localhost:5433/oiva",
+      }),
+    ).toThrow(
+      "DATABASE_URL is unsupported; use POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB",
+    );
+  });
+
+  it("rejects DATABASE_URL when split variables are also present", () => {
+    expect(() =>
+      createPostgresConnectionConfig({
         DATABASE_URL: "postgresql://url:user@db.example.com:5432/from_url",
         POSTGRES_HOST: "localhost",
         POSTGRES_PORT: "5433",
@@ -32,32 +40,40 @@ describe("resolvePostgresDatabaseUrl", () => {
         POSTGRES_PASSWORD: "oiva_dev",
         POSTGRES_DB: "oiva",
       }),
-    ).toBe("postgresql://url:user@db.example.com:5432/from_url");
+    ).toThrow("DATABASE_URL is unsupported");
   });
 
   it("fails when split Postgres variables are incomplete", () => {
     expect(() =>
-      resolvePostgresDatabaseUrl({
+      createPostgresConnectionConfig({
         POSTGRES_HOST: "localhost",
         POSTGRES_PORT: "5433",
         POSTGRES_USER: "oiva",
       }),
-    ).toThrow(
-      "Provide DATABASE_URL or all split Postgres variables. Missing: POSTGRES_PASSWORD, POSTGRES_DB",
-    );
+    ).toThrow("Provide all split Postgres variables. Missing: POSTGRES_PASSWORD, POSTGRES_DB");
   });
 
-  it("encodes userinfo and database name from split variables", () => {
-    expect(
-      resolvePostgresDatabaseUrl({
+  it("rejects a non-numeric Postgres port", () => {
+    expect(() =>
+      createPostgresConnectionConfig({
         POSTGRES_HOST: "localhost",
-        POSTGRES_PORT: "5433",
-        POSTGRES_USER: "oiva user",
-        POSTGRES_PASSWORD: "p@ss/word",
-        POSTGRES_DB: "oiva/dev",
+        POSTGRES_PORT: "not-a-port",
+        POSTGRES_USER: "oiva",
+        POSTGRES_PASSWORD: "oiva_dev",
+        POSTGRES_DB: "oiva",
       }),
-    ).toBe(
-      "postgresql://oiva%20user:p%40ss%2Fword@localhost:5433/oiva%2Fdev",
-    );
+    ).toThrow("POSTGRES_PORT must be an integer from 1 to 65535");
+  });
+
+  it("rejects an out-of-range Postgres port", () => {
+    expect(() =>
+      createPostgresConnectionConfig({
+        POSTGRES_HOST: "localhost",
+        POSTGRES_PORT: "65536",
+        POSTGRES_USER: "oiva",
+        POSTGRES_PASSWORD: "oiva_dev",
+        POSTGRES_DB: "oiva",
+      }),
+    ).toThrow("POSTGRES_PORT must be an integer from 1 to 65535");
   });
 });

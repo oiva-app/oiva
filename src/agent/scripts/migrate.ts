@@ -16,7 +16,12 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import pg from "pg";
 import dotenv from "dotenv";
-import { resolvePostgresDatabaseUrl } from "../src/mastra/config/postgres.js";
+import { createPostgresConnectionConfig } from "../src/mastra/config/postgres.js";
+import {
+  createPostgresSslConfig,
+  parsePostgresSslNodeEnv,
+  type PostgresSslNodeEnv,
+} from "../src/mastra/db/postgres-ssl.js";
 
 // Same upward-walk pattern as src/mastra/config/env.ts so the script
 // finds the repo-root .env from wherever it's invoked.
@@ -36,9 +41,11 @@ if (envPath) {
   dotenv.config({ path: envPath });
 }
 
-let databaseUrl: string;
+let postgresConfig: pg.ClientConfig;
+let nodeEnv: PostgresSslNodeEnv;
 try {
-  databaseUrl = resolvePostgresDatabaseUrl(process.env);
+  postgresConfig = createPostgresConnectionConfig(process.env);
+  nodeEnv = parsePostgresSslNodeEnv(process.env.NODE_ENV);
 } catch (err) {
   const message = err instanceof Error ? err.message : String(err);
   console.error(message);
@@ -65,9 +72,12 @@ const MIGRATE_CONNECT_MAX_ATTEMPTS = parsePositiveInteger(
 );
 const MIGRATE_CONNECT_RETRY_DELAY_MS = 2000;
 
-async function connectWithRetry(connectionString: string): Promise<pg.Client> {
+async function connectWithRetry(config: pg.ClientConfig): Promise<pg.Client> {
   for (let attempt = 1; attempt <= MIGRATE_CONNECT_MAX_ATTEMPTS; attempt++) {
-    const client = new pg.Client({ connectionString });
+    const client = new pg.Client({
+      ...config,
+      ssl: createPostgresSslConfig(nodeEnv),
+    });
 
     try {
       await client.connect();
@@ -121,7 +131,7 @@ async function main() {
   let lockAcquired = false;
 
   try {
-    client = await connectWithRetry(databaseUrl);
+    client = await connectWithRetry(postgresConfig);
     connected = true;
 
     await client.query("SELECT pg_advisory_lock($1, $2)", [

@@ -6,9 +6,9 @@
  * an EXTERNAL scheduler (cron, a platform scheduled job, a k8s CronJob) — NOT
  * run as a daemon. Each run is independent and idempotent: safe on any cadence,
  * and a run that overlaps a human Close/Retry or a finishing workflow is a
- * no-op. Unlike scripts/migrate.ts (which needs only DATABASE_URL and loads env
- * by hand), the reaper reuses the real app singletons — it genuinely needs the
- * DB pool, the Slack reporter, and the full validated env.
+ * no-op. Unlike scripts/migrate.ts (which loads only Postgres config by hand),
+ * the reaper reuses the real app singletons — it genuinely needs the DB pool,
+ * the Slack reporter, and the full validated env.
  *
  * Run: `npm run reap` (or `npx tsx scripts/reap.ts`).
  */

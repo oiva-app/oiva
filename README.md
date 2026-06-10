@@ -28,10 +28,23 @@ npm install @mastra/otel-exporter --legacy-peer-deps
 
 ### Database (local dev)
 
-Start the local Postgres container before running the dev server:
+Local development uses split Postgres variables from `.env`; `DATABASE_URL`
+is intentionally unsupported. The compose defaults are:
+
+```bash
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5433
+POSTGRES_USER=oiva
+POSTGRES_PASSWORD=oiva_dev
+POSTGRES_DB=oiva
+```
+
+Start the local Postgres container and run migrations before starting the dev
+server:
 
 ```bash
 docker compose up -d postgres
+npm run db:migrate
 ```
 
 ### ALERT WEBHOOK PAYLOAD FORMAT

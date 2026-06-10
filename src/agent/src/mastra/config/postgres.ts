@@ -7,7 +7,13 @@ export interface PostgresConfigInput {
   POSTGRES_DB?: string;
 }
 
-const DATABASE_URL_PATTERN = /^postgres(ql)?:\/\//;
+export interface PostgresConnectionConfig {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  database: string;
+}
 
 const requiredSplitKeys = [
   "POSTGRES_HOST",
@@ -17,33 +23,37 @@ const requiredSplitKeys = [
   "POSTGRES_DB",
 ] as const;
 
-export const resolvePostgresDatabaseUrl = (
+export const createPostgresConnectionConfig = (
   input: PostgresConfigInput,
-): string => {
+): PostgresConnectionConfig => {
   if (input.DATABASE_URL) {
-    if (!DATABASE_URL_PATTERN.test(input.DATABASE_URL)) {
-      throw new Error(
-        "DATABASE_URL must be a postgres:// or postgresql:// connection string",
-      );
-    }
-
-    return input.DATABASE_URL;
+    throw new Error(
+      "DATABASE_URL is unsupported; use POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB",
+    );
   }
 
   const missing = requiredSplitKeys.filter((key) => !input[key]);
   if (missing.length > 0) {
     throw new Error(
-      `Provide DATABASE_URL or all split Postgres variables. Missing: ${missing.join(
-        ", ",
-      )}`,
+      `Provide all split Postgres variables. Missing: ${missing.join(", ")}`,
     );
   }
 
-  const host = input.POSTGRES_HOST as string;
-  const port = input.POSTGRES_PORT as string;
-  const user = encodeURIComponent(input.POSTGRES_USER as string);
-  const password = encodeURIComponent(input.POSTGRES_PASSWORD as string);
-  const database = encodeURIComponent(input.POSTGRES_DB as string);
+  const port = Number(input.POSTGRES_PORT);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("POSTGRES_PORT must be an integer from 1 to 65535");
+  }
 
-  return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+  const host = input.POSTGRES_HOST as string;
+  const user = input.POSTGRES_USER as string;
+  const password = input.POSTGRES_PASSWORD as string;
+  const database = input.POSTGRES_DB as string;
+
+  return {
+    host,
+    port,
+    user,
+    password,
+    database,
+  };
 };

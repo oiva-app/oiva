@@ -1,0 +1,78 @@
+# Copy this file before editing:
+# cp terraform.tfvars.example terraform.tfvars
+
+# Short lowercase name used in AWS resource names.
+deployment_name = "oiva"
+
+# AWS region for all resources in this example.
+aws_region = "us-east-1"
+
+# Published oiva-agent container image.
+agent_image = "replace-me"
+
+# Public Oiva hostname. This example assumes the parent zone is in Route 53.
+domain_name           = "oiva.example.com"
+hosted_zone_id        = "replace-me"
+create_route53_record = true
+
+# App Oiva observes and the Slack channel where it posts.
+observed_app_name    = "replace-me"
+app_github_https_url = "https://github.com/example/repo"
+slack_channel_id     = "C0123456789"
+
+# --------------------------------------------------------------------------------
+# Optional escape hatches below: defaults are shown, and you can uncomment values
+# to override them or provide ARNs/IDs/names for existing resources.
+
+# Task sizing defaults.
+# task_cpu              = 1024
+# task_memory           = 2048
+# ephemeral_storage_gib = 50
+
+# CloudWatch log retention.
+# cloudwatch_log_retention_days = 30
+
+# RDS defaults.
+# postgres_instance_class    = "db.t4g.micro"
+# postgres_allocated_storage = 20
+# postgres_backup_retention  = 7
+
+# Knowledge-base S3 defaults. knowledge_base_force_destroy=true lets
+# `terraform destroy` delete uploaded knowledge-base files in the beginner setup.
+# knowledge_base_s3_prefix     = ""
+# knowledge_base_force_destroy = true
+
+# Agent runtime tuning.
+# supervisor_max_steps           = 30
+# subagent_max_steps             = 20
+# telemetry_max_steps            = 20
+# codebase_max_steps             = 20
+# correlation_window_minutes     = 30
+# reaper_enabled                 = true
+# reaper_interval_minutes        = 10
+# reaper_delivered_quiet_minutes = 1440
+# reaper_failed_quiet_minutes    = 1440
+# reaper_stuck_deadline_minutes  = 60
+
+# Existing infrastructure escape hatches.
+# create_vpc         = false
+# vpc_id             = "vpc-..."
+# public_subnet_ids  = ["subnet-...", "subnet-..."]
+# private_subnet_ids = ["subnet-...", "subnet-..."]
+
+# External-DNS users must provide an existing ACM certificate ARN for domain_name.
+# create_route53_record = false
+# certificate_arn       = "arn:aws:acm:..."
+
+# Existing knowledge-base bucket escape hatch.
+# create_knowledge_base_bucket = false
+# knowledge_base_s3_bucket     = "existing-bucket-name"
+
+# Existing Secrets Manager secret ARN escape hatches.
+# openai_api_key_secret_arn       = "arn:aws:secretsmanager:..."
+# hc_mcp_key_secret_arn           = "arn:aws:secretsmanager:..."
+# hc_shared_secret_secret_arn     = "arn:aws:secretsmanager:..."
+# github_pat_secret_arn           = "arn:aws:secretsmanager:..."
+# slack_bot_token_secret_arn      = "arn:aws:secretsmanager:..."
+# slack_signing_secret_secret_arn = "arn:aws:secretsmanager:..."
+# honeycomb_api_key_secret_arn    = "arn:aws:secretsmanager:..."

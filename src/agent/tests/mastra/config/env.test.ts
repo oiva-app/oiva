@@ -64,9 +64,19 @@ describe("env config", () => {
     const { env } = await importEnv();
 
     expect(env.KNOWLEDGE_BASE_S3_BUCKET).toBe("test-bucket");
-    expect(env.DATABASE_URL).toBe(
-      "postgresql://oiva:password@localhost:5432/oiva",
-    );
+    expect(env.POSTGRES_CONFIG).toEqual({
+      host: "localhost",
+      port: 5432,
+      user: "oiva",
+      password: "password",
+      database: "oiva",
+    });
+    expect("DATABASE_URL" in env).toBe(false);
+    expect("POSTGRES_HOST" in env).toBe(false);
+    expect("POSTGRES_PORT" in env).toBe(false);
+    expect("POSTGRES_USER" in env).toBe(false);
+    expect("POSTGRES_PASSWORD" in env).toBe(false);
+    expect("POSTGRES_DB" in env).toBe(false);
   });
 
   it("loads .env when present", async () => {
@@ -87,6 +97,16 @@ describe("env config", () => {
     expect(env.KNOWLEDGE_BASE_S3_PREFIX).toBe("kb");
   });
 
+  it("uses NODE_ENV from .env over a stale parent process value", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    await fs.writeFile(path.join(testRoot, ".env"), "NODE_ENV=development");
+
+    const { env } = await importEnv();
+
+    expect(env.NODE_ENV).toBe("development");
+  });
+
   it("requires the S3 bucket", async () => {
     stubRequiredEnv({ KNOWLEDGE_BASE_S3_BUCKET: undefined });
 
@@ -105,4 +125,24 @@ describe("env config", () => {
     await expect(importEnv()).rejects.toThrow("KNOWLEDGE_BASE_S3_PREFIX");
   });
 
+  it("rejects DATABASE_URL", async () => {
+    stubRequiredEnv({
+      DATABASE_URL: "postgresql://oiva:password@localhost:5432/oiva",
+    });
+
+    await expect(importEnv()).rejects.toThrow(
+      "DATABASE_URL is unsupported; use POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB",
+    );
+  });
+
+  it("requires split Postgres variables", async () => {
+    stubRequiredEnv({
+      POSTGRES_PASSWORD: undefined,
+      POSTGRES_DB: undefined,
+    });
+
+    await expect(importEnv()).rejects.toThrow(
+      "Provide all split Postgres variables. Missing: POSTGRES_PASSWORD, POSTGRES_DB",
+    );
+  });
 });
