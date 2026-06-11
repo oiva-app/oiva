@@ -33,6 +33,7 @@ locals {
       name  = "NODE_ENV"
       value = "production"
     },
+    # Must match the ADOT sidecar's OTLP HTTP traces receiver.
     {
       name  = "COLLECTOR_ENDPOINT"
       value = "http://localhost:4318/v1/traces"
