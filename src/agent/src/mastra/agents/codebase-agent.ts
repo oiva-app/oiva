@@ -4,7 +4,7 @@ import { Memory } from "@mastra/memory";
 import { ToolCallFilter } from '@mastra/core/processors';
 import { env } from "../config/env";
 import { getCodebaseAgentWorkspace } from "../workspaces/codebase-workspace";
-import { prompt } from "../prompts/system-prompt-codebase-agent-ws-ver";
+import { prompt } from "../prompts/codebase-agent-prompt";
 import { investigationSchema } from "../memory/investigation-schema";
 
 export const codebaseAgent: SubAgent = new Agent({

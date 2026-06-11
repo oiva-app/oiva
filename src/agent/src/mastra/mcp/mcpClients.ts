@@ -2,7 +2,7 @@ import { MCPClient } from "@mastra/mcp";
 import { env } from "../config/env";
 import { wrapTools } from "@/tools/investigation-tool-wrapper";
 
-export const mvpMcpClient = new MCPClient({
+export const mcpClient = new MCPClient({
   id: "honeycomb-mcp-client",
   servers: {
     honeycomb: {
@@ -46,8 +46,7 @@ export const {
   honeycomb_get_query_results,
   honeycomb_get_trace,
   honeycomb_find_columns,
-  honeycomb_analyze_columns, // TODO -this is a deprecated or fake tool name?
-} = await mvpMcpClient.listTools();
+} = await mcpClient.listTools();
 
 const honeycombToolsToWrap = {
   honeycomb_get_workspace_context,
@@ -57,7 +56,6 @@ const honeycombToolsToWrap = {
   // honeycomb_get_query_results,  // omitted here because the agent doesn't seem to know how to properly use this tool, and the enrichAlert tool does everything that the agent needs?
   honeycomb_get_trace,
   honeycomb_find_columns,
-  honeycomb_analyze_columns,
 };
 
 export const wrappedHoneycombTools = wrapTools(

@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { alertContextSchema, type AlertContext } from "../types/alert-context";
 import { env } from "../config/env";
-import { mvpMcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
+import { mcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
 import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
 import { telemetryFindingsSchema } from "../types/investigation";
 
@@ -167,7 +167,7 @@ const getQueryResultsJson = createStep({
     );
     if (!link?.uri) throw new Error("no JSON resource_link in query results");
 
-    const res = await mvpMcpClient.resources.read("honeycomb", link.uri);
+    const res = await mcpClient.resources.read("honeycomb", link.uri);
 
     span?.update({
       metadata: { "workflow_step.resource_link": JSON.stringify(res) },

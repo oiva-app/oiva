@@ -14,9 +14,6 @@ RUN npm run build:prod
 
 FROM base AS runtime
 
-ENV NODE_ENV=production
-ENV COLLECTOR_ENDPOINT=http://localhost:4318/v1/traces
-
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates curl \
   && curl -fsSL https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
