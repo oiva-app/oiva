@@ -4,7 +4,7 @@ import type { SubAgent } from "@mastra/core/agent";
 import { env } from "../config/env"
 import { enrichAlertTool } from "@/tools/alert-enrich";
 import { wrappedHoneycombTools } from "../mcp/mcpClients";
-import { telemetryPrompt } from "../prompts/telemetry-prompt";
+import { telemetryPrompt } from "../prompts/telemetry-agent-prompt";
 
 export const telemetryAgent: SubAgent = new Agent({
   id: "telemetry-agent",

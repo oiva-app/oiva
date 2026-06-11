@@ -12,7 +12,7 @@ vi.mock("@/mcp/mcpClients", () => {
     honeycomb_get_query_results: {
       execute: vi.fn().mockResolvedValue(queryResults),
     },
-    mvpMcpClient: { resources: { read: vi.fn() } },
+    mcpClient: { resources: { read: vi.fn() } },
   };
 });
 

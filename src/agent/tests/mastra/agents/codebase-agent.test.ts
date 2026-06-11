@@ -37,7 +37,7 @@ describe("codebaseAgent", () => {
       "../../../src/mastra/agents/codebase-agent"
     );
     const { prompt } = await import(
-      "../../../src/mastra/prompts/system-prompt-codebase-agent-ws-ver"
+      "../../../src/mastra/prompts/codebase-agent-prompt"
     );
     const { investigationSchema } = await import(
       "../../../src/mastra/memory/investigation-schema"
