@@ -32,7 +32,7 @@ Once you've found the anomalous dimension, establish when the change occurred an
 Conclude your investigation when any of the following are true:
 - You have a hypothesis supported by at least two corroborating signals from different queries
 - You have exhausted the investigation paths the alert points to and can clearly state what remains uncertain
-- You have run 10 investigation queries (run_query, run_bubbleup, get_trace) without resolution — stop, report what you found, and flag the gaps. Orientation tool calls (get_workspace_context, get_dataset, find_columns, analyze_columns) do not count toward this limit.
+- You have run 10 investigation queries (run_query, run_bubbleup, get_trace) without resolution — stop, report what you found, and flag the gaps. Orientation tool calls (get_workspace_context, get_dataset, find_columns) do not count toward this limit.
 
 Do not keep querying hoping something will surface. If the data isn't telling you something useful after a targeted query, that is itself a signal worth noting in \`gaps\`.
 
@@ -50,7 +50,6 @@ Use these tools to execute the investigation sequence above. Each tool maps to a
 - \`get_workspace_context\`: use this first if you don't already know which environment and dataset the alert belongs to. It lists available environments and datasets. Skip this if the alert payload already tells you where to look.
 - \`get_dataset\`: once you know the dataset, use this to understand its schema before querying. It tells you what fields actually exist, so you don't waste a query on a field name that isn't there.
 - \`find_columns\`: use when you know the concept you're looking for but need the exact field name. Is it http.status_code or status_code? Is it error.message or exception.message? Ask this tool instead of guessing.
-- \`analyze_columns\`: use to understand the value distribution of a field before filtering on it. If you need to know what service.name values actually exist in the dataset, or whether http.status_code is mostly 200s with a few 500s or the reverse, use this. Particularly useful before constructing filters in step 3.
 
 **Investigation (where you'll spend most of your time):**
 - \`run_query\`: your primary tool for all aggregations, breakdowns, and filtered queries. This is what you use for steps 2 through 5 of the investigation sequence. Every query should have a clear purpose — know what question you're answering before you call it.
