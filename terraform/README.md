@@ -802,7 +802,7 @@ Secrets Manager may keep deleted secrets during a recovery window. If you destro
 For Terraform-created placeholder secrets, you can also force-delete the pending secrets immediately:
 
 ```bash
-./terraform/utilities/force-delete-secrets.sh oiva
+./utilities/force-delete-secrets.sh oiva
 ```
 
 The argument must match `deployment_name` from `terraform.tfvars`.
