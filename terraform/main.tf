@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "oiva" {
-  source = "../../modules/oiva-aws"
+  source = "./modules/oiva-aws"
 
   deployment_name = var.deployment_name
   aws_region      = var.aws_region
@@ -73,5 +73,5 @@ module "oiva" {
   slack_signing_secret_secret_arn = var.slack_signing_secret_secret_arn
   honeycomb_api_key_secret_arn    = var.honeycomb_api_key_secret_arn
 
-  adot_config_content = file("${path.root}/../../../../src/otel-collector/adot-collector-config.production.yaml")
+  adot_config_content = file("${path.root}/../src/otel-collector/adot-collector-config.production.yaml")
 }

@@ -177,7 +177,7 @@ echo "$IMAGE_URI"
 ## Configure Terraform Variables
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 cp terraform.tfvars.example terraform.tfvars
 ```
 
@@ -186,7 +186,7 @@ cp terraform.tfvars.example terraform.tfvars
 Real `.tfvars` files should usually live next to the Terraform files they configure:
 
 ```text
-infra/terraform/examples/aws-fargate-rds/terraform.tfvars
+terraform/terraform.tfvars
 ```
 
 This repository's `.gitignore` ignores `*.tfvars`, `*.tfvars.json`, and Terraform state files, so your local values should not be committed. Keep `terraform.tfvars.example` committed as the safe template.
@@ -368,12 +368,12 @@ If you prefer to keep real variable files outside the repository entirely, you c
 terraform apply -var-file=/path/to/oiva-production.tfvars
 ```
 
-If you do this, run Terraform from `infra/terraform/examples/aws-fargate-rds` so relative paths in the example still resolve correctly.
+If you do this, run Terraform from `terraform` so relative paths in this deployment still resolve correctly.
 
 ## Create The Infrastructure
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 terraform init
 ```
 
@@ -441,7 +441,7 @@ terraform output secret_arns
 The simplest way to populate them is to run the helper script from this Terraform working directory:
 
 ```bash
-../../../utilities/populate_secrets.py
+./utilities/populate_secrets.py
 ```
 
 The script prompts for each required secret, writes non-empty values to Secrets Manager, and forces a new ECS deployment after successful updates. Leave a value blank to skip it.
@@ -630,7 +630,7 @@ agent_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/oiva-agent:abc1234"
 Review and apply the Terraform change:
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 terraform plan
 terraform apply
 ```
@@ -802,7 +802,7 @@ Secrets Manager may keep deleted secrets during a recovery window. If you destro
 For Terraform-created placeholder secrets, you can also force-delete the pending secrets immediately:
 
 ```bash
-./infra/terraform/utilities/force-delete-secrets.sh oiva
+./terraform/utilities/force-delete-secrets.sh oiva
 ```
 
 The argument must match `deployment_name` from `terraform.tfvars`.
