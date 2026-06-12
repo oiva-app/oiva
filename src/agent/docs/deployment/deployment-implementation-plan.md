@@ -262,7 +262,7 @@ Terraform outputs should include:
 ```text
 oiva_url
 honeycomb_alert_webhook_url
-slack_rating_webhook_url
+slack_action_webhook_url
 secret_arns
 knowledge_base_bucket
 ```

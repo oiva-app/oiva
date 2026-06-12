@@ -8,9 +8,9 @@ output "honeycomb_alert_webhook_url" {
   value       = module.oiva.honeycomb_alert_webhook_url
 }
 
-output "slack_rating_webhook_url" {
+output "slack_action_webhook_url" {
   description = "Slack interaction webhook URL."
-  value       = module.oiva.slack_rating_webhook_url
+  value       = module.oiva.slack_action_webhook_url
 }
 
 output "alb_dns_name" {

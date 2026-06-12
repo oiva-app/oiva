@@ -8,9 +8,9 @@ output "honeycomb_alert_webhook_url" {
   value       = local.honeycomb_alert_webhook_url
 }
 
-output "slack_rating_webhook_url" {
+output "slack_action_webhook_url" {
   description = "Slack interaction webhook URL."
-  value       = local.slack_rating_webhook_url
+  value       = local.slack_action_webhook_url
 }
 
 output "alb_dns_name" {

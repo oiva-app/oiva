@@ -543,7 +543,7 @@ In the logs, check that:
 Then verify the external integrations:
 
 - Honeycomb sends alerts to `honeycomb_alert_webhook_url`.
-- Slack sends interactions to `slack_rating_webhook_url`.
+- Slack sends interactions to `slack_action_webhook_url`.
 - Oiva can read the configured GitHub repositories and knowledge-base S3 files.
 - Oiva posts the expected Slack investigation message or report.
 - Oiva traces arrive in Honeycomb through the ADOT sidecar.
