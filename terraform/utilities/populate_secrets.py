@@ -32,7 +32,7 @@ def terraform_outputs():
             "error: failed to read terraform outputs:\n"
             f"{exc.stderr.strip()}\n"
             "Run this script from the terraform working directory "
-            "(e.g. terraform/examples/aws-fargate-rds) after `terraform apply`."
+            "(e.g. terraform) after `terraform apply`."
         )
     return secret_arns, cluster, service
 

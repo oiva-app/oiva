@@ -12,7 +12,7 @@ locals {
 
   public_url                  = "https://${var.domain_name}"
   honeycomb_alert_webhook_url = "${local.public_url}/hook/honeycomb/alert"
-  slack_rating_webhook_url    = "${local.public_url}/hook/slack/interaction"
+  slack_action_webhook_url    = "${local.public_url}/hook/slack/interaction"
 
   knowledge_base_bucket = var.create_knowledge_base_bucket ? aws_s3_bucket.knowledge_base[0].bucket : var.knowledge_base_s3_bucket
 

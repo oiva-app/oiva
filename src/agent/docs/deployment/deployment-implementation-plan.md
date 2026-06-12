@@ -158,6 +158,10 @@ Suggested layout:
 ```text
 infra/
   terraform/
+    main.tf
+    variables.tf
+    outputs.tf
+    terraform.tfvars.example
     modules/
       oiva-aws/
         main.tf
@@ -171,12 +175,6 @@ infra/
         secrets.tf
         security-groups.tf
         storage.tf
-    examples/
-      aws-fargate-rds/
-        main.tf
-        variables.tf
-        outputs.tf
-        terraform.tfvars.example
 ```
 
 Terraform should manage:
@@ -251,7 +249,7 @@ Preferred self-hosting behavior:
 The default user flow should be:
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
@@ -262,7 +260,7 @@ Terraform outputs should include:
 ```text
 oiva_url
 honeycomb_alert_webhook_url
-slack_rating_webhook_url
+slack_action_webhook_url
 secret_arns
 knowledge_base_bucket
 ```
