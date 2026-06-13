@@ -146,6 +146,12 @@ variable "postgres_backup_retention" {
   default     = 7
 }
 
+variable "postgres_multi_az" {
+  description = "Whether RDS Postgres uses Multi-AZ standby failover."
+  type        = bool
+  default     = true
+}
+
 variable "create_knowledge_base_bucket" {
   description = "Whether Terraform should create a private knowledge-base S3 bucket."
   type        = bool

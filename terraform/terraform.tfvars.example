@@ -40,6 +40,7 @@ slack_channel_id = "C0123456789"
 # RDS defaults.
 # postgres_instance_class    = "db.t4g.micro"
 # postgres_allocated_storage = 20
+# postgres_multi_az          = true
 # postgres_backup_retention  = 7
 
 # Knowledge-base S3 defaults. knowledge_base_force_destroy=true lets
