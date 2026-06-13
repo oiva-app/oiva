@@ -66,7 +66,7 @@ module "oiva" {
   reaper_failed_quiet_minutes    = var.reaper_failed_quiet_minutes
   reaper_stuck_deadline_minutes  = var.reaper_stuck_deadline_minutes
 
-  openai_api_key_secret_arn       = var.openai_api_key_secret_arn
+  llm_provider_secret_env_vars    = var.llm_provider_secret_env_vars
   hc_mcp_key_secret_arn           = var.hc_mcp_key_secret_arn
   hc_shared_secret_secret_arn     = var.hc_shared_secret_secret_arn
   github_pat_secret_arn           = var.github_pat_secret_arn

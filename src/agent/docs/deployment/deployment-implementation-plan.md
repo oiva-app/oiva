@@ -225,7 +225,8 @@ COLLECTOR_ENDPOINT
 Secrets Manager values:
 
 ```text
-OPENAI_API_KEY
+LLM provider API keys named for the configured Mastra model providers
+  for example OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY
 HC_MCP_KEY
 HC_SHARED_SECRET
 GITHUB_PAT

@@ -1,6 +1,5 @@
 locals {
   provided_secret_arns = {
-    openai_api_key       = var.openai_api_key_secret_arn
     hc_mcp_key           = var.hc_mcp_key_secret_arn
     hc_shared_secret     = var.hc_shared_secret_secret_arn
     github_pat           = var.github_pat_secret_arn
@@ -9,8 +8,7 @@ locals {
     honeycomb_api_key    = var.honeycomb_api_key_secret_arn
   }
 
-  placeholder_secret_names = {
-    openai_api_key       = "openai-api-key"
+  fixed_placeholder_secret_names = {
     hc_mcp_key           = "hc-mcp-key"
     hc_shared_secret     = "hc-shared-secret"
     github_pat           = "github-pat"
@@ -19,16 +17,29 @@ locals {
     honeycomb_api_key    = "honeycomb-api-key"
   }
 
-  placeholder_secrets = {
-    for key, name in local.placeholder_secret_names :
+  llm_provider_secret_names = {
+    for name in var.llm_provider_secret_env_vars :
+    name => replace(lower(name), "_", "-")
+  }
+
+  fixed_placeholder_secrets = {
+    for key, name in local.fixed_placeholder_secret_names :
     key => name
     if local.provided_secret_arns[key] == null
   }
 
-  secret_arns = {
-    for key, name in local.placeholder_secret_names :
-    key => local.provided_secret_arns[key] != null ? local.provided_secret_arns[key] : aws_secretsmanager_secret.placeholder[key].arn
-  }
+  placeholder_secrets = merge(local.fixed_placeholder_secrets, local.llm_provider_secret_names)
+
+  secret_arns = merge(
+    {
+      for key, name in local.fixed_placeholder_secret_names :
+      key => local.provided_secret_arns[key] != null ? local.provided_secret_arns[key] : aws_secretsmanager_secret.placeholder[key].arn
+    },
+    {
+      for key, name in local.llm_provider_secret_names :
+      key => aws_secretsmanager_secret.placeholder[key].arn
+    },
+  )
 }
 
 resource "aws_secretsmanager_secret" "placeholder" {

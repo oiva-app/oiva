@@ -414,13 +414,28 @@ Oiva reads API keys, tokens, and webhook signing values from AWS Secrets Manager
 
 The required secrets are:
 
-- `OPENAI_API_KEY`
 - `HC_MCP_KEY`
 - `HC_SHARED_SECRET`
 - `GITHUB_PAT`
 - `SLACK_BOT_TOKEN`
 - `SLACK_SIGNING_SECRET`
 - `HONEYCOMB_API_KEY`
+
+LLM provider API key secrets are configured separately with
+`llm_provider_secret_env_vars`. The default deployment uses OpenAI models, so the
+default value creates and injects `OPENAI_API_KEY`. If you configure non-OpenAI provider(s), include each provider's expected environment variable name:
+
+```hcl
+llm_provider_secret_env_vars = [
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "GOOGLE_API_KEY",
+]
+```
+
+Check Mastra provider docs define these names. For example, `openai/...` models use
+`OPENAI_API_KEY`, `anthropic/...` models use `ANTHROPIC_API_KEY`, and
+`google/...` models use `GOOGLE_API_KEY`. Etc.
 
 `GITHUB_PAT` only needs read access to the repositories Oiva will inspect.
 
@@ -459,17 +474,19 @@ aws secretsmanager list-secrets \
   --output text
 ```
 
-For the default `deployment_name = "oiva"`, the OpenAI API key placeholder is named:
+Provider API key placeholders use the lower-case, hyphenated form of the env var
+name. For example, with `deployment_name = "oiva"`, a provider env var named
+`PROVIDER_API_KEY` would create:
 
 ```text
-/oiva/oiva/openai-api-key
+/oiva/oiva/provider-api-key
 ```
 
-Populate it with:
+Populate a provider key with:
 
 ```bash
 aws secretsmanager put-secret-value \
-  --secret-id /oiva/oiva/openai-api-key \
+  --secret-id /oiva/oiva/provider-api-key \
   --secret-string "actual-value"
 ```
 
