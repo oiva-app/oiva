@@ -44,6 +44,7 @@ module "oiva" {
   postgres_instance_class    = var.postgres_instance_class
   postgres_allocated_storage = var.postgres_allocated_storage
   postgres_backup_retention  = var.postgres_backup_retention
+  postgres_multi_az          = var.postgres_multi_az
 
   create_knowledge_base_bucket = var.create_knowledge_base_bucket
   knowledge_base_s3_bucket     = var.knowledge_base_s3_bucket
