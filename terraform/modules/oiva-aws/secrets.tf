@@ -52,3 +52,8 @@ resource "aws_secretsmanager_secret" "placeholder" {
     Name = "/oiva/${local.name}/${each.value}"
   })
 }
+
+moved {
+  from = aws_secretsmanager_secret.placeholder["openai_api_key"]
+  to   = aws_secretsmanager_secret.placeholder["OPENAI_API_KEY"]
+}
