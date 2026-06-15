@@ -15,7 +15,7 @@
  *            failed.)
  */
 
-import type { IncidentStatus } from "../ports/incident-repository";
+import type { IncidentStatus } from "./incident";
 
 const VALID_TRANSITIONS: Record<IncidentStatus, readonly IncidentStatus[]> = {
   triggered: ["investigating", "failed", "closed"],

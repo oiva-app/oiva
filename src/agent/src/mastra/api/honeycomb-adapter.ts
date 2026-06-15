@@ -1,8 +1,8 @@
 // HC verifyAlert + normalizeAlert → AlertContext
 // (env.HC_SHARED_SECRET is read here only as a function param — the caller passes it in.)
 import { createHash, timingSafeEqual } from "node:crypto";
-import type { HoneycombWebhookPayload } from "../types/honeycomb-alert";
-import type { AlertContext } from "../types/alert-context";
+import type { HoneycombWebhookPayload } from "@/api/honeycomb-alert";
+import type { AlertContext } from "@/domain/alert-context";
 
 export type VerifyResult =
   | { kind: "invalid"; reason: "wrong-secret" | "missing-secret" }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { extractQueryId, normalizeAlert, verifyAlert } from "../../../src/mastra/adapters/honeycomb-adapter";
-import { HoneycombWebhookPayload, honeycombWebhookPayloadSchema } from "../../../src/mastra/types/honeycomb-alert";
-import { alertContextSchema } from "../../../src/mastra/types/alert-context";
+import { extractQueryId, normalizeAlert, verifyAlert } from "@/api/honeycomb-adapter";
+import { HoneycombWebhookPayload, honeycombWebhookPayloadSchema } from "@/api/honeycomb-alert";
+import { alertContextSchema } from "@/domain/alert-context";
 import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
 import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
 

@@ -2,14 +2,14 @@ import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { RequestContext } from "@mastra/core/request-context";
 
-import { alertContextSchema } from "../types/alert-context";
+import { alertContextSchema } from "@/domain/alert-context";
 import {
   investigationTraceSchema,
   supervisorAgentOutputSchema,
-} from "../types/investigation";
-import { incidentReportSchema, reportAgentOutputSchema } from "../types/report";
+} from "@/domain/investigation";
+import { incidentReportSchema, reportAgentOutputSchema } from "@/domain/incident-report";
 import { progressReporter } from "@/slack";
-import type { InvestigationStep } from "../types/investigation";
+import type { InvestigationStep } from "@/domain/investigation";
 import {
   alertRepository,
   incidentRepository,
@@ -18,7 +18,7 @@ import {
 import { assertTransition } from "../domain/incident-state";
 import { incidentDurationMs } from "../domain/incident-duration";
 import { threadIdForIncident } from "../domain/incident-thread";
-import type { IncidentStatus } from "../ports/incident-repository";
+import type { IncidentStatus } from "@/domain/incident";
 import { failIncident as failIncidentService } from "../services/incident-service";
 import { env } from "../config/env";
 import {

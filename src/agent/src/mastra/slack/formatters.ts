@@ -4,12 +4,12 @@ import type {
   RichTextBlock,
   RichTextSection,
 } from "@slack/web-api";
-import type { IncidentReport, Hypothesis } from "../types/report";
-import type { AlertContext } from "../types/alert-context";
+import type { IncidentReport, Hypothesis } from "@/domain/incident-report";
+import type { AlertContext } from "@/domain/alert-context";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
 import type { ClosedBy } from "../ports/progress-reporter";
-import type { IncidentStatus } from "../ports/incident-repository";
-import type { InvestigationStep, NextStep } from "../types/investigation";
+import type { IncidentStatus } from "@/domain/incident";
+import type { InvestigationStep, NextStep } from "@/domain/investigation";
 import { formatDuration } from "../domain/incident-duration";
 
 const NEXT_STEP_GROUPS = [

@@ -1,6 +1,6 @@
-import type { AlertContext } from "../types/alert-context";
-import type { IncidentReport } from "../types/report";
-import type { IncidentStatus } from "../ports/incident-repository";
+import type { AlertContext } from "@/domain/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { IncidentStatus } from "@/domain/incident";
 
 export type ActivityLogEntry =
   | { kind: "milestone"; label: string }

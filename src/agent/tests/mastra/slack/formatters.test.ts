@@ -12,13 +12,13 @@ import {
   buildIncidentMessageBlocks,
   formatInvestigationSteps,
 } from "../../../src/mastra/slack/formatters";
-import type { IncidentReport } from "../../../src/mastra/types/report";
-import type { AlertContext } from "../../../src/mastra/types/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { AlertContext } from "@/domain/alert-context";
 import type {
   ActivityLogEntry,
   IncidentRenderInputs,
 } from "../../../src/mastra/slack/render-types";
-import type { InvestigationStep } from "../../../src/mastra/types/investigation";
+import type { InvestigationStep } from "@/domain/investigation";
 
 const mockNextStep = {
   action:

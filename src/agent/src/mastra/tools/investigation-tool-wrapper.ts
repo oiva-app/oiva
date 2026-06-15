@@ -9,8 +9,8 @@ import type { JSONSchema7 } from "json-schema";
 import {
   investigationToolCallSchema,
   investigationTraceSchema,
-} from "@/types/investigation";
-import { ResourceLinkSchema, type McpTextContent } from "@/types/mcp";
+} from "@/domain/investigation";
+import { ResourceLinkSchema, type McpTextContent } from "@/mcp/result-schemas";
 
 const DEFAULT_PROMPT =
   "Why are you using the tool? Example: `What errors exist in the 'product_catalog' dataset?`  Limit to 65 characters, if possible.";

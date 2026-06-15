@@ -1,10 +1,9 @@
 import { randomUUID } from "node:crypto";
+import type { Incident, IncidentStatus } from "@/domain/incident";
 import type {
   CorrelationLookup,
-  Incident,
   IncidentRepository,
-  IncidentStatus,
-} from "../ports/incident-repository";
+} from "@/ports/incident-repository";
 
 // Mirrors PgIncidentRepository.updateStatus's resolved_at policy: set on
 // entering report_delivered or closed (end-of-lifecycle transitions),

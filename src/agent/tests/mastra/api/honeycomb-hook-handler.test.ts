@@ -4,7 +4,7 @@ import { alertHookHandler } from "../../../src/mastra/api/honeycomb-hook-handler
 import {
   markShuttingDown,
   resetShutdownStateForTests,
-} from "../../../src/mastra/services/shutdown-state";
+} from "@/runtime/shutdown-state";
 
 const mocks = vi.hoisted(() => ({
   alertRepository: {

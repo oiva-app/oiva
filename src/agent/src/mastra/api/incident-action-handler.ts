@@ -3,10 +3,10 @@ import { closeIncident, retryIncident } from "../services/incident-service";
 import { incidentRepository, alertRepository } from "../repositories";
 import { progressReporter } from "../slack";
 import { postEphemeralError } from "../slack/client";
-import { normalizeAlert } from "../adapters/honeycomb-adapter";
-import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
-import type { AlertContext } from "../types/alert-context";
-import { isShuttingDown } from "../services/shutdown-state";
+import { normalizeAlert } from "@/api/honeycomb-adapter";
+import { honeycombWebhookPayloadSchema } from "@/api/honeycomb-alert";
+import type { AlertContext } from "@/domain/alert-context";
+import { isShuttingDown } from "@/runtime/shutdown-state";
 
 export async function handleIncidentClose(
   incidentId: string,

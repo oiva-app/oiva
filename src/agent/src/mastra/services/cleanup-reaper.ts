@@ -8,10 +8,8 @@
  *   2. failed + quiet                → closed  (un-retried, un-acked; give up)
  *   3. working state + past deadline → failed  (the run died or hung)
  */
-import type {
-  IncidentRepository,
-  IncidentStatus,
-} from "../ports/incident-repository";
+import type { IncidentStatus } from "@/domain/incident";
+import type { IncidentRepository } from "../ports/incident-repository";
 import type { ProgressReporter } from "../ports/progress-reporter";
 import { closeIncident, failIncident } from "./incident-service";
 

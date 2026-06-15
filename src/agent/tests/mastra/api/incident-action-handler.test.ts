@@ -7,7 +7,7 @@ import {
 import {
   markShuttingDown,
   resetShutdownStateForTests,
-} from "../../../src/mastra/services/shutdown-state";
+} from "@/runtime/shutdown-state";
 
 const incidentId = "11111111-1111-4111-8111-111111111111";
 

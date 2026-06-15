@@ -1,4 +1,4 @@
-import { alertContextSchema } from "@/types/alert-context";
+import { alertContextSchema } from "@/domain/alert-context";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod"
 

@@ -5,11 +5,10 @@
  */
 import type { Pool } from "pg";
 import type { IncidentRow } from "../db/types";
+import type { Incident, IncidentStatus } from "@/domain/incident";
 import type {
   CorrelationLookup,
-  Incident,
   IncidentRepository,
-  IncidentStatus,
 } from "../ports/incident-repository";
 
 export class PgIncidentRepository implements IncidentRepository {

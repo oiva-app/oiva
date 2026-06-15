@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Tool } from "@mastra/core/tools";
 
 import { investigationToolWrapper } from "@/tools/investigation-tool-wrapper";
-import type { investigationTraceSchema } from "@/types/investigation";
+import type { investigationTraceSchema } from "@/domain/investigation";
 
 type InvestigationTrace = z.infer<typeof investigationTraceSchema>;
 

@@ -11,10 +11,10 @@ import type {
   ClosedBy,
   DelegationOutcome,
   ProgressReporter,
-} from "../ports/progress-reporter";
-import type { AlertContext } from "../types/alert-context";
-import type { IncidentReport } from "../types/report";
-import type { IncidentStatus } from "../ports/incident-repository";
+} from "@/ports/progress-reporter";
+import type { AlertContext } from "@/domain/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { IncidentStatus } from "@/domain/incident";
 
 export type ProgressEvent =
   | { type: "incidentOpened"; incidentId: string; alert: AlertContext }

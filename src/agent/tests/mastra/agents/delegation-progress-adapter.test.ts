@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { FakeProgressReporter } from "../../../src/mastra/testing/fake-progress-reporter";
+import { FakeProgressReporter } from "../../utilities/fake-progress-reporter";
 import { DelegationProgressTracker } from "../../../src/mastra/agents/delegation-progress-adapter";
 import { threadIdForIncident } from "../../../src/mastra/domain/incident-thread";
 
