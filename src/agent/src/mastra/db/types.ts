@@ -14,6 +14,7 @@ export interface IncidentRow {
   resolved_at: Date | null;
   slack_thread_ts: string | null;
   slack_channel_id: string | null;
+  live_update_snapshot: unknown;
 }
 
 export interface AlertRow {

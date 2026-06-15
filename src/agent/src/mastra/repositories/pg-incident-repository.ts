@@ -70,6 +70,45 @@ export class PgIncidentRepository implements IncidentRepository {
   }
 
   /**
+   * Atomic conditional close. The `status != 'closed'` predicate means a second
+   * concurrent close affects zero rows and returns false, so close side effects
+   * (the thread reply, the root re-render) only fire for the call that won.
+   */
+  async closeIfOpen(id: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE incidents
+         SET status = 'closed',
+             status_updated_at = NOW(),
+             resolved_at = CASE
+               WHEN resolved_at IS NULL THEN NOW()
+               ELSE resolved_at
+             END
+         WHERE id = $1
+           AND status != 'closed'`,
+      [id],
+    );
+    return (rowCount ?? 0) > 0;
+  }
+
+  async persistLiveUpdateSnapshot(
+    id: string,
+    snapshot: unknown,
+  ): Promise<void> {
+    await this.pool.query(
+      `UPDATE incidents SET live_update_snapshot = $2::jsonb WHERE id = $1`,
+      [id, JSON.stringify(snapshot)],
+    );
+  }
+
+  async getLiveUpdateSnapshot(id: string): Promise<unknown> {
+    const { rows } = await this.pool.query<{ live_update_snapshot: unknown }>(
+      `SELECT live_update_snapshot FROM incidents WHERE id = $1`,
+      [id],
+    );
+    return rows[0]?.live_update_snapshot ?? null;
+  }
+
+  /**
    * Returns incidents whose alerts match the correlation tuple
    * (triggerName, dataset, queryId) AND whose status is active
    * (NOT in 'report_delivered', 'closed', or 'failed'). The alert time window

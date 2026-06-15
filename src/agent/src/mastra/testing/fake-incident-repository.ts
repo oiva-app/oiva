@@ -18,9 +18,13 @@ export class FakeIncidentRepository implements IncidentRepository {
   /** Every incident the fake currently knows about, keyed by id. */
   readonly incidents = new Map<string, Incident>();
 
+  /** Persisted live-update snapshots, keyed by incident id. */
+  readonly snapshots = new Map<string, unknown>();
+
   /** Clear state between tests. */
   reset(): void {
     this.incidents.clear();
+    this.snapshots.clear();
   }
 
   async create(input?: { status?: IncidentStatus }): Promise<Incident> {
@@ -61,6 +65,30 @@ export class FakeIncidentRepository implements IncidentRepository {
     };
     this.incidents.set(id, updated);
     return updated;
+  }
+
+  async closeIfOpen(id: string): Promise<boolean> {
+    const existing = this.incidents.get(id);
+    if (!existing || existing.status === "closed") return false;
+    const now = new Date();
+    this.incidents.set(id, {
+      ...existing,
+      status: "closed",
+      statusUpdated: now,
+      resolvedAt: existing.resolvedAt ?? now,
+    });
+    return true;
+  }
+
+  async persistLiveUpdateSnapshot(
+    id: string,
+    snapshot: unknown,
+  ): Promise<void> {
+    this.snapshots.set(id, snapshot);
+  }
+
+  async getLiveUpdateSnapshot(id: string): Promise<unknown> {
+    return this.snapshots.get(id) ?? null;
   }
 
   async findActiveCandidates(_opts: CorrelationLookup): Promise<Incident[]> {
