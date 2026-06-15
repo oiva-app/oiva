@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { FakeIncidentRepository } from "../../../src/mastra/testing/fake-incident-repository";
 import type { AlertContext } from "../../../src/mastra/types/alert-context";
+import type { IncidentReport } from "../../../src/mastra/types/report";
 
 const mockFns = vi.hoisted(() => ({
   postMessage: vi.fn(),
@@ -46,6 +47,17 @@ const alert: AlertContext = {
   resultUrl: "https://ui.honeycomb.io/x",
   triggerUrl: "https://ui.honeycomb.io/x",
   instanceId: "instance-1",
+};
+
+const minimalReport: IncidentReport = {
+  id: "report-1",
+  durationMs: null,
+  title: "Test report",
+  summary: "summary",
+  alertOverview: "overview",
+  hypothesis: { paragraph: "hyp", evidenceFor: [], evidenceAgainst: [] },
+  nextSteps: [],
+  investigationSteps: [],
 };
 
 describe("SlackProgressReporter", () => {
@@ -161,11 +173,64 @@ describe("SlackProgressReporter", () => {
         expect.objectContaining({ channel: "C-prior", thread_ts: "T-prior" }),
       );
     });
+
+    it("warm-close of a delivered report removes the Close button", async () => {
+      const incident = await repo.create();
+      mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+      mockFns.update.mockResolvedValue({});
+      await reporter.incidentOpened(incident.id, alert);
+      await reporter.statusChanged(incident.id, "report_delivered");
+      await reporter.reportReady(incident.id, minimalReport, alert.resultUrl);
+      await vi.runAllTimersAsync();
+
+      // The delivered render offers the Close button.
+      const delivered = JSON.stringify(
+        mockFns.update.mock.calls.at(-1)?.[0].blocks,
+      );
+      expect(delivered).toContain("incident_close");
+
+      mockFns.update.mockClear();
+      await reporter.incidentClosed(incident.id, {
+        kind: "user",
+        userId: "U123",
+      });
+
+      expect(mockFns.update).toHaveBeenCalledTimes(1);
+      const afterClose = JSON.stringify(mockFns.update.mock.calls[0][0].blocks);
+      expect(afterClose).toContain("Closed");
+      expect(afterClose).not.toContain("incident_close");
+    });
+
+    it("cold-close rebuilds from the snapshot, dropping the Close button", async () => {
+      const incident = await repo.create();
+      mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+      mockFns.update.mockResolvedValue({});
+      await reporter.incidentOpened(incident.id, alert);
+      await reporter.statusChanged(incident.id, "report_delivered");
+      await reporter.reportReady(incident.id, minimalReport, alert.resultUrl);
+      await vi.runAllTimersAsync();
+
+      // Simulate a restart: fresh reporter (empty in-memory state), same repo.
+      const coldReporter = new SlackProgressReporter(repo);
+      mockFns.update.mockClear();
+      mockFns.postMessage.mockClear();
+
+      await coldReporter.incidentClosed(incident.id, { kind: "reaper" });
+
+      expect(mockFns.update).toHaveBeenCalledTimes(1);
+      const blocks = JSON.stringify(mockFns.update.mock.calls[0][0].blocks);
+      expect(blocks).toContain("Closed");
+      expect(blocks).not.toContain("incident_close");
+      expect(mockFns.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ channel: "C-default", thread_ts: "T1" }),
+      );
+    });
   });
 
-  it("user-close posts a threaded reply with a lock + attribution", async () => {
+  it("user-close re-renders the root as closed and posts an attribution reply", async () => {
     const incident = await repo.create();
     mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+    mockFns.update.mockResolvedValue({});
     await reporter.incidentOpened(incident.id, alert);
     await vi.runAllTimersAsync();
     mockFns.update.mockClear();
@@ -176,7 +241,12 @@ describe("SlackProgressReporter", () => {
       userId: "U123",
     });
 
-    expect(mockFns.update).not.toHaveBeenCalled();
+    // Warm path re-renders the root as closed (header flips, any button gone).
+    expect(mockFns.update).toHaveBeenCalledTimes(1);
+    const updated = JSON.stringify(mockFns.update.mock.calls[0][0].blocks);
+    expect(updated).toContain("Closed");
+
+    // The attribution reply is the only notifying surface.
     expect(mockFns.postMessage).toHaveBeenCalledTimes(1);
     const args = mockFns.postMessage.mock.calls[0][0];
     expect(args).toMatchObject({ channel: "C-default", thread_ts: "T1" });
