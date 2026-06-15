@@ -525,8 +525,9 @@ export function buildAttachCounterBlock(count: number): KnownBlock | null {
 export function buildIncidentFailedBlocks(
   reason: string,
   incidentId: string,
+  includeActions = true,
 ): (Block | KnownBlock)[] {
-  return [
+  const blocks: (Block | KnownBlock)[] = [
     {
       type: "section",
       text: {
@@ -534,7 +535,10 @@ export function buildIncidentFailedBlocks(
         text: `*Investigation failed*\n${toMrkdwn(reason)}`,
       },
     },
-    {
+  ];
+
+  if (includeActions) {
+    blocks.push({
       type: "actions",
       elements: [
         {
@@ -551,8 +555,25 @@ export function buildIncidentFailedBlocks(
           value: incidentId,
         },
       ],
-    },
-  ];
+    });
+  }
+
+  return blocks;
+}
+
+export function buildCloseActionBlock(incidentId: string): KnownBlock {
+  return {
+    type: "actions",
+    elements: [
+      {
+        type: "button",
+        text: { type: "plain_text", text: "Close", emoji: false },
+        action_id: "incident_close",
+        style: "danger",
+        value: incidentId,
+      },
+    ],
+  };
 }
 
 export function buildIncidentClosedAttributionBlock(by: ClosedBy): KnownBlock {
@@ -588,10 +609,18 @@ export function buildIncidentMessageBlocks(
   const counter = buildAttachCounterBlock(inputs.attachCount);
   if (counter) blocks.push(counter);
 
+  if (inputs.report && inputs.status === "report_delivered") {
+    blocks.push(buildCloseActionBlock(incidentId));
+  }
+
   if (inputs.failure) {
     blocks.push(
       { type: "divider" },
-      ...buildIncidentFailedBlocks(inputs.failure.reason, incidentId),
+      ...buildIncidentFailedBlocks(
+        inputs.failure.reason,
+        incidentId,
+        inputs.status !== "closed",
+      ),
     );
   }
 

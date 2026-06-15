@@ -165,6 +165,7 @@ export class SlackProgressReporter implements ProgressReporter {
       const state = this.states.get(incidentId);
       if (!state) return;
       state.report = { report, resultUrl };
+      await this.persistSnapshot(incidentId, state);
       await this.flushNow(incidentId);
     });
   }
@@ -191,17 +192,31 @@ export class SlackProgressReporter implements ProgressReporter {
       if (!state) return;
       state.status = "failed";
       state.failure = failure;
+      await this.persistSnapshot(incidentId, state);
       await this.flushNow(incidentId);
     });
   }
 
   async incidentClosed(incidentId: string, by: ClosedBy): Promise<void> {
     return this.safe("incidentClosed", incidentId, async () => {
-      // Closing is surfaced the same way regardless of who closed it (user or
-      // reaper): a threaded reply, leaving the root message as it last rendered.
       const persisted = await this.incidents.findById(incidentId);
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
 
+      // Re-render the root message as closed so its Close button is removed.
+      try {
+        await this.rerenderClosed(
+          incidentId,
+          persisted.slackChannelId,
+          persisted.slackThreadTs,
+        );
+      } catch (err) {
+        console.error("Failed to re-render root message as closed", {
+          incidentId,
+          err,
+        });
+      }
+
+      // The thread reply is the only surface that notifies, and carries who/auto.
       await postThreadReply({
         channel: persisted.slackChannelId,
         threadTs: persisted.slackThreadTs,
@@ -259,7 +274,66 @@ export class SlackProgressReporter implements ProgressReporter {
     this.cancelFlush(incidentId);
   }
 
-  private fallbackTextFor(state: RenderState): string {
+  private async persistSnapshot(
+    incidentId: string,
+    state: RenderState,
+  ): Promise<void> {
+    const snapshot: IncidentRenderInputs = {
+      status: state.status,
+      alert: state.alert,
+      log: state.log,
+      attachCount: state.attachCount,
+      report: state.report,
+      failure: state.failure,
+    };
+    // Best-effort: the snapshot only backs cold-close rendering, so a failed
+    // write must not block the primary flushNow render. On failure a later cold
+    // close degrades to the legacy (no-snapshot) path.
+    try {
+      await this.incidents.persistLiveUpdateSnapshot(incidentId, snapshot);
+    } catch (err) {
+      console.error("SlackProgressReporter.persistSnapshot failed", {
+        incidentId,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  /**
+   * Re-renders the root message as closed so its Close button is gone. Warm
+   * (in-memory state) re-renders from live state, keeping the full activity log.
+   * Cold (reaper / post-restart) rebuilds from the persisted snapshot; legacy
+   * incidents with no snapshot are left as last rendered since they never had a
+   * Close button to remove.
+   */
+  private async rerenderClosed(
+    incidentId: string,
+    channelId: string,
+    threadTs: string,
+  ): Promise<void> {
+    const state = this.states.get(incidentId);
+    if (state) {
+      state.status = "closed";
+      await this.flushNow(incidentId);
+      return;
+    }
+
+    const snapshot = await this.incidents.getLiveUpdateSnapshot(incidentId);
+    if (!snapshot) return;
+
+    const inputs: IncidentRenderInputs = {
+      ...(snapshot as IncidentRenderInputs),
+      status: "closed",
+    };
+    await updateIncidentMessage({
+      channel: channelId,
+      ts: threadTs,
+      blocks: buildIncidentMessageBlocks(inputs, incidentId),
+      fallbackText: this.fallbackTextFor(inputs),
+    });
+  }
+
+  private fallbackTextFor(state: IncidentRenderInputs): string {
     const trigger = state.alert.triggerName;
     if (state.failure) return `Failed: ${trigger}`;
     if (state.report) return `Report ready: ${trigger}`;
