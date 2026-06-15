@@ -8,7 +8,6 @@ let testRoot: string;
 
 const requiredEnv = {
   OBSERVED_APP_NAME: "orders-api",
-  OPENAI_API_KEY: "openai-key",
   HC_MCP_KEY: "hc-mcp-key",
   COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces",
   GITHUB_PAT: "github-token",
@@ -80,6 +79,7 @@ describe("env config", () => {
     expect(env.TELEMETRY_AGENT_MODEL).toBe("openai/gpt-5.4");
     expect(env.CODEBASE_AGENT_MODEL).toBe("openai/gpt-5.4");
     expect(env.REPORT_AGENT_MODEL).toBe("openai/gpt-4o-mini");
+    expect("OPENAI_API_KEY" in env).toBe(false);
     expect("DATABASE_URL" in env).toBe(false);
     expect("POSTGRES_HOST" in env).toBe(false);
     expect("POSTGRES_PORT" in env).toBe(false);
@@ -130,6 +130,22 @@ describe("env config", () => {
     expect(env.TELEMETRY_AGENT_MODEL).toBe("openai/gpt-5.4");
     expect(env.CODEBASE_AGENT_MODEL).toBe("openai/gpt-5.4-mini");
     expect(env.REPORT_AGENT_MODEL).toBe("openai/gpt-4o");
+  });
+
+  it("accepts non-OpenAI and mixed-provider model ids without provider API keys", async () => {
+    stubRequiredEnv({
+      SUPERVISOR_AGENT_MODEL: "anthropic/claude-sonnet-4-5",
+      TELEMETRY_AGENT_MODEL: "openai/gpt-5.4",
+      CODEBASE_AGENT_MODEL: "google/gemini-2.5-pro",
+      REPORT_AGENT_MODEL: "anthropic/claude-haiku-4-5",
+    });
+
+    const { env } = await importEnv();
+
+    expect(env.SUPERVISOR_AGENT_MODEL).toBe("anthropic/claude-sonnet-4-5");
+    expect(env.TELEMETRY_AGENT_MODEL).toBe("openai/gpt-5.4");
+    expect(env.CODEBASE_AGENT_MODEL).toBe("google/gemini-2.5-pro");
+    expect(env.REPORT_AGENT_MODEL).toBe("anthropic/claude-haiku-4-5");
   });
 
   it("rejects model ids that do not use Mastra router format", async () => {

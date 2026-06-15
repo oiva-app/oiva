@@ -16,6 +16,14 @@ locals {
 
   knowledge_base_bucket = var.create_knowledge_base_bucket ? aws_s3_bucket.knowledge_base[0].bucket : var.knowledge_base_s3_bucket
 
+  app_secret_env_names = {
+    hc_mcp_key           = "HC_MCP_KEY"
+    hc_shared_secret     = "HC_SHARED_SECRET"
+    github_pat           = "GITHUB_PAT"
+    slack_bot_token      = "SLACK_BOT_TOKEN"
+    slack_signing_secret = "SLACK_SIGNING_SECRET"
+  }
+
   app_environment = [
     {
       name  = "OBSERVED_APP_NAME"
@@ -132,34 +140,24 @@ locals {
     },
   ]
 
-  app_secrets = [
-    {
-      name      = "OPENAI_API_KEY"
-      valueFrom = local.secret_arns.openai_api_key
-    },
-    {
-      name      = "HC_MCP_KEY"
-      valueFrom = local.secret_arns.hc_mcp_key
-    },
-    {
-      name      = "HC_SHARED_SECRET"
-      valueFrom = local.secret_arns.hc_shared_secret
-    },
-    {
-      name      = "GITHUB_PAT"
-      valueFrom = local.secret_arns.github_pat
-    },
-    {
-      name      = "SLACK_BOT_TOKEN"
-      valueFrom = local.secret_arns.slack_bot_token
-    },
-    {
-      name      = "SLACK_SIGNING_SECRET"
-      valueFrom = local.secret_arns.slack_signing_secret
-    },
-    {
-      name      = "POSTGRES_PASSWORD"
-      valueFrom = "${aws_db_instance.postgres.master_user_secret[0].secret_arn}:password::"
-    },
-  ]
+  app_secrets = concat(
+    [
+      for key, name in local.app_secret_env_names : {
+        name      = name
+        valueFrom = local.secret_arns[key]
+      }
+    ],
+    [
+      for name in var.llm_provider_secret_env_vars : {
+        name      = name
+        valueFrom = local.secret_arns[name]
+      }
+    ],
+    [
+      {
+        name      = "POSTGRES_PASSWORD"
+        valueFrom = "${aws_db_instance.postgres.master_user_secret[0].secret_arn}:password::"
+      },
+    ],
+  )
 }

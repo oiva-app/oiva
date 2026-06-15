@@ -19,8 +19,8 @@ processors:
     send_batch_max_size: 1024
 
 exporters:
-  otlp/honeycomb:
-    endpoint: api.honeycomb.io:443
+  otlp_http/honeycomb:
+    endpoint: https://api.honeycomb.io:443
     timeout: 10s
     headers:
       x-honeycomb-team: ${env:HONEYCOMB_API_KEY}
@@ -31,4 +31,4 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp/honeycomb]
+      exporters: [otlp_http/honeycomb]

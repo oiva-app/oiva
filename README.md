@@ -8,6 +8,11 @@ Create and edit your .env file from the example
 cp .env.example .env
 ```
 
+Set the LLM provider API keys required by the configured agent models. Mastra
+reads provider-standard environment variables automatically; for example,
+`openai/...` models use `OPENAI_API_KEY`, `anthropic/...` models use
+`ANTHROPIC_API_KEY`, and `google/...` models use `GOOGLE_API_KEY`.
+
 Give Oiva access to the GitHub repositories that define your observed app by including a GitHub PAT in the .env file. If the repositories are public you don't need to grant any permissions. More info: [GitHub Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 
 Start the OTel Collector

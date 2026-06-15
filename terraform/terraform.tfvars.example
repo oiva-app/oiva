@@ -57,6 +57,13 @@ slack_channel_id = "C0123456789"
 # telemetry_agent_model          = "openai/gpt-5.4"
 # codebase_agent_model           = "openai/gpt-5.4"
 # report_agent_model             = "openai/gpt-4o-mini"
+# llm_provider_secret_env_vars   = ["OPENAI_API_KEY"]
+# Example for mixed providers:
+# llm_provider_secret_env_vars = [
+#   "OPENAI_API_KEY",
+#   "ANTHROPIC_API_KEY",
+#   "GOOGLE_API_KEY",
+# ]
 # correlation_window_minutes     = 30
 # reaper_enabled                 = true
 # reaper_interval_minutes        = 10
@@ -79,7 +86,6 @@ slack_channel_id = "C0123456789"
 # knowledge_base_s3_bucket     = "existing-bucket-name"
 
 # Existing Secrets Manager secret ARN escape hatches.
-# openai_api_key_secret_arn       = "arn:aws:secretsmanager:..."
 # hc_mcp_key_secret_arn           = "arn:aws:secretsmanager:..."
 # hc_shared_secret_secret_arn     = "arn:aws:secretsmanager:..."
 # github_pat_secret_arn           = "arn:aws:secretsmanager:..."
