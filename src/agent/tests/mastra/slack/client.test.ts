@@ -6,6 +6,7 @@ const mockFns = vi.hoisted(() => ({
   postMessage: vi.fn(),
   filesUploadV2: vi.fn(),
   update: vi.fn(),
+  postEphemeral: vi.fn(),
   capturedConfig: null as unknown,
 }));
 
@@ -14,7 +15,11 @@ vi.mock("@slack/web-api", () => {
     WebClient: function (_token: string, config?: unknown) {
       mockFns.capturedConfig = config;
       return {
-        chat: { postMessage: mockFns.postMessage, update: mockFns.update },
+        chat: {
+          postMessage: mockFns.postMessage,
+          update: mockFns.update,
+          postEphemeral: mockFns.postEphemeral,
+        },
         filesUploadV2: mockFns.filesUploadV2,
       };
     },
@@ -45,6 +50,7 @@ const {
   postRatingConfirmation,
   postErrorMessage,
   postErrorToThread,
+  postEphemeralError,
 } = await import("../../../src/mastra/slack/client");
 
 const mockReport: IncidentReport = {
@@ -244,7 +250,23 @@ describe("slack client", () => {
   describe("postRatingConfirmation", () => {
     const originalBlocks = [
       { type: "section", text: { type: "mrkdwn", text: "summary" } },
-      { type: "actions", elements: [] },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "👍" },
+            action_id: "positive_rating",
+            value: "report-1",
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: "👎" },
+            action_id: "negative_rating",
+            value: "report-1",
+          },
+        ],
+      },
     ];
     it("updates the report summary with a positive rating", async () => {
       mockFns.update.mockResolvedValue({});
@@ -294,6 +316,38 @@ describe("slack client", () => {
       expect(JSON.stringify(blocks)).toContain("👎");
       expect(JSON.stringify(blocks)).toContain("<@U07ABCDE>");
     });
+
+    it("keeps a non-rating actions block (the Close button) intact", async () => {
+      mockFns.update.mockResolvedValue({});
+      const withClose = [
+        ...originalBlocks,
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              text: { type: "plain_text", text: "Close" },
+              action_id: "incident_close",
+              style: "danger",
+              value: "inc-1",
+            },
+          ],
+        },
+      ];
+
+      await postRatingConfirmation(
+        "mock-ts-123",
+        "mock-channel-123",
+        withClose,
+        "positive",
+        "U07ABCDE",
+      );
+
+      const { blocks } = mockFns.update.mock.calls[0][0];
+      // Rating block gone, Close block preserved.
+      expect(JSON.stringify(blocks)).not.toContain("positive_rating");
+      expect(JSON.stringify(blocks)).toContain("incident_close");
+    });
   });
 
   describe("postErrorMessage", () => {
@@ -316,6 +370,24 @@ describe("slack client", () => {
           thread_ts: "mock-ts-123",
         }),
       );
+    });
+  });
+
+  describe("postEphemeralError", () => {
+    it("posts an ephemeral message to the user in-thread", async () => {
+      mockFns.postEphemeral.mockResolvedValue({});
+      await postEphemeralError({
+        channel: "C1",
+        user: "U1",
+        threadTs: "T1",
+        text: "I couldn't close that time — try again.",
+      });
+      expect(mockFns.postEphemeral).toHaveBeenCalledWith({
+        channel: "C1",
+        user: "U1",
+        thread_ts: "T1",
+        text: "I couldn't close that time — try again.",
+      });
     });
   });
 });

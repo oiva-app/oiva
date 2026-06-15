@@ -121,7 +121,12 @@ async function dispatchAction(
     case "negative_rating":
       return handleRatingAction(payload);
     case "incident_close":
-      return handleIncidentClose(value, payload.user.id);
+      return handleIncidentClose(
+        value,
+        payload.user.id,
+        payload.channel.id,
+        payload.message.ts,
+      );
     case "incident_retry":
       return handleIncidentRetry(value, mastra);
     default:

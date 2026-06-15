@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
-import { handleIncidentRetry } from "../../../src/mastra/api/incident-action-handler";
+import {
+  handleIncidentClose,
+  handleIncidentRetry,
+} from "../../../src/mastra/api/incident-action-handler";
 import {
   markShuttingDown,
   resetShutdownStateForTests,
@@ -14,7 +17,10 @@ const mocks = vi.hoisted(() => ({
   },
   incidentRepository: {
     findById: vi.fn(),
+    closeIfOpen: vi.fn(),
   },
+  incidentClosed: vi.fn(),
+  postEphemeralError: vi.fn(),
   createRun: vi.fn(),
   getWorkflow: vi.fn(),
   warn: vi.fn(),
@@ -27,7 +33,11 @@ vi.mock("../../../src/mastra/repositories", () => ({
 }));
 
 vi.mock("../../../src/mastra/slack", () => ({
-  progressReporter: {},
+  progressReporter: { incidentClosed: mocks.incidentClosed },
+}));
+
+vi.mock("../../../src/mastra/slack/client", () => ({
+  postEphemeralError: mocks.postEphemeralError,
 }));
 
 function failedIncident() {
@@ -81,4 +91,57 @@ describe("incident action shutdown behavior", () => {
     });
   });
 
+});
+
+describe("handleIncidentClose", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const deliveredIncident = () => ({
+    id: incidentId,
+    status: "report_delivered",
+    createdAt: new Date("2026-01-01T00:00:00Z"),
+    statusUpdated: new Date("2026-01-01T00:00:00Z"),
+    resolvedAt: null,
+    slackThreadTs: "T1",
+    slackChannelId: "C1",
+  });
+
+  it("closes and notifies the reporter, without an ephemeral", async () => {
+    mocks.incidentRepository.findById.mockResolvedValue(deliveredIncident());
+    mocks.incidentRepository.closeIfOpen.mockResolvedValue(true);
+
+    await handleIncidentClose(incidentId, "U1", "C1", "T1");
+
+    expect(mocks.incidentClosed).toHaveBeenCalledWith(incidentId, {
+      kind: "user",
+      userId: "U1",
+    });
+    expect(mocks.postEphemeralError).not.toHaveBeenCalled();
+  });
+
+  it("stays silent when the incident was already closed (lost the race)", async () => {
+    mocks.incidentRepository.findById.mockResolvedValue(deliveredIncident());
+    mocks.incidentRepository.closeIfOpen.mockResolvedValue(false);
+
+    await handleIncidentClose(incidentId, "U1", "C1", "T1");
+
+    expect(mocks.incidentClosed).not.toHaveBeenCalled();
+    expect(mocks.postEphemeralError).not.toHaveBeenCalled();
+  });
+
+  it("alerts the clicker with an ephemeral when the close throws", async () => {
+    mocks.incidentRepository.findById.mockResolvedValue(null); // not found → throws
+    mocks.postEphemeralError.mockResolvedValue(undefined);
+
+    await expect(
+      handleIncidentClose(incidentId, "U1", "C1", "T1"),
+    ).rejects.toThrow(/not found/);
+
+    expect(mocks.postEphemeralError).toHaveBeenCalledWith(
+      expect.objectContaining({ channel: "C1", user: "U1", threadTs: "T1" }),
+    );
+    expect(mocks.incidentClosed).not.toHaveBeenCalled();
+  });
 });

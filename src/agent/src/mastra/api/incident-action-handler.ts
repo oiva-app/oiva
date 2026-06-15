@@ -2,6 +2,7 @@ import type { Mastra } from "@mastra/core/mastra";
 import { closeIncident, retryIncident } from "../services/incident-service";
 import { incidentRepository, alertRepository } from "../repositories";
 import { progressReporter } from "../slack";
+import { postEphemeralError } from "../slack/client";
 import { normalizeAlert } from "../adapters/honeycomb-adapter";
 import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
 import type { AlertContext } from "../types/alert-context";
@@ -10,12 +11,24 @@ import { isShuttingDown } from "../services/shutdown-state";
 export async function handleIncidentClose(
   incidentId: string,
   userId: string,
+  channel: string,
+  threadTs: string,
 ): Promise<void> {
-  await closeIncident(
-    incidentId,
-    { kind: "user", userId },
-    { incidents: incidentRepository, reporter: progressReporter },
-  );
+  try {
+    await closeIncident(
+      incidentId,
+      { kind: "user", userId },
+      { incidents: incidentRepository, reporter: progressReporter },
+    );
+  } catch (err) {
+    await postEphemeralError({
+      channel,
+      user: userId,
+      threadTs,
+      text: "I couldn't close that time — try again.",
+    }).catch(() => {});
+    throw err;
+  }
 }
 
 export async function handleIncidentRetry(
