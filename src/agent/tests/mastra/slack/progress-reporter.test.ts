@@ -157,6 +157,28 @@ describe("SlackProgressReporter", () => {
     });
   });
 
+  it("still renders the report when snapshot persistence fails", async () => {
+    const incident = await repo.create();
+    mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+    mockFns.update.mockResolvedValue({});
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    vi.spyOn(repo, "persistLiveUpdateSnapshot").mockRejectedValue(
+      new Error("db down"),
+    );
+
+    await reporter.incidentOpened(incident.id, alert);
+    await reporter.statusChanged(incident.id, "report_delivered");
+    await reporter.reportReady(incident.id, minimalReport, alert.resultUrl);
+    await vi.runAllTimersAsync();
+
+    // Primary render still happens despite the snapshot failure.
+    const rendered = JSON.stringify(mockFns.update.mock.calls.at(-1)?.[0].blocks);
+    expect(rendered).toContain("incident_close");
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
   describe("incidentClosed", () => {
     it("reaper-close posts a threaded reply, does not chat.update the root", async () => {
       const incident = await repo.create();
@@ -224,6 +246,33 @@ describe("SlackProgressReporter", () => {
       expect(mockFns.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({ channel: "C-default", thread_ts: "T1" }),
       );
+    });
+
+    it("posts the attribution reply even if the close re-render fails", async () => {
+      const incident = await repo.create();
+      mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
+      mockFns.update.mockResolvedValue({});
+      await reporter.incidentOpened(incident.id, alert);
+      await vi.runAllTimersAsync();
+
+      const errorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+      mockFns.update.mockRejectedValue(new Error("slack update failed"));
+      mockFns.postMessage.mockClear();
+      mockFns.postMessage.mockResolvedValue({});
+
+      await reporter.incidentClosed(incident.id, {
+        kind: "user",
+        userId: "U123",
+      });
+
+      // Re-render failed, but the close is still surfaced.
+      expect(mockFns.postMessage).toHaveBeenCalledTimes(1);
+      expect(
+        JSON.stringify(mockFns.postMessage.mock.calls[0][0].blocks),
+      ).toContain("<@U123>");
+      expect(errorSpy).toHaveBeenCalled();
     });
   });
 

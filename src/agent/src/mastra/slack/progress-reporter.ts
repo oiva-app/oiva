@@ -203,11 +203,18 @@ export class SlackProgressReporter implements ProgressReporter {
       if (!persisted?.slackThreadTs || !persisted.slackChannelId) return;
 
       // Re-render the root message as closed so its Close button is removed.
-      await this.rerenderClosed(
-        incidentId,
-        persisted.slackChannelId,
-        persisted.slackThreadTs,
-      );
+      try {
+        await this.rerenderClosed(
+          incidentId,
+          persisted.slackChannelId,
+          persisted.slackThreadTs,
+        );
+      } catch (err) {
+        console.error("Failed to re-render root message as closed", {
+          incidentId,
+          err,
+        });
+      }
 
       // The thread reply is the only surface that notifies, and carries who/auto.
       await postThreadReply({
@@ -279,7 +286,17 @@ export class SlackProgressReporter implements ProgressReporter {
       report: state.report,
       failure: state.failure,
     };
-    await this.incidents.persistLiveUpdateSnapshot(incidentId, snapshot);
+    // Best-effort: the snapshot only backs cold-close rendering, so a failed
+    // write must not block the primary flushNow render. On failure a later cold
+    // close degrades to the legacy (no-snapshot) path.
+    try {
+      await this.incidents.persistLiveUpdateSnapshot(incidentId, snapshot);
+    } catch (err) {
+      console.error("SlackProgressReporter.persistSnapshot failed", {
+        incidentId,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   /**
