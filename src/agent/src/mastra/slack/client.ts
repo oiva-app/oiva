@@ -1,4 +1,4 @@
-import { WebClient, Block, KnownBlock } from "@slack/web-api";
+import { WebClient, Block, KnownBlock, ActionsBlock } from "@slack/web-api";
 import { env } from "../config/env";
 import {
   buildReportBlocks,
@@ -85,6 +85,24 @@ export async function postThreadReply(input: {
   });
 }
 
+/**
+ * Posts a message only the given user sees (in-thread when threadTs is set).
+ * Used for transient close-failure feedback — no history, no notification.
+ */
+export async function postEphemeralError(input: {
+  channel: string;
+  user: string;
+  threadTs?: string;
+  text: string;
+}): Promise<void> {
+  await client.chat.postEphemeral({
+    channel: input.channel,
+    user: input.user,
+    thread_ts: input.threadTs,
+    text: input.text,
+  });
+}
+
 export async function uploadFileToThread(
   threadTs: string,
   report: IncidentReport,
@@ -100,6 +118,21 @@ export async function uploadFileToThread(
   });
 }
 
+const RATING_ACTION_IDS = ["positive_rating", "negative_rating"];
+
+function isRatingActionsBlock(block: Block | KnownBlock): boolean {
+  if (block.type !== "actions") return false;
+
+  const actionsBlock = block as ActionsBlock;
+  for (const el of actionsBlock.elements) {
+    const actionId = "action_id" in el ? el.action_id : undefined;
+    if (actionId !== undefined && RATING_ACTION_IDS.includes(actionId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function postRatingConfirmation(
   messageTs: string,
   channelId: string,
@@ -108,7 +141,7 @@ export async function postRatingConfirmation(
   userId: string,
 ): Promise<void> {
   const updatedBlocks = originalBlocks.filter(
-    (block) => block.type !== "actions",
+    (block) => !isRatingActionsBlock(block),
   );
   const userRatedBlock = buildRatingConfirmationBlock(rating, userId);
 
