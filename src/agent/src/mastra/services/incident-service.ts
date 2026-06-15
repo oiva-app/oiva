@@ -1,4 +1,4 @@
-import { assertTransition, canTransition } from "../domain/incident-state";
+import { canTransition } from "../domain/incident-state";
 import type { IncidentRepository } from "../ports/incident-repository";
 import type { ClosedBy, ProgressReporter } from "../ports/progress-reporter";
 import type { AlertContext } from "../types/alert-context";
@@ -19,13 +19,11 @@ export async function closeIncident(
   if (!incident) {
     throw new Error(`closeIncident: incident ${id} not found`);
   }
-  if (incident.status === "closed") {
-    return; // already closed — nothing to do
-  }
 
-  assertTransition(incident.status, "closed");
-  await incidents.updateStatus(id, "closed");
-  await reporter.incidentClosed(id, by);
+  const didClose = await incidents.closeIfOpen(id);
+  if (didClose) {
+    await reporter.incidentClosed(id, by);
+  }
 }
 
 export interface RetryIncidentDeps {
