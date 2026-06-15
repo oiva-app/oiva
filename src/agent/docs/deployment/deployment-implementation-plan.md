@@ -158,6 +158,10 @@ Suggested layout:
 ```text
 infra/
   terraform/
+    main.tf
+    variables.tf
+    outputs.tf
+    terraform.tfvars.example
     modules/
       oiva-aws/
         main.tf
@@ -171,12 +175,6 @@ infra/
         secrets.tf
         security-groups.tf
         storage.tf
-    examples/
-      aws-fargate-rds/
-        main.tf
-        variables.tf
-        outputs.tf
-        terraform.tfvars.example
 ```
 
 Terraform should manage:
@@ -227,7 +225,8 @@ COLLECTOR_ENDPOINT
 Secrets Manager values:
 
 ```text
-OPENAI_API_KEY
+LLM provider API keys named for the configured Mastra model providers
+  for example OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY
 HC_MCP_KEY
 HC_SHARED_SECRET
 GITHUB_PAT
@@ -237,6 +236,13 @@ SLACK_SIGNING_SECRET
 HONEYCOMB_API_KEY
 DATABASE_URL or database credentials
 ```
+
+Postgres password rotation caveat:
+
+- Terraform sets `manage_master_user_password = true` for RDS, so AWS RDS stores and rotates the master user password in Secrets Manager by default.
+- ECS injects Secrets Manager values into container environment variables only at task startup; already-running `oiva-agent` tasks can keep an old `POSTGRES_PASSWORD` after rotation.
+- If CloudWatch logs show `password authentication failed for user "oiva"`, force a new ECS deployment so the task reads the current RDS-managed secret value.
+- Future hardening can use EventBridge/Secrets Manager rotation events to redeploy ECS automatically, or intentionally adjust the rotation policy.
 
 Preferred self-hosting behavior:
 
@@ -251,7 +257,7 @@ Preferred self-hosting behavior:
 The default user flow should be:
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
@@ -262,7 +268,7 @@ Terraform outputs should include:
 ```text
 oiva_url
 honeycomb_alert_webhook_url
-slack_rating_webhook_url
+slack_action_webhook_url
 secret_arns
 knowledge_base_bucket
 ```

@@ -31,8 +31,8 @@ exporters:
     verbosity: detailed
   
   # SEND TO HONEYCOMB
-  otlp/honeycomb:
-    endpoint: "api.honeycomb.io:443"
+  otlp_http/honeycomb:
+    endpoint: "https://api.honeycomb.io:443"
     timeout: 10s
     headers:
       x-honeycomb-team: ${env:HONEYCOMB_API_KEY}
@@ -42,7 +42,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [debug, otlp/honeycomb]
+      exporters: [debug, otlp_http/honeycomb]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]

@@ -303,6 +303,12 @@ variable "postgres_backup_retention" {
   default     = 7
 }
 
+variable "postgres_multi_az" {
+  description = "Whether RDS Postgres uses Multi-AZ standby failover."
+  type        = bool
+  default     = true
+}
+
 variable "postgres_publicly_accessible" {
   description = "Whether RDS is publicly accessible."
   type        = bool
@@ -363,10 +369,30 @@ variable "secrets_recovery_window_days" {
   default     = 7
 }
 
-variable "openai_api_key_secret_arn" {
-  description = "Existing Secrets Manager ARN for OPENAI_API_KEY."
-  type        = string
-  default     = null
+variable "llm_provider_secret_env_vars" {
+  description = "LLM provider API key environment variable names to create as Secrets Manager placeholders and inject into the agent container. Names must match Mastra/provider expectations, such as OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY."
+  type        = set(string)
+  default     = ["OPENAI_API_KEY"]
+
+  validation {
+    condition = alltrue([
+      for name in var.llm_provider_secret_env_vars :
+      can(regex("^[A-Z_][A-Z0-9_]*$", name))
+    ])
+    error_message = "llm_provider_secret_env_vars entries must be valid uppercase environment variable names."
+  }
+
+  validation {
+    condition = length(setintersection(var.llm_provider_secret_env_vars, toset([
+      "HC_MCP_KEY",
+      "HC_SHARED_SECRET",
+      "GITHUB_PAT",
+      "SLACK_BOT_TOKEN",
+      "SLACK_SIGNING_SECRET",
+      "HONEYCOMB_API_KEY",
+    ]))) == 0
+    error_message = "llm_provider_secret_env_vars must contain only LLM provider API key env vars, not Oiva integration secret names."
+  }
 }
 
 variable "hc_mcp_key_secret_arn" {

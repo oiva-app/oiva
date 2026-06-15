@@ -18,11 +18,22 @@ if [ "$#" -ne 1 ]; then
 fi
 
 DEPLOYMENT_NAME="$1"
+SECRET_PREFIX="/oiva/$DEPLOYMENT_NAME/"
 
-for secret_name in slack-bot-token hc-shared-secret slack-signing-secret \
-           github-pat honeycomb-api-key hc-mcp-key openai-api-key; do
-    echo "Force-deleting secret: /oiva/$DEPLOYMENT_NAME/$secret_name"
+secret_ids=$(aws secretsmanager list-secrets \
+  --include-planned-deletion \
+  --filters "Key=name,Values=$SECRET_PREFIX" \
+  --query 'SecretList[].Name' \
+  --output text)
+
+if [ -z "$secret_ids" ]; then
+    echo "No secrets found with prefix: $SECRET_PREFIX"
+    exit 0
+fi
+
+for secret_id in $secret_ids; do
+    echo "Force-deleting secret: $secret_id"
     aws secretsmanager delete-secret \
-      --secret-id "/oiva/$DEPLOYMENT_NAME/$secret_name" \
+      --secret-id "$secret_id" \
       --force-delete-without-recovery
 done

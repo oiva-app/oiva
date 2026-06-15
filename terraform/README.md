@@ -177,7 +177,7 @@ echo "$IMAGE_URI"
 ## Configure Terraform Variables
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 cp terraform.tfvars.example terraform.tfvars
 ```
 
@@ -186,7 +186,7 @@ cp terraform.tfvars.example terraform.tfvars
 Real `.tfvars` files should usually live next to the Terraform files they configure:
 
 ```text
-infra/terraform/examples/aws-fargate-rds/terraform.tfvars
+terraform/terraform.tfvars
 ```
 
 This repository's `.gitignore` ignores `*.tfvars`, `*.tfvars.json`, and Terraform state files, so your local values should not be committed. Keep `terraform.tfvars.example` committed as the safe template.
@@ -368,12 +368,12 @@ If you prefer to keep real variable files outside the repository entirely, you c
 terraform apply -var-file=/path/to/oiva-production.tfvars
 ```
 
-If you do this, run Terraform from `infra/terraform/examples/aws-fargate-rds` so relative paths in the example still resolve correctly.
+If you do this, run Terraform from `terraform` so relative paths in this deployment still resolve correctly.
 
 ## Create The Infrastructure
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 terraform init
 ```
 
@@ -412,15 +412,32 @@ Terraform creates placeholder Secrets Manager secrets unless you provide existin
 
 Oiva reads API keys, tokens, and webhook signing values from AWS Secrets Manager. Terraform creates the secret containers, but you add the actual secret values after `terraform apply`.
 
+The app's `POSTGRES_PASSWORD` is different from the application/API secrets below. Terraform sets `manage_master_user_password = true` on the RDS instance, so AWS RDS creates and manages the master user password in Secrets Manager and rotates it by default.
+
 The required secrets are:
 
-- `OPENAI_API_KEY`
 - `HC_MCP_KEY`
 - `HC_SHARED_SECRET`
 - `GITHUB_PAT`
 - `SLACK_BOT_TOKEN`
 - `SLACK_SIGNING_SECRET`
 - `HONEYCOMB_API_KEY`
+
+LLM provider API key secrets are configured separately with
+`llm_provider_secret_env_vars`. The default deployment uses OpenAI models, so the
+default value creates and injects `OPENAI_API_KEY`. If you configure non-OpenAI provider(s), include each provider's expected environment variable name:
+
+```hcl
+llm_provider_secret_env_vars = [
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "GOOGLE_API_KEY",
+]
+```
+
+Check Mastra provider docs define these names. For example, `openai/...` models use
+`OPENAI_API_KEY`, `anthropic/...` models use `ANTHROPIC_API_KEY`, and
+`google/...` models use `GOOGLE_API_KEY`. Etc.
 
 `GITHUB_PAT` only needs read access to the repositories Oiva will inspect.
 
@@ -441,7 +458,7 @@ terraform output secret_arns
 The simplest way to populate them is to run the helper script from this Terraform working directory:
 
 ```bash
-../../../utilities/populate_secrets.py
+./utilities/populate_secrets.py
 ```
 
 The script prompts for each required secret, writes non-empty values to Secrets Manager, and forces a new ECS deployment after successful updates. Leave a value blank to skip it.
@@ -459,17 +476,19 @@ aws secretsmanager list-secrets \
   --output text
 ```
 
-For the default `deployment_name = "oiva"`, the OpenAI API key placeholder is named:
+Provider API key placeholders use the lower-case, hyphenated form of the env var
+name. For example, with `deployment_name = "oiva"`, a provider env var named
+`PROVIDER_API_KEY` would create:
 
 ```text
-/oiva/oiva/openai-api-key
+/oiva/oiva/provider-api-key
 ```
 
-Populate it with:
+Populate a provider key with:
 
 ```bash
 aws secretsmanager put-secret-value \
-  --secret-id /oiva/oiva/openai-api-key \
+  --secret-id /oiva/oiva/provider-api-key \
   --secret-string "actual-value"
 ```
 
@@ -483,6 +502,8 @@ aws ecs update-service \
   --service "$(terraform output -raw ecs_service_name)" \
   --force-new-deployment
 ```
+
+ECS injects Secrets Manager values into container environment variables only when a task starts. If a secret value changes later, including the RDS-managed Postgres password after AWS rotates it, already-running tasks keep the old value until ECS replaces them.
 
 ## Verify The Deployment
 
@@ -539,11 +560,12 @@ In the logs, check that:
 - database migrations ran successfully during app startup
 - the `oiva-agent` container started without missing environment variable errors
 - the `adot-collector` container started and is receiving telemetry
+- there are no Postgres authentication errors such as `password authentication failed for user "oiva"` after the current task starts
 
 Then verify the external integrations:
 
 - Honeycomb sends alerts to `honeycomb_alert_webhook_url`.
-- Slack sends interactions to `slack_rating_webhook_url`.
+- Slack sends interactions to `slack_action_webhook_url`.
 - Oiva can read the configured GitHub repositories and knowledge-base S3 files.
 - Oiva posts the expected Slack investigation message or report.
 - Oiva traces arrive in Honeycomb through the ADOT sidecar.
@@ -630,7 +652,7 @@ agent_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/oiva-agent:abc1234"
 Review and apply the Terraform change:
 
 ```bash
-cd infra/terraform/examples/aws-fargate-rds
+cd terraform
 terraform plan
 terraform apply
 ```
@@ -795,6 +817,27 @@ Common causes are missing secrets, invalid environment configuration, image star
 
 Check the `oiva-agent` startup logs in CloudWatch. Common causes are RDS connectivity problems, missing database credentials, or an app image that does not include the expected migration files.
 
+### Postgres password authentication fails
+
+If CloudWatch logs show:
+
+```text
+password authentication failed for user "oiva"
+```
+
+the running ECS task may have an old `POSTGRES_PASSWORD`. This can happen because Terraform configures RDS with `manage_master_user_password = true`; AWS RDS manages that master password in Secrets Manager and rotates it by default, while ECS task environment variables do not refresh in place.
+
+Force ECS to start a new task so it reads the current RDS-managed secret value:
+
+```bash
+aws ecs update-service \
+  --cluster "$(terraform output -raw ecs_cluster_name)" \
+  --service "$(terraform output -raw ecs_service_name)" \
+  --force-new-deployment
+```
+
+Then tail logs again and confirm the error does not appear for the new `oiva-agent` task stream. For a harder production setup, consider adding EventBridge automation that redeploys the ECS service after successful Secrets Manager rotation, or intentionally adjust the RDS password rotation policy.
+
 ### Re-applying fails because a secret name already exists
 
 Secrets Manager may keep deleted secrets during a recovery window. If you destroyed and recreated the stack with the same `deployment_name`, either wait for the recovery window, restore the pending-deletion secret, or use a different `deployment_name`.
@@ -802,7 +845,7 @@ Secrets Manager may keep deleted secrets during a recovery window. If you destro
 For Terraform-created placeholder secrets, you can also force-delete the pending secrets immediately:
 
 ```bash
-./infra/terraform/utilities/force-delete-secrets.sh oiva
+./utilities/force-delete-secrets.sh oiva
 ```
 
 The argument must match `deployment_name` from `terraform.tfvars`.
