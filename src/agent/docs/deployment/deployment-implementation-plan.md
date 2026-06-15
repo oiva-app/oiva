@@ -237,6 +237,13 @@ HONEYCOMB_API_KEY
 DATABASE_URL or database credentials
 ```
 
+Postgres password rotation caveat:
+
+- Terraform sets `manage_master_user_password = true` for RDS, so AWS RDS stores and rotates the master user password in Secrets Manager by default.
+- ECS injects Secrets Manager values into container environment variables only at task startup; already-running `oiva-agent` tasks can keep an old `POSTGRES_PASSWORD` after rotation.
+- If CloudWatch logs show `password authentication failed for user "oiva"`, force a new ECS deployment so the task reads the current RDS-managed secret value.
+- Future hardening can use EventBridge/Secrets Manager rotation events to redeploy ECS automatically, or intentionally adjust the rotation policy.
+
 Preferred self-hosting behavior:
 
 - Terraform can create empty secret placeholders.

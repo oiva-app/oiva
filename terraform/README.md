@@ -412,6 +412,8 @@ Terraform creates placeholder Secrets Manager secrets unless you provide existin
 
 Oiva reads API keys, tokens, and webhook signing values from AWS Secrets Manager. Terraform creates the secret containers, but you add the actual secret values after `terraform apply`.
 
+The app's `POSTGRES_PASSWORD` is different from the application/API secrets below. Terraform sets `manage_master_user_password = true` on the RDS instance, so AWS RDS creates and manages the master user password in Secrets Manager and rotates it by default.
+
 The required secrets are:
 
 - `HC_MCP_KEY`
@@ -501,6 +503,8 @@ aws ecs update-service \
   --force-new-deployment
 ```
 
+ECS injects Secrets Manager values into container environment variables only when a task starts. If a secret value changes later, including the RDS-managed Postgres password after AWS rotates it, already-running tasks keep the old value until ECS replaces them.
+
 ## Verify The Deployment
 
 After secrets are populated and ECS redeploys, use Terraform outputs to find the deployed resources:
@@ -556,6 +560,7 @@ In the logs, check that:
 - database migrations ran successfully during app startup
 - the `oiva-agent` container started without missing environment variable errors
 - the `adot-collector` container started and is receiving telemetry
+- there are no Postgres authentication errors such as `password authentication failed for user "oiva"` after the current task starts
 
 Then verify the external integrations:
 
@@ -811,6 +816,27 @@ Common causes are missing secrets, invalid environment configuration, image star
 ### Database migrations fail
 
 Check the `oiva-agent` startup logs in CloudWatch. Common causes are RDS connectivity problems, missing database credentials, or an app image that does not include the expected migration files.
+
+### Postgres password authentication fails
+
+If CloudWatch logs show:
+
+```text
+password authentication failed for user "oiva"
+```
+
+the running ECS task may have an old `POSTGRES_PASSWORD`. This can happen because Terraform configures RDS with `manage_master_user_password = true`; AWS RDS manages that master password in Secrets Manager and rotates it by default, while ECS task environment variables do not refresh in place.
+
+Force ECS to start a new task so it reads the current RDS-managed secret value:
+
+```bash
+aws ecs update-service \
+  --cluster "$(terraform output -raw ecs_cluster_name)" \
+  --service "$(terraform output -raw ecs_service_name)" \
+  --force-new-deployment
+```
+
+Then tail logs again and confirm the error does not appear for the new `oiva-agent` task stream. For a harder production setup, consider adding EventBridge automation that redeploys the ECS service after successful Secrets Manager rotation, or intentionally adjust the RDS password rotation policy.
 
 ### Re-applying fails because a secret name already exists
 
