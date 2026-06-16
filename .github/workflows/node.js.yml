@@ -16,9 +16,8 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: npm install -g bats
-      - run: bats -v
+          node-version: '24'
+      - run: npx bats -v
 
 #   build:
 
