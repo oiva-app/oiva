@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import type { AlertRow } from "../db/types";
+import type { Alert } from "@/domain/alert";
 import type {
-  Alert,
   AlertRepository,
   InsertAlertInput,
 } from "../ports/alert-repository";

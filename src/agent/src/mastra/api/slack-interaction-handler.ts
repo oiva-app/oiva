@@ -10,7 +10,7 @@ import {
 import {
   slackInteractionPayloadSchema,
   type SlackInteractionPayload,
-} from "../types/slack";
+} from "@/api/slack-payload";
 import type { Block, KnownBlock } from "@slack/web-api";
 import { reportRepository } from "../repositories";
 

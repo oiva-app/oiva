@@ -16,9 +16,9 @@
  * never be allowed to fail an investigation, so adapters swallow and log their
  * own errors and always resolve.
  */
-import type { AlertContext } from "../types/alert-context";
-import type { IncidentReport } from "../types/report";
-import type { IncidentStatus } from "./incident-repository";
+import type { AlertContext } from "@/domain/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { IncidentStatus } from "@/domain/incident";
 
 /** Outcome of a single sub-agent delegation, as seen by the supervisor hooks. */
 export interface DelegationOutcome {

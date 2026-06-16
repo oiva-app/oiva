@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import type { IncidentReport } from "../../../src/mastra/types/report";
-import type { AlertContext } from "../../../src/mastra/types/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { AlertContext } from "@/domain/alert-context";
 
 const mockFns = vi.hoisted(() => ({
   postMessage: vi.fn(),

@@ -1,18 +1,18 @@
 import type { Context } from "hono";
 import type { Mastra } from "@mastra/core/mastra";
-import { honeycombWebhookPayloadSchema } from "../types/honeycomb-alert";
+import { honeycombWebhookPayloadSchema } from "@/api/honeycomb-alert";
 import {
   verifyAlert,
   normalizeAlert,
   extractQueryId,
-} from "../adapters/honeycomb-adapter";
+} from "@/api/honeycomb-adapter";
 import { incidentRepository, alertRepository } from "../repositories";
 import { progressReporter } from "../slack";
 import { failIncident } from "../services/incident-service";
 import { correlate } from "../domain/correlation";
 import { env } from "../config/env";
 import { z } from "zod";
-import { isShuttingDown } from "../services/shutdown-state";
+import { isShuttingDown } from "@/runtime/shutdown-state";
 
 const SOURCE = "honeycomb";
 /**

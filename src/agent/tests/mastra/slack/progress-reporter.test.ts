@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { FakeIncidentRepository } from "../../../src/mastra/testing/fake-incident-repository";
-import type { AlertContext } from "../../../src/mastra/types/alert-context";
-import type { IncidentReport } from "../../../src/mastra/types/report";
+import { FakeIncidentRepository } from "../../utilities/fake-incident-repository";
+import type { AlertContext } from "@/domain/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
 
 const mockFns = vi.hoisted(() => ({
   postMessage: vi.fn(),
@@ -174,7 +174,9 @@ describe("SlackProgressReporter", () => {
     await vi.runAllTimersAsync();
 
     // Primary render still happens despite the snapshot failure.
-    const rendered = JSON.stringify(mockFns.update.mock.calls.at(-1)?.[0].blocks);
+    const rendered = JSON.stringify(
+      mockFns.update.mock.calls.at(-1)?.[0].blocks,
+    );
     expect(rendered).toContain("incident_close");
     expect(errorSpy).toHaveBeenCalled();
   });

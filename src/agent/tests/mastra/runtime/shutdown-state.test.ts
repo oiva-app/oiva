@@ -3,7 +3,7 @@ import {
   isShuttingDown,
   markShuttingDown,
   resetShutdownStateForTests,
-} from "../../../src/mastra/services/shutdown-state";
+} from "@/runtime/shutdown-state";
 
 describe("shutdown-state", () => {
   afterEach(() => {

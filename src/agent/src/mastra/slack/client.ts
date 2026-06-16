@@ -6,9 +6,9 @@ import {
   buildErrorBlocks,
   buildRatingConfirmationBlock,
 } from "./formatters";
-import type { IncidentReport } from "../types/report";
-import type { AlertContext } from "../types/alert-context";
-import type { SlackThreadData } from "../types/slack";
+import type { IncidentReport } from "@/domain/incident-report";
+import type { AlertContext } from "@/domain/alert-context";
+import type { SlackThreadData } from "@/api/slack-payload";
 import { fiveRetriesInFiveMinutes } from "@slack/web-api/dist/retry-policies.js";
 
 const client = new WebClient(env.SLACK_BOT_TOKEN, {

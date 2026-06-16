@@ -9,7 +9,7 @@
  */
 
 import * as z from "zod";
-import type { Incident } from "../ports/incident-repository";
+import type { Incident } from "./incident";
 
 export const CorrelationResultSchema = z.discriminatedUnion("kind", [
   z.object({

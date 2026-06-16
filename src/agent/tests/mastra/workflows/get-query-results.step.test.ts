@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest";
 import { createWorkflow } from "@mastra/core/workflows";
-import { alertContextSchema } from "@/types/alert-context";
+import { alertContextSchema } from "@/domain/alert-context";
 import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
 
 // Replace the live MCP client with the captured tool output so the step runs

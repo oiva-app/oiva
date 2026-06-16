@@ -25,7 +25,7 @@ import {
   contextualizeUsingHoneycombMCP,
 } from "./workflows/alert-enrich";
 import { startCleanupReaper } from "./services/cleanup-service-scheduler";
-import { installShutdownSignalHandlers } from "./services/shutdown-state";
+import { installShutdownSignalHandlers } from "@/runtime/shutdown-state";
 
 installShutdownSignalHandlers();
 

@@ -3,12 +3,10 @@ import type {
   DelegationOutcome,
   ProgressReporter,
 } from "../ports/progress-reporter";
-import type {
-  IncidentRepository,
-  IncidentStatus,
-} from "../ports/incident-repository";
-import type { AlertContext } from "../types/alert-context";
-import type { IncidentReport } from "../types/report";
+import type { IncidentStatus } from "@/domain/incident";
+import type { IncidentRepository } from "../ports/incident-repository";
+import type { AlertContext } from "@/domain/alert-context";
+import type { IncidentReport } from "@/domain/incident-report";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";
 import {
   buildIncidentClosedAttributionBlock,

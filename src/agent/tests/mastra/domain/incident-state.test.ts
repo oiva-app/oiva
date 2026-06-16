@@ -4,7 +4,7 @@ import {
   assertTransition,
   isTerminal,
 } from "../../../src/mastra/domain/incident-state";
-import type { IncidentStatus } from "../../../src/mastra/ports/incident-repository";
+import type { IncidentStatus } from "@/domain/incident";
 
 describe("incident-state", () => {
   describe("canTransition — happy path lifecycle", () => {

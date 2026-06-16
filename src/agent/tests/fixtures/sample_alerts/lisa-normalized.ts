@@ -1,4 +1,4 @@
-import type { AlertContext } from "@/types/alert-context";
+import type { AlertContext } from "@/domain/alert-context";
 
 export const lisaExpected = {
   status: "TRIGGERED",

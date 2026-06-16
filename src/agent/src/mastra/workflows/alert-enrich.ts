@@ -6,11 +6,11 @@ TODO:
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 
-import { alertContextSchema, type AlertContext } from "../types/alert-context";
+import { alertContextSchema, type AlertContext } from "@/domain/alert-context";
 import { env } from "../config/env";
 import { mcpClient, honeycomb_get_query_results } from "../mcp/mcpClients";
-import { ResourceLinkSchema, type McpResourceLink } from "../types/mcp";
-import { telemetryFindingsSchema } from "../types/investigation";
+import { ResourceLinkSchema, type McpResourceLink } from "@/mcp/result-schemas";
+import { telemetryFindingsSchema } from "@/domain/investigation";
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,8 @@
 import type { Pool } from "pg";
 import type { ReportRow } from "../db/types";
+import type { Feedback, Report } from "@/domain/report";
 import type {
-  Feedback,
   InsertReportInput,
-  Report,
   ReportRepository,
 } from "../ports/report-repository";
 
