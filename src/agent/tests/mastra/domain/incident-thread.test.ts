@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   threadIdForIncident,
   incidentIdFromThreadId,
-} from "../../../src/mastra/domain/incident-thread";
+} from "@/domain/incident-thread";
 
 describe("incident-thread", () => {
   it("round-trips an incident id", () => {

@@ -1,11 +1,11 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
-import { supervisorPrompt } from "../prompts/supervisor-prompt";
+import { supervisorPrompt } from "@/prompts/supervisor-prompt";
 import { codebaseAgent } from "./codebase-agent";
 import { telemetryAgent } from "./telemetry-agent";
-import { env } from "../config/env";
-import { getSupervisorWorkspace } from "../workspaces/supervisor-workspace";
-import { progressReporter } from "../slack";
+import { env } from "@/config/env";
+import { getSupervisorWorkspace } from "@/workspaces/supervisor-workspace";
+import { progressReporter } from "@/slack";
 import { DelegationProgressTracker } from "./delegation-progress-adapter";
 
 const SUBAGENTS = {

@@ -1,6 +1,6 @@
-import type { ProgressReporter } from "../ports/progress-reporter";
-import { incidentIdFromThreadId } from "../domain/incident-thread";
-import { parseHeadline } from "../domain/headline";
+import type { ProgressReporter } from "@/ports/progress-reporter";
+import { incidentIdFromThreadId } from "@/domain/incident-thread";
+import { parseHeadline } from "@/domain/headline";
 
 export class DelegationProgressTracker {
   private readonly incidents = new Map<string, string>(); // toolCallId -> incidentId

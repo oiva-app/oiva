@@ -5,7 +5,7 @@
 */
 
 import pg from "pg";
-import { env } from "../config/env";
+import { env } from "@/config/env";
 import { createPostgresSslConfig } from "./postgres-ssl";
 
 export const pool = new pg.Pool({

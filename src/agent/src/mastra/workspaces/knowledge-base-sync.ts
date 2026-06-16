@@ -6,7 +6,7 @@ import {
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { env } from "../config/env";
+import { env } from "@/config/env";
 import { getKnowledgeBaseMirrorPath } from "./workspace-paths";
 
 const s3 = new S3Client({

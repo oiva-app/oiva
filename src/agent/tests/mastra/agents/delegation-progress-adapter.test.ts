@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { FakeProgressReporter } from "../../utilities/fake-progress-reporter";
-import { DelegationProgressTracker } from "../../../src/mastra/agents/delegation-progress-adapter";
-import { threadIdForIncident } from "../../../src/mastra/domain/incident-thread";
+import { DelegationProgressTracker } from "@/agents/delegation-progress-adapter";
+import { threadIdForIncident } from "@/domain/incident-thread";
 
 describe("DelegationProgressTracker", () => {
   let reporter: FakeProgressReporter;

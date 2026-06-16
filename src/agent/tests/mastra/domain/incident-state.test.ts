@@ -3,7 +3,7 @@ import {
   canTransition,
   assertTransition,
   isTerminal,
-} from "../../../src/mastra/domain/incident-state";
+} from "@/domain/incident-state";
 import type { IncidentStatus } from "@/domain/incident";
 
 describe("incident-state", () => {

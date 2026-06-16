@@ -1,10 +1,10 @@
 import type { Pool } from "pg";
-import type { AlertRow } from "../db/types";
+import type { AlertRow } from "@/db/types";
 import type { Alert } from "@/domain/alert";
 import type {
   AlertRepository,
   InsertAlertInput,
-} from "../ports/alert-repository";
+} from "@/ports/alert-repository";
 
 export class PgAlertRepository implements AlertRepository {
   constructor(private readonly pool: Pool) {}

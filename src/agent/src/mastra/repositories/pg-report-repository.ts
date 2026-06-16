@@ -1,10 +1,10 @@
 import type { Pool } from "pg";
-import type { ReportRow } from "../db/types";
+import type { ReportRow } from "@/db/types";
 import type { Feedback, Report } from "@/domain/report";
 import type {
   InsertReportInput,
   ReportRepository,
-} from "../ports/report-repository";
+} from "@/ports/report-repository";
 
 export class PgReportRepository implements ReportRepository {
   constructor(private readonly pool: Pool) {}

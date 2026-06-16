@@ -14,22 +14,22 @@ import {
   alertRepository,
   incidentRepository,
   reportRepository,
-} from "../repositories";
-import { assertTransition } from "../domain/incident-state";
-import { incidentDurationMs } from "../domain/incident-duration";
-import { threadIdForIncident } from "../domain/incident-thread";
+} from "@/repositories";
+import { assertTransition } from "@/domain/incident-state";
+import { incidentDurationMs } from "@/domain/incident-duration";
+import { threadIdForIncident } from "@/domain/incident-thread";
 import type { IncidentStatus } from "@/domain/incident";
-import { failIncident as failIncidentService } from "../services/incident-service";
-import { env } from "../config/env";
+import { failIncident as failIncidentService } from "@/services/incident-service";
+import { env } from "@/config/env";
 import {
   cleanupCodebaseAgentWorkspace,
   prepareCodebaseAgentWorkspace,
-} from "../workspaces/codebase-workspace";
+} from "@/workspaces/codebase-workspace";
 import {
   prepareSupervisorWorkspace,
   cleanupSupervisorWorkspace,
-} from "../workspaces/supervisor-workspace";
-import { syncKnowledgeBaseForIncident } from "../workspaces/knowledge-base-sync";
+} from "@/workspaces/supervisor-workspace";
+import { syncKnowledgeBaseForIncident } from "@/workspaces/knowledge-base-sync";
 
 /*
 z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids

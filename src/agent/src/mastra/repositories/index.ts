@@ -1,4 +1,4 @@
-import { pool } from "../db/client";
+import { pool } from "@/db/client";
 import { PgIncidentRepository } from "./pg-incident-repository";
 import { PgAlertRepository } from "./pg-alert-repository";
 import { PgReportRepository } from "./pg-report-repository";

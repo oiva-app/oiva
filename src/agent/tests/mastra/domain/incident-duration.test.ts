@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   incidentDurationMs,
   formatDuration,
-} from "../../../src/mastra/domain/incident-duration";
+} from "@/domain/incident-duration";
 
 describe("incidentDurationMs", () => {
   it("computes the elapsed milliseconds between two dates", () => {

@@ -1,8 +1,8 @@
 import type { Context } from "hono";
 import type { Mastra } from "@mastra/core/mastra";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { env } from "../config/env";
-import { postRatingConfirmation } from "../slack/client";
+import { env } from "@/config/env";
+import { postRatingConfirmation } from "@/slack/client";
 import {
   handleIncidentClose,
   handleIncidentRetry,
@@ -10,9 +10,9 @@ import {
 import {
   slackInteractionPayloadSchema,
   type SlackInteractionPayload,
-} from "@/api/slack-payload";
+} from "./slack-payload";
 import type { Block, KnownBlock } from "@slack/web-api";
-import { reportRepository } from "../repositories";
+import { reportRepository } from "@/repositories";
 
 function isVerifiedSlackSignature(
   rawBody: string,
