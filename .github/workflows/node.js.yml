@@ -16,14 +16,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: src/agent
 
     strategy:
       matrix:
         node-version: [24.x]
+        root-dir: [src/agent]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.root-dir }}
 
     steps:
     - uses: actions/checkout@v4
@@ -32,6 +34,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: ${{ matrix.root-dir }}
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
