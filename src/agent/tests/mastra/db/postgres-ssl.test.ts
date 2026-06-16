@@ -4,7 +4,7 @@ import fs from "node:fs";
 import {
   createPostgresSslConfig,
   parsePostgresSslNodeEnv,
-} from "../../../src/mastra/db/postgres-ssl";
+} from "@/db/postgres-ssl";
 
 describe("postgres SSL config", () => {
   afterEach(() => {

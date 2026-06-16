@@ -9,8 +9,8 @@
  *   3. working state + past deadline → failed  (the run died or hung)
  */
 import type { IncidentStatus } from "@/domain/incident";
-import type { IncidentRepository } from "../ports/incident-repository";
-import type { ProgressReporter } from "../ports/progress-reporter";
+import type { IncidentRepository } from "@/ports/incident-repository";
+import type { ProgressReporter } from "@/ports/progress-reporter";
 import { closeIncident, failIncident } from "./incident-service";
 
 const STUCK_STATUSES: readonly IncidentStatus[] = [

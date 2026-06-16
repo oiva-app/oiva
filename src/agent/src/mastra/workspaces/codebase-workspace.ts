@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { env } from "../config/env";
+import { env } from "@/config/env";
 import {
   getCodebaseRoot,
   getKnowledgeBaseMirrorPath,

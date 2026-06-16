@@ -2,9 +2,9 @@ import type {
   ClosedBy,
   DelegationOutcome,
   ProgressReporter,
-} from "../ports/progress-reporter";
+} from "@/ports/progress-reporter";
 import type { IncidentStatus } from "@/domain/incident";
-import type { IncidentRepository } from "../ports/incident-repository";
+import type { IncidentRepository } from "@/ports/incident-repository";
 import type { AlertContext } from "@/domain/alert-context";
 import type { IncidentReport } from "@/domain/incident-report";
 import type { ActivityLogEntry, IncidentRenderInputs } from "./render-types";

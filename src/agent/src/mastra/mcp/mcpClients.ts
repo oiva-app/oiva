@@ -1,5 +1,5 @@
 import { MCPClient } from "@mastra/mcp";
-import { env } from "../config/env";
+import { env } from "@/config/env";
 import { wrapTools } from "@/tools/investigation-tool-wrapper";
 
 export const mcpClient = new MCPClient({

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
-import { alertHookHandler } from "../../../src/mastra/api/honeycomb-hook-handler";
+import { alertHookHandler } from "@/api/honeycomb-hook-handler";
 import {
   markShuttingDown,
   resetShutdownStateForTests,

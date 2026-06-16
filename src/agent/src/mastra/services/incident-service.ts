@@ -1,6 +1,6 @@
-import { canTransition } from "../domain/incident-state";
-import type { IncidentRepository } from "../ports/incident-repository";
-import type { ClosedBy, ProgressReporter } from "../ports/progress-reporter";
+import { canTransition } from "@/domain/incident-state";
+import type { IncidentRepository } from "@/ports/incident-repository";
+import type { ClosedBy, ProgressReporter } from "@/ports/progress-reporter";
 import type { AlertContext } from "@/domain/alert-context";
 
 export interface CloseIncidentDeps {

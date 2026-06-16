@@ -1,7 +1,7 @@
-import { incidentRepository } from "../repositories";
-import { progressReporter } from "../slack";
+import { incidentRepository } from "@/repositories";
+import { progressReporter } from "@/slack";
 import { reapStaleIncidents } from "./cleanup-reaper";
-import { env } from "../config/env";
+import { env } from "@/config/env";
 
 interface ReaperLogger {
   info?: (message: string, meta?: Record<string, unknown>) => void;

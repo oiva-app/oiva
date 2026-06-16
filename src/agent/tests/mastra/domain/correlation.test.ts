@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { correlate } from "../../../src/mastra/domain/correlation";
+import { correlate } from "@/domain/correlation";
 import type { Incident } from "@/domain/incident";
 
 const incident = (id: string): Incident => ({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createPostgresConnectionConfig } from "../../../src/mastra/config/postgres";
+import { createPostgresConnectionConfig } from "@/config/postgres";
 
 describe("createPostgresConnectionConfig", () => {
   it("returns a pg config object from split Postgres variables", () => {

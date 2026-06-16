@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseHeadline } from "../../../src/mastra/domain/headline";
+import { parseHeadline } from "@/domain/headline";
 
 describe("parseHeadline", () => {
   it("extracts an explicit HEADLINE: line", () => {

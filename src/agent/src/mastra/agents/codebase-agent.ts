@@ -2,10 +2,10 @@ import { Agent } from "@mastra/core/agent";
 import type { SubAgent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { ToolCallFilter } from '@mastra/core/processors';
-import { env } from "../config/env";
-import { getCodebaseAgentWorkspace } from "../workspaces/codebase-workspace";
-import { prompt } from "../prompts/codebase-agent-prompt";
-import { investigationSchema } from "../memory/investigation-schema";
+import { env } from "@/config/env";
+import { getCodebaseAgentWorkspace } from "@/workspaces/codebase-workspace";
+import { prompt } from "@/prompts/codebase-agent-prompt";
+import { investigationSchema } from "@/memory/investigation-schema";
 
 export const codebaseAgent: SubAgent = new Agent({
   id: "codebase-agent",

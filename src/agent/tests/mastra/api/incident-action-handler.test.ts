@@ -3,7 +3,7 @@ import lisaPayload from "../../fixtures/sample_alerts/lisa.json";
 import {
   handleIncidentClose,
   handleIncidentRetry,
-} from "../../../src/mastra/api/incident-action-handler";
+} from "@/api/incident-action-handler";
 import {
   markShuttingDown,
   resetShutdownStateForTests,

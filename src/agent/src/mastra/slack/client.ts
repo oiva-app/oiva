@@ -1,5 +1,5 @@
 import { WebClient, Block, KnownBlock, ActionsBlock } from "@slack/web-api";
-import { env } from "../config/env";
+import { env } from "@/config/env";
 import {
   buildReportBlocks,
   renderFullReportMarkdown,
