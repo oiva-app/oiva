@@ -47,6 +47,11 @@ jobs:
         SLACK_BOT_TOKEN: xoxb-dummy
         SLACK_CHANNEL_ID: C0000000000
         SLACK_SIGNING_SECRET: dummy
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5433
+        POSTGRES_USER: oiva
+        POSTGRES_PASSWORD: oiva_dev
+        POSTGRES_DB: oiva
       run: |
         npm ci
         npm run build --if-present
