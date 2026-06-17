@@ -35,6 +35,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: ${{ matrix.root-dir }}
     - name: "Clean install, build, test"
+      # dummy envars for preventing startup validation errors in `env.ts`
       env:
         OBSERVED_APP_NAME: ci-test
         COLLECTOR_ENDPOINT: http://localhost:4318
