@@ -1,4 +1,4 @@
-
+[![tests badge](https://github.com/oiva-app/oiva/actions/workflows/node.js.yml/badge.svg?branch=sv13-ci)](https://github.com/oiva-app/oiva/actions/workflows/node.js.yml)
 
 ## INSTALLATION
 
