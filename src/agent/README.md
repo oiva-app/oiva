@@ -1,35 +1,68 @@
-# oiva-exp
+# Oiva Agent
 
-Welcome to your new [Mastra](https://mastra.ai/) project! We're excited to see what you'll build.
+The [Mastra](https://mastra.ai/) Agent application at the heart of Oiva. It receives a
+Honeycomb alert webhook, runs a multi-agent investigation across the user's telemetry and codebase, writes a structured incident report, and posts it to Slack. Throughout the workflow, live progress updates are surfaced to the user in the incident message on Slack.
 
-## Getting Started
+For full-system setup (Docker, Postgres, OTel Collector, environment keys, and
+the Honeycomb alert webhook contract) see the main [Oiva README](../../README.md). This document covers the agent package itself.
 
-Start the development server:
+## Development
 
-```shell
-npm run dev
+First-time setup:
+
+```bash
+npm install        # install dependencies
+npm run db:migrate # apply Postgres migrations
+npm run dev        # Mastra Studio at http://localhost:4111
 ```
 
-Configure the LLM provider API keys required by the agent model router IDs in
-your `.env` file. Mastra reads provider-standard names automatically, such as
-`OPENAI_API_KEY` for `openai/...`, `ANTHROPIC_API_KEY` for `anthropic/...`, and
-`GOOGLE_API_KEY` for `google/...`.
+`npm run dev` boots without Postgres, but `db:migrate` and any real investigation need it. Start it from the project root with `docker compose up -d postgres` before migrating (see the project README linked above for the full environment).
 
-Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/studio/overview). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
+Other commands:
 
-You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
+```bash
+npm test     # run the Vitest suite
+npm run reap # run the cleanup reaper for stale incidents
+```
 
-## Learn more
+## Incident Workflow
 
-To learn more about Mastra, visit our [documentation](https://mastra.ai/docs/). Your bootstrapped project includes example code for [agents](https://mastra.ai/docs/agents/overview), [tools](https://mastra.ai/docs/agents/using-tools), [workflows](https://mastra.ai/docs/workflows/overview), [scorers](https://mastra.ai/docs/evals/overview), and [observability](https://mastra.ai/docs/observability/overview).
+A single Mastra workflow, `oiva-workflow`, orchestrates each incident through
+four steps:
 
-If you're new to AI agents, check out our [course](https://mastra.ai/learn) and [YouTube videos](https://youtube.com/@mastra-ai). You can also join our [Discord](https://discord.gg/BTYqqHKUrf) community to get help and share your projects.
+1. **announce** — opens a Slack thread for the incoming alert and posts the
+   initial incident card as the main message.
+2. **investigate** — the **Supervisor Agent** orchestrates the investigation, delegating
+   to two sub-agents, analysing and synthesizing their findings together:
+   - **Telemetry Agent** — explores Honeycomb datasets, runs queries, compares
+     anomalies against baselines, and pulls relevant telemetry evidence (such as traces) via the Honeycomb MCP.
+   - **Codebase Agent** — examines the user's codebase by cloning the target repository into a Mastra workspace and inspecting it with local tools: filesystem navigation, Git history, LSP, and BM25 search.
+3. **report** — the **Report Agent** turns the Supervisor Agent's gathered investigation findings into a structured incident report that is persisted in a Postgres database.
+4. **send-report** — posts the final report back to the Slack thread.
 
-## Deploy to the Mastra platform
+Progress is surfaced live in Slack through the `ProgressReporter` port, so the thread reflects which phase the incident workflow is in, including the subagent investigations.
 
-The [Mastra platform](https://projects.mastra.ai) provides two products for deploying and managing AI applications built with the Mastra framework:
+## Project layout
 
-- **Studio**: A hosted visual environment for testing agents, running workflows, and inspecting traces
-- **Server**: A production deployment target that runs your Mastra application as an API server
+All Mastra code lives under `src/mastra`. `src/mastra/index.ts` is the entry
+point that wires everything together and registers the alert and Slack webhook
+routes.
 
-Learn more in the [Mastra platform documentation](https://mastra.ai/docs/mastra-platform/overview).
+| Folder          | Description                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `api/`          | Honeycomb alert + Slack interaction webhook handlers and adapters.                                                          |
+| `workflows/`    | The main `oiva-workflow` and `alert-enrich` for alert contextualization.                                                    |
+| `agents/`       | Supervisor, telemetry, codebase, and report agents.                                                                         |
+| `prompts/`      | Custom system prompts for each agent.                                                                                       |
+| `tools/`        | Reusable tools (alert enrichment, investigation tool wrapper).                                                              |
+| `mcp/`          | Hosted MCP client for Honeycomb (telemetry tools).                                                                          |
+| `workspaces/`   | Per-agent sandboxed workspaces and knowledge-base sync.                                                                     |
+| `memory/`       | Investigation memory schema.                                                                                                |
+| `domain/`       | Core domain types and logic — incident/alert/report schemas, the incident state machine, correlation, and duration helpers. |
+| `services/`     | Incident service and the cleanup reaper + scheduler.                                                                        |
+| `ports/`        | Interfaces for repositories and the progress reporter (ports/adapters).                                                     |
+| `repositories/` | Postgres implementations of the alert, incident, and report repositories.                                                   |
+| `db/`           | Postgres client, SSL config, types, and migrations.                                                                         |
+| `slack/`        | Slack client, message formatters, and the progress reporter for incident updates.                                           |
+| `config/`       | Environment parsing and Postgres configuration.                                                                             |
+| `runtime/`      | Process lifecycle (graceful shutdown handling).                                                                             |
