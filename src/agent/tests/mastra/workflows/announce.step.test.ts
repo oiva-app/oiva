@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { createWorkflow } from "@mastra/core/workflows";
 import { lisaExpected } from "../../fixtures/sample_alerts/lisa-normalized";
 
-// Importing the workflow module pulls in repositories (pg.Pool) and the knowledge-base sync (S3Client) 
+// Importing the workflow module pulls in repositories (pg.Pool) and the knowledge-base mirror adapter (S3Client).
 vi.mock("@/config/env", () => ({
   env: {
     POSTGRES_CONFIG: {

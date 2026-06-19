@@ -222,6 +222,11 @@ NODE_ENV
 COLLECTOR_ENDPOINT
 ```
 
+The runtime workspace layer depends on the `KnowledgeBaseMirror` port. The
+current adapter is S3-backed and uses `KNOWLEDGE_BASE_S3_BUCKET`,
+`KNOWLEDGE_BASE_S3_PREFIX`, and `AWS_REGION` to populate per-incident local
+mirrors before agents read knowledge-base files.
+
 Secrets Manager values:
 
 ```text
