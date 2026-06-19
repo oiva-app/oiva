@@ -1,0 +1,59 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: tests
+permissions: 
+  contents: read
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+        root-dir: [src/agent]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.root-dir }}
+
+    steps:
+    - uses: actions/checkout@v6
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ matrix.root-dir }}
+    - name: "Clean install, build, test"
+      # dummy envars for preventing startup validation errors in `env.ts`
+      env:
+        OBSERVED_APP_NAME: ci-test
+        COLLECTOR_ENDPOINT: http://localhost:4318
+        HC_MCP_KEY: dummy
+        GITHUB_PAT: dummy
+        APP_GITHUB_REPOSITORIES: '[{"name":"example-app","url":"https://github.com/example/repo.git"}]'
+        KNOWLEDGE_BASE_S3_BUCKET: dummy-bucket
+        KNOWLEDGE_BASE_S3_PREFIX: dummy/
+        AWS_REGION: us-east-1
+        SLACK_BOT_TOKEN: xoxb-dummy
+        SLACK_CHANNEL_ID: C0000000000
+        SLACK_SIGNING_SECRET: dummy
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5433
+        POSTGRES_USER: oiva
+        POSTGRES_PASSWORD: oiva_dev
+        POSTGRES_DB: oiva
+      run: |
+        npm ci
+        npm run build --if-present
+        npm test
