@@ -33,7 +33,7 @@ four steps:
 1. **announce** — opens a Slack thread for the incoming alert and posts the
    initial incident card as the main message.
 2. **investigate** — the **Supervisor Agent** orchestrates the investigation, delegating
-   to two sub-agents, analysing and synthesizing their findings together:
+   to two sub-agents, analyzing and synthesizing their findings together:
    - **Telemetry Agent** — explores Honeycomb datasets, runs queries, compares
      anomalies against baselines, and pulls relevant telemetry evidence (such as traces) via the Honeycomb MCP.
    - **Codebase Agent** — examines the user's codebase by cloning the target repository into a Mastra workspace and inspecting it with local tools: filesystem navigation, Git history, LSP, and BM25 search.
