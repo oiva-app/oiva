@@ -27,7 +27,7 @@ npm run reap # run the cleanup reaper for stale incidents
 
 ## Incident Workflow
 
-A single Mastra workflow, `oiva-workflow`, orchestrates each incident through
+A single Mastra workflow, `oivaWorkflow`, orchestrates each incident through
 four steps:
 
 1. **announce** — opens a Slack thread for the incoming alert and posts the
@@ -51,7 +51,7 @@ routes.
 | Folder          | Description                                                                                                                 |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `api/`          | Honeycomb alert + Slack interaction webhook handlers and adapters.                                                          |
-| `workflows/`    | The main `oiva-workflow` and `alert-enrich` for alert contextualization.                                                    |
+| `workflows/`    | The main `oivaWorkflow` and `alertEnrich` for alert contextualization.                                                      |
 | `agents/`       | Supervisor, telemetry, codebase, and report agents.                                                                         |
 | `prompts/`      | Custom system prompts for each agent.                                                                                       |
 | `tools/`        | Reusable tools (alert enrichment, investigation tool wrapper).                                                              |
