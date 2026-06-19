@@ -586,7 +586,7 @@ Startup migrations are acceptable for the default `desired_count = 1` deployment
 
 ## Upload Knowledge Base Files
 
-Oiva can use knowledge-base files from S3 during investigations. These files should contain durable context that may not be obvious from code alone.
+Oiva can use knowledge-base files from S3 during investigations. These files should contain durable context that may not be obvious from code alone. At runtime, Oiva syncs these files through its knowledge-base mirror adapter into a per-incident local workspace before agents read them.
 
 The default Terraform deployment creates a private, encrypted, versioned S3 bucket for these files. Get the bucket name:
 

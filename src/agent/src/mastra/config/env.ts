@@ -105,8 +105,8 @@ const EnvSchema = z
     // "production" so an unset value fails closed.
     NODE_ENV: z.enum(["development", "production"]).default("production"),
 
-    // Knowledge base source in S3. Local per-incident mirrors are created under
-    // /tmp/workspaces by the workspace layer.
+    // S3 configuration for the current KnowledgeBaseMirror adapter.
+    // Agents read from local per-incident mirrors created under /tmp/workspaces.
     KNOWLEDGE_BASE_S3_BUCKET: z.string(),
     KNOWLEDGE_BASE_S3_PREFIX: z.string(),
     AWS_REGION: z.string(),

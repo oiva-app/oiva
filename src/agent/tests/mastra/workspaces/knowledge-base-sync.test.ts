@@ -18,21 +18,18 @@ vi.mock("@aws-sdk/client-s3", () => ({
   }),
 }));
 
-vi.mock("../../../src/mastra/config/env", () => ({
-  env: {
-    APP_GITHUB_REPOSITORIES: [
-      { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
-    ],
-    KNOWLEDGE_BASE_S3_BUCKET: "test-bucket",
-    KNOWLEDGE_BASE_S3_PREFIX: "three-services-demo/knowledge-base",
-    AWS_REGION: "us-east-1",
-  },
-}));
-
 const workspaceRoot = "/tmp/workspaces";
+const config = {
+  bucket: "test-bucket",
+  prefix: "three-services-demo/knowledge-base",
+  region: "us-east-1",
+};
 
-async function importSyncModule() {
-  return import("../../../src/mastra/workspaces/knowledge-base-sync");
+async function createMirror() {
+  const { S3KnowledgeBaseMirror } = await import(
+    "../../../src/mastra/workspaces/knowledge-base-adapters/s3-knowledge-base-mirror"
+  );
+  return new S3KnowledgeBaseMirror(config);
 }
 
 function listResponse(keys: string[], nextToken?: string) {
@@ -50,7 +47,7 @@ function getResponse(content: string) {
   };
 }
 
-describe("knowledge-base sync", () => {
+describe("S3KnowledgeBaseMirror", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
@@ -94,9 +91,9 @@ describe("knowledge-base sync", () => {
       return Promise.resolve(getResponse(contentByKey[command.input.Key]));
     });
 
-    const { syncKnowledgeBaseForIncident } = await importSyncModule();
+    const mirror = await createMirror();
 
-    const destination = await syncKnowledgeBaseForIncident("incident-kb");
+    const destination = await mirror.syncForIncident("incident-kb");
 
     expect(destination).toBe("/tmp/workspaces/incident-kb/knowledge-base");
     await expect(
@@ -136,9 +133,9 @@ describe("knowledge-base sync", () => {
       )
       .mockResolvedValueOnce(getResponse("second"));
 
-    const { syncKnowledgeBaseForIncident } = await importSyncModule();
+    const mirror = await createMirror();
 
-    await syncKnowledgeBaseForIncident("incident-kb");
+    await mirror.syncForIncident("incident-kb");
 
     await expect(
       fs.access("/tmp/workspaces/incident-kb/knowledge-base/stale.md"),
@@ -159,10 +156,10 @@ describe("knowledge-base sync", () => {
       listResponse(["three-services-demo/knowledge-base/../escape.md"]),
     );
 
-    const { syncKnowledgeBaseForIncident } = await importSyncModule();
+    const mirror = await createMirror();
 
     await expect(
-      syncKnowledgeBaseForIncident("incident-traversal"),
+      mirror.syncForIncident("incident-traversal"),
     ).rejects.toThrow("Rejected S3 object path outside destination");
     await expect(
       fs.access("/tmp/workspaces/incident-traversal/escape.md"),
