@@ -29,7 +29,7 @@ import {
   prepareSupervisorWorkspace,
   cleanupSupervisorWorkspace,
 } from "@/workspaces/supervisor-workspace";
-import { knowledgeBaseMirror } from "@/workspaces/knowledge-base-mirror";
+import { knowledgeBaseMirror } from "@/workspaces/configured-knowledge-base-mirror";
 
 /*
 z.string.uuid() is deprecated per https://zod.dev/api?id=uuids#uuids
