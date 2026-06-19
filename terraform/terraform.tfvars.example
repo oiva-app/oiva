@@ -86,8 +86,8 @@ slack_channel_id = "C0123456789"
 # knowledge_base_s3_bucket     = "existing-bucket-name"
 
 # Existing Secrets Manager secret ARN escape hatches.
-# hc_mcp_key_secret_arn           = "arn:aws:secretsmanager:..."
-# hc_shared_secret_secret_arn     = "arn:aws:secretsmanager:..."
+# honeycomb_mcp_key_secret_arn    = "arn:aws:secretsmanager:..."
+# honeycomb_shared_secret_secret_arn = "arn:aws:secretsmanager:..."
 # github_pat_secret_arn           = "arn:aws:secretsmanager:..."
 # slack_bot_token_secret_arn      = "arn:aws:secretsmanager:..."
 # slack_signing_secret_secret_arn = "arn:aws:secretsmanager:..."

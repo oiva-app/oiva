@@ -66,13 +66,13 @@ module "oiva" {
   reaper_failed_quiet_minutes    = var.reaper_failed_quiet_minutes
   reaper_stuck_deadline_minutes  = var.reaper_stuck_deadline_minutes
 
-  llm_provider_secret_env_vars    = var.llm_provider_secret_env_vars
-  hc_mcp_key_secret_arn           = var.hc_mcp_key_secret_arn
-  hc_shared_secret_secret_arn     = var.hc_shared_secret_secret_arn
-  github_pat_secret_arn           = var.github_pat_secret_arn
-  slack_bot_token_secret_arn      = var.slack_bot_token_secret_arn
-  slack_signing_secret_secret_arn = var.slack_signing_secret_secret_arn
-  honeycomb_api_key_secret_arn    = var.honeycomb_api_key_secret_arn
+  llm_provider_secret_env_vars       = var.llm_provider_secret_env_vars
+  honeycomb_mcp_key_secret_arn       = var.honeycomb_mcp_key_secret_arn
+  honeycomb_shared_secret_secret_arn = var.honeycomb_shared_secret_secret_arn
+  github_pat_secret_arn              = var.github_pat_secret_arn
+  slack_bot_token_secret_arn         = var.slack_bot_token_secret_arn
+  slack_signing_secret_secret_arn    = var.slack_signing_secret_secret_arn
+  honeycomb_api_key_secret_arn       = var.honeycomb_api_key_secret_arn
 
   adot_config_content = file("${path.root}/../src/otel-collector/adot-collector-config.production.yaml")
 }
