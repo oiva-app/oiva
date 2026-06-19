@@ -44,8 +44,7 @@ Progress is surfaced live in Slack through the `ProgressReporter` port, so the t
 
 ## Data model
 
-Three Postgres tables hold incident state. This is a summary. The source of
-truth is the migrations under `src/mastra/db/migrations/`.
+Three Postgres tables hold incident state. This is a summary. The source of truth is the migrations under `src/agent/src/mastra/db/migrations/`.
 
 ```mermaid
 erDiagram
@@ -92,7 +91,7 @@ erDiagram
 
 ## Project layout
 
-All Mastra code lives under `src/mastra`. `src/mastra/index.ts` is the entry
+All Mastra code lives under `src/agent/src/mastra`. `src/agent/src/mastra/index.ts` is the entry
 point that wires everything together and registers the alert and Slack webhook
 routes.
 

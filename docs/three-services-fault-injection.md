@@ -114,4 +114,4 @@ Suggested rotation for a first round of agent evaluation:
 - **No probabilistic faults** (`inventory:error=503@0.1` — fail 10% of the time). The _caller_ can produce probabilistic mixes by attaching the header to a fraction of their requests.
 - **No timeout / hang / malformed-payload modes.** Tracked for v2.
 
-_NOTE_: I omitted the `FAULT_INJECTION_ENABLED=true` from the `.env.example` in the three-services-demo-app to prevent Oiva's discovery of it. Make sure to add that to your local repo's `.env` if you want to run the runtime fault injections.
+_NOTE_: `FAULT_INJECTION_ENABLED=true` is omitted from the `.env.example` in the three-services-demo-app to prevent Oiva's discovery of it. Make sure to add that to your local repo's `.env` if you want to run the runtime fault injections.

@@ -118,4 +118,4 @@ shape looks like:
 - [Local development](docs/local-dev.md)
 - [Oiva agent overview](docs/oiva-agent.md)
 - [Fault-injection: Three-Services Demo](docs/three-services-fault-injection.md)
-- [Fault-injection: OTel Astro Shop Demo](docs/oTel-astro-shop-fault-injection.md)
+- [Fault-injection: OTel Astro Shop Demo](docs/otel-astro-shop-fault-injection.md)

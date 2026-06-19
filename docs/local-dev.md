@@ -52,7 +52,9 @@ Reset the database:
 
 ```bash
 docker compose down -v   # destroys all DB contents
+
 npm run db:migrate       # from src/agent — recreates schema
+
 docker compose up
 ```
 
