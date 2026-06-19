@@ -1,64 +1,31 @@
+# Oiva
+
 [![tests badge](https://github.com/oiva-app/oiva/actions/workflows/node.js.yml/badge.svg)](https://github.com/oiva-app/oiva/actions/workflows/node.js.yml)
 
-## INSTALLATION
+> Oiva is a self-hosted, open-source service for AI-assisted incident investigation.
 
-Create and edit your .env file from the example
+Oiva receives Honeycomb alert webhooks and runs an automated investigation,
+combining observability data with read access to the GitHub repositories that
+define your observed app.
 
-```bash
-cp .env.example .env
-```
+## Deployment
 
-Set the LLM provider API keys required by the configured agent models. Mastra
-reads provider-standard environment variables automatically; for example,
-`openai/...` models use `OPENAI_API_KEY`, `anthropic/...` models use
-`ANTHROPIC_API_KEY`, and `google/...` models use `GOOGLE_API_KEY`.
+To self-host Oiva in production on AWS (ECS/Fargate) with Terraform, see the
+**[deployment guide](terraform/README.md)**.
 
-Give Oiva access to the GitHub repositories that define your observed app by including a GitHub PAT in the .env file. If the repositories are public you don't need to grant any permissions. More info: [GitHub Docs.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+## Local development
 
-Start the OTel Collector
+See **[docs/local-dev.md](docs/local-dev.md)** for setup, running the dev
+server, and troubleshooting.
 
-```bash
-docker compose up
-```
+## Alert webhook payload format
 
+For proper functioning, you must use this alert template.
 
-
-### INSTALL MASTRA OTEL EXPORTER
-
-If you receive errors when installing the `@mastra/otel-exporter`, try the `--legacy-peer-deps` flag:
-
-```bash
-npm install @mastra/otel-exporter --legacy-peer-deps
-```
-
-### Database (local dev)
-
-Local development uses split Postgres variables from `.env`; `DATABASE_URL`
-is intentionally unsupported. The compose defaults are:
-
-```bash
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5433
-POSTGRES_USER=oiva
-POSTGRES_PASSWORD=oiva_dev
-POSTGRES_DB=oiva
-```
-
-Start the local Postgres container and run migrations before starting the dev
-server:
-
-```bash
-docker compose up -d postgres
-npm run db:migrate
-```
-
-### ALERT WEBHOOK PAYLOAD FORMAT
-
-For proper functioning, you must use this alert template!
-
-This alert payload shape is a slightly modified version of the "Generic" Honeycomb (HC)Alert Trigger Template that is provided for HC users who don't know or care about their required payload shape.
-
-This alert includes additional properties that aid our agent in its investigation.
+This payload shape is a slightly modified version of the "Generic" Honeycomb
+Alert Trigger Template (provided for Honeycomb users who don't know or care
+about their required payload shape). It includes additional properties that aid
+the agent in its investigation.
 
 ```go
 {
@@ -101,124 +68,54 @@ This alert includes additional properties that aid our agent in its investigatio
   },
   "secret": "{{.Recipient.Secret}}"
 }
-
 ```
 
-More info in the Honeycomb Docs: https://docs.honeycomb.io/notify/webhooks and in the Go Docs, which defines the templating syntax: https://pkg.go.dev/text/template
+More info: [Honeycomb webhooks docs](https://docs.honeycomb.io/notify/webhooks)
+and the [Go text/template docs](https://pkg.go.dev/text/template) for the
+templating syntax.
 
-## Sample alerts
+### Sample alerts
 
-From Astro Shop
+Sample alert payloads live in
+[src/agent/tests/fixtures/sample_alerts/](src/agent/tests/fixtures/sample_alerts/),
+and runnable `curl` examples are in
+[src/agent/tests/manual_tests/](src/agent/tests/manual_tests/).
 
-```go
-{
-  "name": "error == true",
-  "id": "2XteoXm4S78",
-  "description": "",
-  "links": {
-    "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/datasets/frontend/triggers/2XteoXm4S78?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
-  },
-  "environment": "astro-lisa",
-  "threshold": {
-    "op": "greater than",
-    "value": "1"
-  },
-  "result": {
-    "groupsTriggered": [
-      {
-        "count": 2726
-      }
-    ],
-    "links": {
-      "url": "https://ui.honeycomb.io/senorvalenz-gettingstarted/environments/astro-lisa/datasets/frontend/result/eLzr7yW3bQq/a/D37zNFYxc7f?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
-    }
-  },
-  "alert": {
-    "instanceId": "1015bd0f-99a3-41e7-817e-9c831df21262",
-    "description": "astro-lisa environment:\nCurrent value (2.726 k) greater than threshold value (1)",
-    "status": "TRIGGERED",
-    "summary": "TRIGGER TEST: Triggered: error == true",
-    "isTest": false
-  }
-}
-```
+## Observing Oiva with an OTel frontend (e.g. Honeycomb)
 
-From Valerie's 3-service app
+### Notable span attributes
 
-```go
-{
-  "name": "Too many HTTP request errors",
-  "id": "sbLy6gwM56r",
-  "description": "This trigger notifies us if there are any 400 or 500 level HTTP status requests",
-  "links": {
-    "url": "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/triggers/sbLy6gwM56r?utm_content=edit_trigger&utm_medium=Trigger&utm_source=webhook"
-  },
-  "environment": "homelab-env",
-  "threshold": { "op": "greater than", "value": "0.05" },
-  "result": {
-    "groupsTriggered": [
-      {
-        "field": "http.route",
-        "value": "/api/orders",
-        "count": 0.07634730538922156
-      }
-    ],
-    "links": {
-      "url": "https://ui.honeycomb.io/vracine-homelab/environments/homelab-env/datasets/gateway/result/YkMQXZo8Ve/a/CZxFiuoAp5Z?utm_content=view_graph&utm_medium=Trigger&utm_source=webhook"
-    }
-  },
-  "alert": {
-    "instanceId": "b67ba3e5-b4b7-40c3-a556-be2a41eb16ac",
-    "description": "homelab-env environment:\nCurrently greater than threshold value (0.05) for http.route: /api/orders (value 0.076347)",
-    "status": "TRIGGERED",
-    "summary": "Triggered: Too many HTTP request errors",
-    "isTest": false
-  }
-}
-```
-## TROUBLESHOOTING
-500 error from webhook endpoint?  This might help:
+Trying to understand what Oiva did? When viewing a trace, show these span
+attributes as columns in your trace view:
 
-```bash
-docker compose down -v  # destroys all DB contents
-npm run db:migrate      # sets up Postgres database
-docker compose up
-```
-
-## Observing Oiva with an OTel Frontend (e.g. Honeycomb)
-
-### Notable Span Attributes
-Trying to understand what Oiva did? When viewing a trace, it's helpful to show these span attributes as columns in your trace view:
-- gen_ai.operation.name
-- mastra.workflow_step.input
-- gen_ai.tool.name
-- mastra.model_step.input and .output (agent LLM inputs and outputs)
+- `gen_ai.operation.name`
+- `mastra.workflow_step.input`
+- `gen_ai.tool.name`
+- `mastra.model_step.input` and `.output` (agent LLM inputs and outputs)
 
 ### Model inputs and outputs
-When viewing the `mastra.model_step.input` and `.output` attributes, keep in mind that you are NOT viewing the actual data set to the LLM API.  Mastra redacts tool calls.
 
-TBD: this is likely an OTel-implemented behavior?
+When viewing `mastra.model_step.input` / `.output`, note that you are **not**
+seeing the exact data sent to the LLM API — Mastra redacts tool calls. The
+shape looks like:
+
 ```json
 [
+  { "role": "system", "content": "..." },
   {
     "role": "system",
-    "content": "..."
+    "content": "Local filesystem at \"/.../knowledge-base\". Relative paths resolve from this directory. File access is restricted to this directory."
   },
-  {
-    "role": "system",
-    "content": "Local filesystem at \"/home/sv/projects/capstone/test-workspaces/opentelemetry-demo-workspaces/knowledge-base\". Relative paths resolve from this directory. File access is restricted to this directory."
-  },
-  {
-    "role": "user",
-    "content": { "omittedForBrevity": "raw alert is here" },
-  {
-    "role": "assistant",
-    "content": "[tool: agent-telemetryAgent]"
-  },
-  {
-    "role": "tool",
-    "content": "[tool: agent-telemetryAgent]"
-  }
+  { "role": "user", "content": { "omittedForBrevity": "raw alert is here" } },
+  { "role": "assistant", "content": "[tool: agent-telemetryAgent]" },
+  { "role": "tool", "content": "[tool: agent-telemetryAgent]" }
 ]
-
 ```
+
+## Documentation
+
+- [Deployment (AWS + Terraform)](terraform/README.md)
+- [Local development](docs/local-dev.md)
+- [Oiva agent overview](docs/oiva-agent.md)
+- [Fault-injection: Three-Services Demo](docs/three-services-fault-injection.md)
+- [Fault-injection: OTel Astro Shop Demo](docs/oTel-astro-shop-fault-injection.md)
