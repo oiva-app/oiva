@@ -1,20 +1,20 @@
 locals {
   provided_secret_arns = {
-    hc_mcp_key           = var.honeycomb_mcp_key_secret_arn
-    hc_shared_secret     = var.honeycomb_shared_secret_secret_arn
-    github_pat           = var.github_pat_secret_arn
-    slack_bot_token      = var.slack_bot_token_secret_arn
-    slack_signing_secret = var.slack_signing_secret_secret_arn
-    honeycomb_api_key    = var.honeycomb_api_key_secret_arn
+    honeycomb_mcp_key       = var.honeycomb_mcp_key_secret_arn
+    honeycomb_shared_secret = var.honeycomb_shared_secret_secret_arn
+    github_pat              = var.github_pat_secret_arn
+    slack_bot_token         = var.slack_bot_token_secret_arn
+    slack_signing_secret    = var.slack_signing_secret_secret_arn
+    honeycomb_api_key       = var.honeycomb_api_key_secret_arn
   }
 
   fixed_placeholder_secret_names = {
-    hc_mcp_key           = "hc-mcp-key"
-    hc_shared_secret     = "hc-shared-secret"
-    github_pat           = "github-pat"
-    slack_bot_token      = "slack-bot-token"
-    slack_signing_secret = "slack-signing-secret"
-    honeycomb_api_key    = "honeycomb-api-key"
+    honeycomb_mcp_key       = "hc-mcp-key"
+    honeycomb_shared_secret = "hc-shared-secret"
+    github_pat              = "github-pat"
+    slack_bot_token         = "slack-bot-token"
+    slack_signing_secret    = "slack-signing-secret"
+    honeycomb_api_key       = "honeycomb-api-key"
   }
 
   llm_provider_secret_names = {
@@ -56,4 +56,14 @@ resource "aws_secretsmanager_secret" "placeholder" {
 moved {
   from = aws_secretsmanager_secret.placeholder["openai_api_key"]
   to   = aws_secretsmanager_secret.placeholder["OPENAI_API_KEY"]
+}
+
+moved {
+  from = aws_secretsmanager_secret.placeholder["hc_mcp_key"]
+  to   = aws_secretsmanager_secret.placeholder["honeycomb_mcp_key"]
+}
+
+moved {
+  from = aws_secretsmanager_secret.placeholder["hc_shared_secret"]
+  to   = aws_secretsmanager_secret.placeholder["honeycomb_shared_secret"]
 }

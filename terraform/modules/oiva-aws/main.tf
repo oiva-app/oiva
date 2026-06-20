@@ -17,11 +17,11 @@ locals {
   knowledge_base_bucket = var.create_knowledge_base_bucket ? aws_s3_bucket.knowledge_base[0].bucket : var.knowledge_base_s3_bucket
 
   app_secret_env_names = {
-    hc_mcp_key           = "HONEYCOMB_MCP_KEY"
-    hc_shared_secret     = "HONEYCOMB_SHARED_SECRET"
-    github_pat           = "GITHUB_PAT"
-    slack_bot_token      = "SLACK_BOT_TOKEN"
-    slack_signing_secret = "SLACK_SIGNING_SECRET"
+    honeycomb_mcp_key       = "HONEYCOMB_MCP_KEY"
+    honeycomb_shared_secret = "HONEYCOMB_SHARED_SECRET"
+    github_pat              = "GITHUB_PAT"
+    slack_bot_token         = "SLACK_BOT_TOKEN"
+    slack_signing_secret    = "SLACK_SIGNING_SECRET"
   }
 
   app_environment = [
