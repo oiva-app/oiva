@@ -232,8 +232,8 @@ Secrets Manager values:
 ```text
 LLM provider API keys named for the configured Mastra model providers
   for example OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY
-HC_MCP_KEY
-HC_SHARED_SECRET
+HONEYCOMB_MCP_KEY
+HONEYCOMB_SHARED_SECRET
 GITHUB_PAT
 SLACK_BOT_TOKEN
 SLACK_CHANNEL_ID

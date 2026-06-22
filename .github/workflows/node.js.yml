@@ -39,7 +39,7 @@ jobs:
       env:
         OBSERVED_APP_NAME: ci-test
         COLLECTOR_ENDPOINT: http://localhost:4318
-        HC_MCP_KEY: dummy
+        HONEYCOMB_MCP_KEY: dummy
         GITHUB_PAT: dummy
         APP_GITHUB_REPOSITORIES: '[{"name":"example-app","url":"https://github.com/example/repo.git"}]'
         KNOWLEDGE_BASE_S3_BUCKET: dummy-bucket

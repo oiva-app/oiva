@@ -384,9 +384,9 @@ variable "llm_provider_secret_env_vars" {
 
   validation {
     condition = length(setintersection(var.llm_provider_secret_env_vars, toset([
-      "HC_MCP_KEY",
-      "HC_SHARED_SECRET",
       "GITHUB_PAT",
+      "HONEYCOMB_MCP_KEY",
+      "HONEYCOMB_SHARED_SECRET",
       "SLACK_BOT_TOKEN",
       "SLACK_SIGNING_SECRET",
       "HONEYCOMB_API_KEY",
@@ -395,14 +395,14 @@ variable "llm_provider_secret_env_vars" {
   }
 }
 
-variable "hc_mcp_key_secret_arn" {
-  description = "Existing Secrets Manager ARN for HC_MCP_KEY."
+variable "honeycomb_mcp_key_secret_arn" {
+  description = "Existing Secrets Manager ARN to inject as HONEYCOMB_MCP_KEY."
   type        = string
   default     = null
 }
 
-variable "hc_shared_secret_secret_arn" {
-  description = "Existing Secrets Manager ARN for HC_SHARED_SECRET."
+variable "honeycomb_shared_secret_secret_arn" {
+  description = "Existing Secrets Manager ARN to inject as HONEYCOMB_SHARED_SECRET."
   type        = string
   default     = null
 }

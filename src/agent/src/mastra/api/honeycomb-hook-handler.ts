@@ -57,7 +57,7 @@ export async function alertHookHandler(c: Context) {
   const verdict = verifyAlert(
     parsed.data,
     providedSecret,
-    env.HC_SHARED_SECRET,
+    env.HONEYCOMB_SHARED_SECRET,
   );
 
   if (verdict.kind === "invalid") {

@@ -9,7 +9,7 @@ export const mcpClient = new MCPClient({
       url: new URL("https://mcp.honeycomb.io/mcp"),
       requestInit: {
         headers: {
-          Authorization: `Bearer ${env.HC_MCP_KEY}`,
+          Authorization: `Bearer ${env.HONEYCOMB_MCP_KEY}`,
         },
       },
     },

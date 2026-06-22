@@ -7,7 +7,7 @@
  *
  *   npx tsx tests/utilities/capture-query-results.ts
  *
- * Requires a valid HC_MCP_KEY (loaded via src/mastra/config/env.ts) and a live
+ * Requires a valid HONEYCOMB_MCP_KEY (loaded via src/mastra/config/env.ts) and a live
  * `lisaExpected.resultUrl`. Honeycomb query runs expire, so the URL in the
  * fixture may need updating from the Honeycomb UI before re-capturing.
  */
@@ -32,7 +32,7 @@ async function main() {
 
   if ((out as { isError?: boolean }).isError) {
     throw new Error(
-      `MCP returned an error envelope (stale URL or wrong HC_MCP_KEY?):\n${JSON.stringify(out, null, 2)}`,
+      `MCP returned an error envelope (stale URL or wrong HONEYCOMB_MCP_KEY?):\n${JSON.stringify(out, null, 2)}`,
     );
   }
 

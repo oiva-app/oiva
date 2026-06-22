@@ -1,7 +1,7 @@
 locals {
   provided_secret_arns = {
-    hc_mcp_key           = var.hc_mcp_key_secret_arn
-    hc_shared_secret     = var.hc_shared_secret_secret_arn
+    hc_mcp_key           = var.honeycomb_mcp_key_secret_arn
+    hc_shared_secret     = var.honeycomb_shared_secret_secret_arn
     github_pat           = var.github_pat_secret_arn
     slack_bot_token      = var.slack_bot_token_secret_arn
     slack_signing_secret = var.slack_signing_secret_secret_arn
