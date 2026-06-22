@@ -8,6 +8,35 @@ Oiva receives Honeycomb alert webhooks and runs an automated investigation,
 combining observability data with read access to the GitHub repositories that
 define your observed app.
 
+## Prerequisites
+
+Oiva needs credentials for a few external services before it can run. Obtain these regardless of how you run Oiva: for local development put them in your
+`.env` (see [local development](docs/local-dev.md)); for production store them in AWS Secrets Manager (see the [deployment guide](terraform/README.md)).
+
+### LLM provider
+
+Oiva's agents call an LLM provider. The default models are OpenAI, so by default you need an **`OPENAI_API_KEY`**. Mastra reads provider-standard variables automatically — if you configure non-OpenAI models, set that provider's key as well: `anthropic/...` models use `ANTHROPIC_API_KEY`, `google/...` models use
+`GOOGLE_API_KEY`.
+
+### Honeycomb
+
+- **MCP key** (`HONEYCOMB_MCP_KEY`) — a Team-level key with read-only Environments and MCP access, in `key_id:key_secret` format. The telemetry agent uses it to query your data. See the [Honeycomb MCP guide](https://docs.honeycomb.io/integrations/mcp/configuration-guide).
+- **Alert webhook** — add a webhook recipient that POSTs to Oiva at `/hook/honeycomb/alert`, using the payload template in [Alert webhook payload format](#alert-webhook-payload-format). In production, set a shared secret (`HONEYCOMB_SHARED_SECRET`). Oiva rejects requests whose secret doesn't match. The secret may be supplied either as the `X-Honeycomb-Webhook-Token` header or as the `secret` field in the payload body (the template uses the body field); the header takes precedence if both are present. `HONEYCOMB_SHARED_SECRET` is optional in development and required in production.
+
+### Slack
+
+Oiva posts incident reports and live updates to a Slack channel. Create a Slack app for your workspace and:
+
+- Add the **`chat:write`** bot scope, install the app, and copy the **Bot User OAuth token** (`SLACK_BOT_TOKEN`).
+- Copy the app's **Signing secret** (`SLACK_SIGNING_SECRET`) — used to verify Slack interactions, like user ratings and incident retries.
+- Enable **Interactivity** and set the request URL to Oiva at `/hook/slack/interaction`.
+- Invite the bot to the target channel and copy its **channel ID** (`SLACK_CHANNEL_ID`).
+
+### GitHub
+
+- A **personal access token** (`GITHUB_PAT`) with read access to the repositories Oiva should inspect. Public repos need no scopes.
+- The repositories themselves, as JSON in `APP_GITHUB_REPOSITORIES`, e.g. `[{"name":"example-app","url":"https://github.com/example/repo.git"}]`.
+
 ## Deployment
 
 To self-host Oiva in production on AWS (ECS/Fargate) with Terraform, see the
