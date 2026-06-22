@@ -49,7 +49,7 @@ server, and troubleshooting.
 
 ## Alert webhook payload format
 
-For proper functioning, you must use this alert template.
+For proper functioning, you must use this Honeycomb webhook template.
 
 This payload shape is a slightly modified version of the "Generic" Honeycomb
 Alert Trigger Template (provided for Honeycomb users who don't know or care

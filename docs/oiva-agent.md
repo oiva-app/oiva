@@ -44,50 +44,29 @@ Progress is surfaced live in Slack through the `ProgressReporter` port, so the t
 
 ## Data model
 
-Three Postgres tables hold incident state. This is a summary. The source of truth is the migrations under `src/agent/src/mastra/db/migrations/`.
+Three Postgres tables hold incident state. This is a conceptual summary. The source of truth is the migrations under `src/agent/src/mastra/db/migrations/`.
 
 ```mermaid
 erDiagram
-    incidents |o--o{ alerts : "correlates (FK nullable, SET NULL on delete)"
-    incidents ||--o{ reports : "produces (CASCADE on delete)"
+    incidents |o--o{ alerts : "correlates"
+    incidents ||--o{ reports : "produces"
 
     incidents {
         uuid id PK
-        text status "triggered, investigating, report_in_process, report_generated, report_delivered, failed, closed"
-        timestamptz created_at
-        timestamptz status_updated_at
-        timestamptz resolved_at "nullable"
-        text slack_thread_ts "nullable; live message identity"
-        text slack_channel_id "nullable"
-        jsonb live_update_snapshot "nullable; cold-rebuild fallback"
+        text status
     }
-
     alerts {
         uuid id PK
-        uuid incident_id FK "nullable, ON DELETE SET NULL"
-        text source "default 'honeycomb'"
-        text vendor_instance_id "nullable; UNIQUE(source, vendor_instance_id) for webhook idempotency"
-        text trigger_name "correlation key"
-        text dataset "correlation key"
-        text query_id "correlation key"
-        jsonb raw_payload
-        timestamptz received_at
+        uuid incident_id FK
     }
-
     reports {
         uuid id PK
-        uuid incident_id FK "NOT NULL, ON DELETE CASCADE"
-        jsonb report_json
-        text feedback "nullable: positive | negative"
-        timestamptz generated_at
+        uuid incident_id FK
     }
 ```
 
-- An **alert** may arrive before (or without) an incident, so its `incident_id`
-  is nullable; deleting an incident detaches its alerts rather than dropping
-  them. The partial unique index on `(source, vendor_instance_id)` gives
-  webhook retries wire-level idempotency.
-- A **report** always belongs to an incident and is deleted with it.
+- An **alert** optionally links to an incident (detached if the incident is deleted).
+- A **report** always belongs to an incident (deleted with it).
 
 ## Project layout
 
