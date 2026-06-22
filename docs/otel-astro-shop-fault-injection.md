@@ -50,6 +50,9 @@ product_ids = [f"#{x.id}" for x in cat_response.products]
 ```
 
 ##### Example alert webhook
+  <details>
+  <summary>Click to expand</summary>
+
 ```json fold
 {
   "name": "error == true",
@@ -114,6 +117,8 @@ product_ids = [f"#{x.id}" for x in cat_response.products]
   }
 }
 ```
+  </details>
+
 #### wiggum
 ##### Summary
 Simulates a change in the API that was executed on one service but not propagated to nearby services.
@@ -136,6 +141,9 @@ $src={`/assets/products/${picture}`}
 ```
 
 ##### Example alert webhook
+  <details>
+  <summary>Click to expand</summary>
+
 ```json fold
 {
   "name": "Excess 4xx HTTP Status Codes",
@@ -200,4 +208,7 @@ $src={`/assets/products/${picture}`}
   "secret": "letmein"
 }
 ```
+
+  </details>
+
 
