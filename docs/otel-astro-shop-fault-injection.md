@@ -34,7 +34,7 @@ make build && make restart
 
 At this point, the application should be sending telemetry to your observability backend that exhibits the bug that the code intends to simulate.
 ### The bugs
-All bugs are listed below.  Each bug as a `-dev` branch, which was used to modify the code, and a `-prod` branch which is used to 'deploy' the bug
+All bugs are listed below.  Each bug has a `-dev` branch, which was used to modify the code, and a `-prod` branch which is used to 'deploy' the bug
 #### lisa
 ##### Summary
 Recommendation service returns invalid product IDs, causing errors elsewhere in the system.  Simulates a change in a naming convention that was not propagated to nearby services.
@@ -116,7 +116,7 @@ product_ids = [f"#{x.id}" for x in cat_response.products]
 ```
 #### wiggum
 ##### Summary
-Simulates a change in the API that was executed on one service but not propagated to nearby services. Modify image source string to causes 404's when client requests images: `images` path renamed to `img`
+Simulates a change in the API that was executed on one service but not propagated to nearby services.
 
 ##### Details
 The next app requests images from the `image-provider` service, which is an Nginx container.  This code change requests images from a path on the server that does not exist.  
@@ -126,7 +126,7 @@ Files affected:
 frontend/pages/product/[productId]/index.tsx
 ```
 
-Change line 78 to:
+Change line 78 from:
 ```
 $src={`/images/products/${picture}`}  
 ```
