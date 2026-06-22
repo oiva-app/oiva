@@ -416,8 +416,8 @@ The app's `POSTGRES_PASSWORD` is different from the application/API secrets belo
 
 The required secrets are:
 
-- `HC_MCP_KEY`
-- `HC_SHARED_SECRET`
+- `HONEYCOMB_MCP_KEY`
+- `HONEYCOMB_SHARED_SECRET`
 - `GITHUB_PAT`
 - `SLACK_BOT_TOKEN`
 - `SLACK_SIGNING_SECRET`
@@ -441,7 +441,14 @@ Check Mastra provider docs define these names. For example, `openai/...` models 
 
 `GITHUB_PAT` only needs read access to the repositories Oiva will inspect.
 
-`HC_SHARED_SECRET` is a shared webhook secret between Honeycomb and Oiva. Generate a random value and save it in Secrets Manager now. Later, use the same value when configuring the Honeycomb webhook.
+`HONEYCOMB_SHARED_SECRET` is a shared webhook secret between Honeycomb and Oiva. Generate a random value and save it in Secrets Manager now. Later, use the same value when configuring the Honeycomb webhook.
+
+If you are updating an existing deployment that already has Secrets Manager
+secrets originally injected as `HC_MCP_KEY` and `HC_SHARED_SECRET`, do not create
+empty replacement secrets. Point `honeycomb_mcp_key_secret_arn` and
+`honeycomb_shared_secret_secret_arn` at the existing secret ARNs. ECS will inject
+those same secret values under the new `HONEYCOMB_MCP_KEY` and
+`HONEYCOMB_SHARED_SECRET` environment variable names.
 
 For example:
 

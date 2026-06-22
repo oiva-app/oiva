@@ -26,7 +26,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../../../src/mastra/config/env", () => ({
   env: {
-    HC_SHARED_SECRET: "secret",
+    HONEYCOMB_SHARED_SECRET: "secret",
     CORRELATION_WINDOW_MINUTES: 30,
   },
 }));

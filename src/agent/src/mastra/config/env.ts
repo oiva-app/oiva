@@ -78,13 +78,13 @@ const GitHubRepositoriesEnvSchema = z
 const EnvSchema = z
   .object({
     OBSERVED_APP_NAME: z.string(),
-    HC_MCP_KEY: z.string(),
+    HONEYCOMB_MCP_KEY: z.string(),
     COLLECTOR_ENDPOINT: z.string(),
     GITHUB_PAT: z.string(),
     APP_GITHUB_REPOSITORIES: GitHubRepositoriesEnvSchema,
 
     // Optional in development (no webhook auth). REQUIRED in production.
-    HC_SHARED_SECRET: z.string().optional(),
+    HONEYCOMB_SHARED_SECRET: z.string().optional(),
 
     // Reduce max steps to save tokens
     SUPERVISOR_MAX_STEPS: z.coerce.number().default(30),
@@ -101,7 +101,7 @@ const EnvSchema = z
       MastraModelRouterIdSchema.default("openai/gpt-4o-mini"),
     RUN_EVALS: z.stringbool().default(true), // `false` to save tokens
 
-    // Gates HC_SHARED_SECRET enforcement (see .refine below). Defaults to
+    // Gates HONEYCOMB_SHARED_SECRET enforcement (see .refine below). Defaults to
     // "production" so an unset value fails closed.
     NODE_ENV: z.enum(["development", "production"]).default("production"),
 
@@ -118,7 +118,7 @@ const EnvSchema = z
 
     /*
       mcp integration testing
-        Only set to true if 'HC_MCP_KEY' points at a valid MCP key for the `oiva-sv` team 
+        Only set to true if 'HONEYCOMB_MCP_KEY' points at a valid MCP key for the `oiva-sv` team 
     */
     RUN_OIVA_SV_MCP_INTEGRATION_TESTS: z.stringbool().default(false),
 
@@ -142,11 +142,12 @@ const EnvSchema = z
     REAPER_INTERVAL_MINUTES: z.coerce.number().default(10),
   })
   .refine(
-    (env) => env.NODE_ENV !== "production" || Boolean(env.HC_SHARED_SECRET),
+    (env) =>
+      env.NODE_ENV !== "production" || Boolean(env.HONEYCOMB_SHARED_SECRET),
     {
       message:
-        "HC_SHARED_SECRET is required when NODE_ENV=production (an unset NODE_ENV defaults to production). Set NODE_ENV=development to run webhooks without a shared secret.",
-      path: ["HC_SHARED_SECRET"],
+        "HONEYCOMB_SHARED_SECRET is required when NODE_ENV=production (an unset NODE_ENV defaults to production). Set NODE_ENV=development to run webhooks without a shared secret.",
+      path: ["HONEYCOMB_SHARED_SECRET"],
     },
   );
 

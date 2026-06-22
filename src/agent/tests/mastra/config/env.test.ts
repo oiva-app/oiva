@@ -8,7 +8,7 @@ let testRoot: string;
 
 const requiredEnv = {
   OBSERVED_APP_NAME: "orders-api",
-  HC_MCP_KEY: "hc-mcp-key",
+  HONEYCOMB_MCP_KEY: "hc-mcp-key",
   COLLECTOR_ENDPOINT: "http://localhost:4318/v1/traces",
   GITHUB_PAT: "github-token",
   APP_GITHUB_REPOSITORIES: JSON.stringify([
