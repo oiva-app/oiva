@@ -4,7 +4,7 @@ The [Mastra](https://mastra.ai/) Agent application at the heart of Oiva. It rece
 Honeycomb alert webhook, runs a multi-agent investigation across the user's telemetry and codebase, writes a structured incident report, and posts it to Slack. Throughout the workflow, live progress updates are surfaced to the user in the incident message on Slack.
 
 For full-system setup (Docker, Postgres, OTel Collector, environment keys, and
-the Honeycomb alert webhook contract) see the main [Oiva README](../../README.md). This document covers the agent package itself.
+the Honeycomb alert webhook contract), see the [local development guide](local-dev.md). This document covers the agent package itself.
 
 ## Development
 
@@ -16,7 +16,7 @@ npm run db:migrate # apply Postgres migrations
 npm run dev        # Mastra Studio at http://localhost:4111
 ```
 
-`npm run dev` boots without Postgres, but `db:migrate` and any real investigation need it. Start it from the project root with `docker compose up -d postgres` before migrating (see the project README linked above for the full environment).
+`npm run dev` boots without Postgres, but `db:migrate` and any real investigation need it. Start it from the project root with `docker compose up -d postgres` before migrating (see the [local development guide](local-dev.md)).
 
 Other commands:
 
@@ -25,7 +25,7 @@ npm test     # run the Vitest suite
 npm run reap # run the cleanup reaper for stale incidents
 ```
 
-## Incident Workflow
+## Incident workflow
 
 A single Mastra workflow, `oivaWorkflow`, orchestrates each incident through
 four steps:
@@ -42,9 +42,37 @@ four steps:
 
 Progress is surfaced live in Slack through the `ProgressReporter` port, so the thread reflects which phase the incident workflow is in, including the subagent investigations.
 
+## Data model
+
+Three Postgres tables hold incident state. This is a conceptual summary. The source of truth is the migrations under `src/agent/src/mastra/db/migrations/`.
+
+```mermaid
+erDiagram
+    incidents |o--|{ alerts : "correlates"
+    incidents ||--o{ reports : "produces"
+
+    incidents {
+        uuid id PK
+        text status
+    }
+    alerts {
+        uuid id PK
+        uuid incident_id FK
+    }
+    reports {
+        uuid id PK
+        uuid incident_id FK
+    }
+```
+
+- An **alert** optionally links to an incident (detached if the incident is deleted).
+- An **incident** always has at least one alert. It's created in response to the alert that triggers it, and later alerts may correlate in. (This is a workflow invariant, not a DB constraint.)
+- An **incident** may have no report. A report is written only when an investigation completes successfully, so failed or in-progress incidents have none. (Exactly one per successful run; the schema permits more, but nothing re-reports today.)
+- A **report** always belongs to an incident (deleted with it).
+
 ## Project layout
 
-All Mastra code lives under `src/mastra`. `src/mastra/index.ts` is the entry
+All Mastra code lives under `src/agent/src/mastra`. `src/agent/src/mastra/index.ts` is the entry
 point that wires everything together and registers the alert and Slack webhook
 routes.
 
