@@ -435,20 +435,13 @@ llm_provider_secret_env_vars = [
 ]
 ```
 
-Check Mastra provider docs define these names. For example, `openai/...` models use
+Check Mastra provider docs for these variable names. For example, `openai/...` models use
 `OPENAI_API_KEY`, `anthropic/...` models use `ANTHROPIC_API_KEY`, and
 `google/...` models use `GOOGLE_API_KEY`. Etc.
 
 `GITHUB_PAT` only needs read access to the repositories Oiva will inspect.
 
 `HONEYCOMB_SHARED_SECRET` is a shared webhook secret between Honeycomb and Oiva. Generate a random value and save it in Secrets Manager now. Later, use the same value when configuring the Honeycomb webhook.
-
-If you are updating an existing deployment that already has Secrets Manager
-secrets originally injected as `HC_MCP_KEY` and `HC_SHARED_SECRET`, do not create
-empty replacement secrets. Point `honeycomb_mcp_key_secret_arn` and
-`honeycomb_shared_secret_secret_arn` at the existing secret ARNs. ECS will inject
-those same secret values under the new `HONEYCOMB_MCP_KEY` and
-`HONEYCOMB_SHARED_SECRET` environment variable names.
 
 For example:
 
