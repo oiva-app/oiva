@@ -48,7 +48,7 @@ Three Postgres tables hold incident state. This is a conceptual summary. The sou
 
 ```mermaid
 erDiagram
-    incidents |o--o{ alerts : "correlates"
+    incidents |o--|{ alerts : "correlates"
     incidents ||--o{ reports : "produces"
 
     incidents {
@@ -66,6 +66,8 @@ erDiagram
 ```
 
 - An **alert** optionally links to an incident (detached if the incident is deleted).
+- An **incident** always has at least one alert. It's created in response to the alert that triggers it, and later alerts may correlate in. (This is a workflow invariant, not a DB constraint.)
+- An **incident** may have no report. A report is written only when an investigation completes successfully, so failed or in-progress incidents have none. (Exactly one per successful run; the schema permits more, but nothing re-reports today.)
 - A **report** always belongs to an incident (deleted with it).
 
 ## Project layout
