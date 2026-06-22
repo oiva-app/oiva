@@ -2,7 +2,7 @@
 This note describes how to run tests with the Oiva fork of the OTel Astronomy Shop app.  First, you should use that README (https://github.com/oiva-app/opentelemetry-demo) to get up and running.  You can then return to this README in order to inject code bugs.
 
 ## Code failure injection
-> [!NOTE] Note
+> [!NOTE]
 > It would be more convenient to provide this documentation inside the Oiva fork of the Astronomy Shop.  However, this has the potential to create an unrealistic testing environment for Oiva, since it would be able to access descriptions of the bugs that we want to test it against.
 
 In addition to the feature-flags provided in the upstream repo, the Oiva fork provides a couple of code-level faults that you can inject into your telemetry and diagnose with Oiva.  They are codenamed to obscure the true nature of the bugs from Oiva.  In addition to lines that were changed to introduce bugs, additional lines were modified in an attempt to obscure the cause of the bug.
