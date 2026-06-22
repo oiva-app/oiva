@@ -7,8 +7,14 @@ This note describes how to run tests with the Oiva fork of the OTel Astronomy Sh
 
 In addition to the feature-flags provided in the upstream repo, the Oiva fork provides a couple of code-level faults that you can inject into your telemetry and diagnose with Oiva.  They are codenamed to obscure the true nature of the bugs from Oiva.  In addition to lines that were changed to introduce bugs, additional lines were modified in an attempt to obscure the cause of the bug.
 
-### Running a test
-Run the app with the `main` branch to record a minimum of ~20 minutes of 'good' telemetry in your Observability platform.
+See below for a list of bugs.
+
+## Running a test
+This procedure can be used with the below code bugs or any of the feature flag bugs that ship with the upstream repo.
+
+**Setup the alert trigger(s)** in your Observability backend (Honeycomb or similar).
+
+**Run the app** with the `main` branch to record a minimum of ~20 minutes of 'good' telemetry in your Observability platform.
 ```
 git switch main
 make start
@@ -32,13 +38,13 @@ You can also rebuild the entire application, although this will take significant
 make build && make restart
 ```
 
-At this point, the application should be sending telemetry to your observability backend that exhibits the bug that the code intends to simulate.
-### The bugs
-All bugs are listed below.  Each bug has a `-dev` branch, which was used to modify the code, and a `-prod` branch which is used to 'deploy' the bug
-#### lisa
-##### Summary
+**That's it!**  At this point, the application should be sending telemetry to your observability backend that exhibits the bug that the code intends to simulate.
+## The bugs
+All code bugs are listed below.  Each bug has a `-dev` branch, which was used to modify the code, and a `-prod` branch which is used to 'deploy' the bug
+### lisa
+#### Summary
 Recommendation service returns invalid product IDs, causing errors elsewhere in the system.  Simulates a change in a naming convention that was not propagated to nearby services.
-##### Details
+#### Details
 **File affected:** 
 ```
 recommendation/recommendation_server.py
@@ -49,7 +55,7 @@ Here’s the bug, prepending the id with `#`:
 product_ids = [f"#{x.id}" for x in cat_response.products]
 ```
 
-##### Example alert webhook
+#### Example alert webhook
   <details>
   <summary>Click to expand</summary>
 
@@ -119,11 +125,11 @@ product_ids = [f"#{x.id}" for x in cat_response.products]
 ```
   </details>
 
-#### wiggum
-##### Summary
+### wiggum
+#### Summary
 Simulates a change in the API that was executed on one service but not propagated to nearby services.
 
-##### Details
+#### Details
 The next app requests images from the `image-provider` service, which is an Nginx container.  This code change requests images from a path on the server that does not exist.  
 
 Files affected:
@@ -140,7 +146,7 @@ to
 $src={`/assets/products/${picture}`}
 ```
 
-##### Example alert webhook
+#### Example alert webhook
   <details>
   <summary>Click to expand</summary>
 
