@@ -119,8 +119,8 @@ product_ids = [f"#{x.id}" for x in cat_response.products]
     "summary": "Triggered: error == true",
     "timestamp": "May 18 2026 13:21:03 UTC-04:00",
     "isTest": false,
-    "secret": "letmein"
-  }
+  },
+  "secret": "letmein"
 }
 ```
   </details>
