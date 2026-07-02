@@ -7,13 +7,13 @@ const ROOT = "/tmp/workspaces/incident-unit/codebase";
 describe("getContainedClonePath", () => {
   it("returns the contained clone path for a normal repo name", () => {
     expect(getContainedClonePath(ROOT, "orders-api")).toBe(
-      path.join(ROOT, "orders-api"),
+      path.resolve(path.join(ROOT, "orders-api")),
     );
   });
 
   it("allows a nested but still-contained repo path", () => {
     expect(getContainedClonePath(ROOT, "team/orders-api")).toBe(
-      path.join(ROOT, "team", "orders-api"),
+      path.resolve(path.join(ROOT, "team", "orders-api")),
     );
   });
 
