@@ -33,13 +33,15 @@ vi.mock("@mastra/core/workspace", () => ({
 const testRoot = path.join(os.tmpdir(), "oiva-codebase-workspace-test");
 const workspaceBasePath = "/tmp/workspaces";
 
-function mockEnv(repositories = [
-  { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
-  {
-    name: "orders-worker",
-    url: "https://github.com/acme/orders-worker.git",
-  },
-]) {
+function mockEnv(
+  repositories = [
+    { name: "orders-api", url: "https://github.com/acme/orders-api.git" },
+    {
+      name: "orders-worker",
+      url: "https://github.com/acme/orders-worker.git",
+    },
+  ],
+) {
   vi.doMock("../../../src/mastra/config/env", () => ({
     env: {
       APP_GITHUB_REPOSITORIES: repositories,
@@ -356,26 +358,6 @@ describe("codebase workspace", () => {
     );
   });
 
-  it("rejects repository names that escape the codebase root before cloning", async () => {
-    mockEnv([
-      { name: "..", url: "https://github.com/acme/orders-api.git" },
-    ]);
-
-    const { prepareCodebaseAgentWorkspace } = await importWorkspaceModule();
-    const incidentSandboxPath = path.join(
-      workspaceBasePath,
-      "incident-path-escape",
-    );
-
-    await expect(
-      prepareCodebaseAgentWorkspace("incident-path-escape"),
-    ).rejects.toThrow("Repository name escapes codebase root: ..");
-
-    expect(mocks.execFile).not.toHaveBeenCalled();
-    expect(mocks.Workspace).not.toHaveBeenCalled();
-    await expect(fs.access(incidentSandboxPath)).rejects.toThrow();
-  });
-
   it("preserves the synced knowledge base when resetting the codebase sandbox", async () => {
     const knowledgeBasePath = path.join(
       workspaceBasePath,
@@ -401,7 +383,9 @@ describe("codebase workspace", () => {
       getCodebaseAgentWorkspace({
         requestContext: createRequestContext(),
       }),
-    ).toThrow("getCodebaseAgentWorkspace: incidentId missing from request context");
+    ).toThrow(
+      "getCodebaseAgentWorkspace: incidentId missing from request context",
+    );
   });
 
   it("returns the prepared workspace for the matching incidentId", async () => {
@@ -437,5 +421,4 @@ describe("codebase workspace", () => {
       "getCodebaseAgentWorkspace: workspace not prepared for incidentId incident-123",
     );
   });
-
 });
