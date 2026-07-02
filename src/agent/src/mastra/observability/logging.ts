@@ -17,9 +17,10 @@ const SERVICE_NAME = "mastra";
 // sibling logs endpoint. Read process.env directly to keep this bootstrap module
 // free of the config/env.ts import (which logs at load time → avoids a cycle).
 function deriveLogsEndpoint(): string {
-  const base =
-    process.env.COLLECTOR_ENDPOINT ?? "http://localhost:4318/v1/traces";
-  return base.replace(/\/v1\/(traces|logs|metrics)\/?$/, "") + "/v1/logs";
+  const base = (
+    process.env.COLLECTOR_ENDPOINT ?? "http://localhost:4318/v1/traces"
+  ).replace(/\/+$/, "");
+  return base.replace(/\/v1\/(traces|logs|metrics)$/, "") + "/v1/logs";
 }
 
 const loggerProvider = new LoggerProvider({
@@ -53,6 +54,8 @@ const SEVERITY_TEXT: Record<number, string> = {
 
 function toOtelLogRecord(line: string) {
   const rec = JSON.parse(line) as Record<string, unknown>;
+  if (!rec || typeof rec !== "object") return;
+
   const level = typeof rec.level === "number" ? rec.level : 30;
   // Everything except pino's reserved fields becomes a (high-cardinality) log
   // attribute — incidentId, runId, reason, etc. all become queryable columns.
