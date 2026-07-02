@@ -1,3 +1,4 @@
+import { logger } from "@/observability/logging";
 import type {
   ClosedBy,
   DelegationOutcome,
@@ -208,7 +209,7 @@ export class SlackProgressReporter implements ProgressReporter {
           persisted.slackThreadTs,
         );
       } catch (err) {
-        console.error("Failed to re-render root message as closed", {
+        logger.error("Failed to re-render root message as closed", {
           incidentId,
           err,
         });
@@ -290,7 +291,7 @@ export class SlackProgressReporter implements ProgressReporter {
     try {
       await this.incidents.persistLiveUpdateSnapshot(incidentId, snapshot);
     } catch (err) {
-      console.error("SlackProgressReporter.persistSnapshot failed", {
+      logger.error("SlackProgressReporter.persistSnapshot failed", {
         incidentId,
         errorMessage: err instanceof Error ? err.message : String(err),
       });
@@ -346,7 +347,7 @@ export class SlackProgressReporter implements ProgressReporter {
     try {
       await fn();
     } catch (err: unknown) {
-      console.error("SlackProgressReporter method failed", {
+      logger.error("SlackProgressReporter method failed", {
         method,
         incidentId,
         errorMessage: err instanceof Error ? err.message : String(err),

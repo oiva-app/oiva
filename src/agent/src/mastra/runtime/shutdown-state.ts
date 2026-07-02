@@ -1,3 +1,4 @@
+import { shutdownLogs } from "@/observability/logging";
 export type ShutdownSignal = "SIGTERM" | "SIGINT";
 
 let shuttingDown = false;
@@ -20,8 +21,11 @@ export function installShutdownSignalHandlers(): void {
   process.once("SIGTERM", () => {
     markShuttingDown("SIGTERM");
     // Allow routine requests to finish, then exit before ECS SIGKILL (stop_timeout = 60s).
-    setTimeout(() => {
-      console.info("shutdown-state: exiting process after SIGTERM grace period");
+    setTimeout(async () => {
+      console.info(
+        "shutdown-state: exiting process after SIGTERM grace period",
+      );
+      await shutdownLogs(); // flush buffered OTLP logs before exit
       process.exit(0);
     }, 15_000).unref();
   });

@@ -121,9 +121,9 @@ attributes as columns in your trace view:
 - `mastra.workflow_step.input`
 - `gen_ai.tool.name`
 - `mastra.model_step.input` and `.output` (agent LLM inputs and outputs)
-- `app.incident.id` (groups every span in one investigation)
-- `app.alert.trigger_name`
-- `app.alert.dataset`
+- `mastra.metadata.app.incident.id` (groups every span in one investigation)
+- `mastra.metadata.app.alert.trigger_name`
+- `mastra.metadata.app.alert.dataset`
 
 ### Model inputs and outputs
 

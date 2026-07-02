@@ -1,3 +1,4 @@
+import { logger } from "@/observability/logging";
 import type { Context } from "hono";
 import type { Mastra } from "@mastra/core/mastra";
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -44,7 +45,7 @@ async function handleRatingAction(
   try {
     await reportRepository.recordFeedback(reportId, rating);
   } catch (err) {
-    console.error("recordFeedback failed", {
+    logger.error("recordFeedback failed", {
       reportId,
       userId: user.id,
       rating,
@@ -101,7 +102,7 @@ export async function slackInteractionHandler(c: Context) {
   // Ack within 3s; run the action in the background (best-effort, logs its own errors).
   const mastra = c.get("mastra") as Mastra;
   void dispatchAction(parsedPayload.data, mastra).catch((err) =>
-    console.error("slackInteractionHandler: action failed", {
+    logger.error("slackInteractionHandler: action failed", {
       actionId: parsedPayload.data.actions[0].action_id,
       err,
     }),
@@ -130,7 +131,7 @@ async function dispatchAction(
     case "incident_retry":
       return handleIncidentRetry(value, mastra);
     default:
-      console.warn("slackInteractionHandler: unhandled action_id", {
+      logger.warn("slackInteractionHandler: unhandled action_id", {
         action_id,
       });
   }
