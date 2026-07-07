@@ -1,3 +1,4 @@
+import { logger } from "@/observability/logging";
 import type { Mastra } from "@mastra/core/mastra";
 import { closeIncident, retryIncident } from "@/services/incident-service";
 import { incidentRepository, alertRepository } from "@/repositories";
@@ -50,7 +51,7 @@ export async function loadAlertContext(
 
   const parsed = honeycombWebhookPayloadSchema.safeParse(alert.rawPayload);
   if (!parsed.success) {
-    console.error("loadAlertContext: stored payload failed schema parse", {
+    logger.error("loadAlertContext: stored payload failed schema parse", {
       incidentId,
     });
     return null;
