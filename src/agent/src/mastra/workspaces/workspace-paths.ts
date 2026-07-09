@@ -13,3 +13,20 @@ export function getKnowledgeBaseMirrorPath(incidentId: string) {
 export function getCodebaseRoot(incidentId: string) {
   return path.join(getWorkspaceRoot(incidentId), "codebase");
 }
+
+export function getContainedClonePath(
+  codebaseRoot: string,
+  repositoryName: string,
+) {
+  const resolvedCodebaseRoot = path.resolve(codebaseRoot);
+  const clonePath = path.resolve(path.join(codebaseRoot, repositoryName));
+
+  if (
+    clonePath === resolvedCodebaseRoot ||
+    !clonePath.startsWith(`${resolvedCodebaseRoot}${path.sep}`)
+  ) {
+    throw new Error(`Repository name escapes codebase root: ${repositoryName}`);
+  }
+
+  return clonePath;
+}
