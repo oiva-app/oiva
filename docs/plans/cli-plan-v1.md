@@ -32,7 +32,7 @@ This is the project's local master plan. Task bodies live in `plans/tasks/`; mer
 
 ## Tasks
 
-- [ ] 0001 · Terraform root prerequisites → tasks/0001-terraform-root-prerequisites.md
+- [~] 0001 · Terraform root prerequisites → tasks/0001-terraform-root-prerequisites.md
 - [ ] 0002 · CLI package, version, and repository discovery → tasks/0002-cli-package-version-discovery.md
 - [ ] 0003 · Config schema, init, validate, and show (after 0002) → tasks/0003-config-schema-init-validate-show.md
 - [ ] 0004 · Doctor (after 0002, 0003) → tasks/0004-doctor.md

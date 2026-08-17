@@ -152,6 +152,24 @@ variable "postgres_multi_az" {
   default     = true
 }
 
+variable "postgres_deletion_protection" {
+  description = "Whether RDS deletion protection is enabled."
+  type        = bool
+  default     = false
+}
+
+variable "postgres_skip_final_snapshot" {
+  description = "Whether to skip the final RDS snapshot on destroy."
+  type        = bool
+  default     = true
+}
+
+variable "postgres_final_snapshot_identifier" {
+  description = "Final RDS snapshot identifier. Required when postgres_skip_final_snapshot is false."
+  type        = string
+  default     = null
+}
+
 variable "create_knowledge_base_bucket" {
   description = "Whether Terraform should create a private knowledge-base S3 bucket."
   type        = bool

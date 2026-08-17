@@ -47,3 +47,8 @@ output "secret_arns" {
   description = "Secrets Manager ARNs for Oiva runtime secrets."
   value       = local.secret_arns
 }
+
+output "secret_arns_by_env_var" {
+  description = "Secrets Manager ARNs keyed by environment variable name."
+  value       = local.secret_arns_by_env_var
+}

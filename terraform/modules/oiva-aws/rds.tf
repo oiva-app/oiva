@@ -28,9 +28,10 @@ resource "aws_db_instance" "postgres" {
   publicly_accessible    = var.postgres_publicly_accessible
   multi_az               = var.postgres_multi_az
 
-  backup_retention_period = var.postgres_backup_retention
-  deletion_protection     = var.postgres_deletion_protection
-  skip_final_snapshot     = var.postgres_skip_final_snapshot
+  backup_retention_period   = var.postgres_backup_retention
+  deletion_protection       = var.postgres_deletion_protection
+  skip_final_snapshot       = var.postgres_skip_final_snapshot
+  final_snapshot_identifier = var.postgres_final_snapshot_identifier
 
   tags = merge(local.tags, {
     Name = "${local.name}-postgres"

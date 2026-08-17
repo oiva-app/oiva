@@ -40,6 +40,17 @@ locals {
       key => aws_secretsmanager_secret.placeholder[key].arn
     },
   )
+
+  secret_arns_by_env_var = merge(
+    {
+      for key, name in local.fixed_placeholder_secret_names :
+      upper(key) => local.provided_secret_arns[key] != null ? local.provided_secret_arns[key] : aws_secretsmanager_secret.placeholder[key].arn
+    },
+    {
+      for key, name in local.llm_provider_secret_names :
+      key => aws_secretsmanager_secret.placeholder[key].arn
+    },
+  )
 }
 
 resource "aws_secretsmanager_secret" "placeholder" {

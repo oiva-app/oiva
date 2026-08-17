@@ -25,13 +25,13 @@ The child module (`modules/oiva-aws`) may need a new output for the env-name-key
 
 ## Implementation work
 
-- [ ] Bump `required_version` in `terraform/main.tf` from `>= 1.5.0` to `>= 1.10.0`
-- [ ] Add partial `backend "s3" {}` block to `terraform/main.tf`
-- [ ] Add safety pass-through variables to `terraform/variables.tf`: `postgres_deletion_protection`, `postgres_skip_final_snapshot`, `postgres_final_snapshot_identifier`, `knowledge_base_force_destroy` — wire them to the corresponding child module inputs in `main.tf`
-- [ ] Add `agent_image` output to `terraform/outputs.tf` (pass through the input variable value)
-- [ ] Add env-name-keyed secret ARN map output to child module `modules/oiva-aws/outputs.tf` and surface it in root `outputs.tf` — map each secret's environment variable name to its ARN
-- [ ] Ensure `terraform validate` passes
-- [ ] Ensure `terraform plan -var-file=terraform.tfvars.example` passes without errors
+- [x] Bump `required_version` in `terraform/main.tf` from `>= 1.5.0` to `>= 1.10.0`
+- [x] Add partial `backend "s3" {}` block to `terraform/main.tf`
+- [x] Add safety pass-through variables to `terraform/variables.tf`: `postgres_deletion_protection`, `postgres_skip_final_snapshot`, `postgres_final_snapshot_identifier`, `knowledge_base_force_destroy` — wire them to the corresponding child module inputs in `main.tf`
+- [x] Add `agent_image` output to `terraform/outputs.tf` (pass through the input variable value)
+- [x] Add env-name-keyed secret ARN map output to child module `modules/oiva-aws/outputs.tf` and surface it in root `outputs.tf` — map each secret's environment variable name to its ARN
+- [x] Ensure `terraform validate` passes
+- [ ] Ensure `terraform plan -var-file=terraform.tfvars.example` passes without errors — **blocked: AWS credentials invalid (`InvalidClientTokenId`); `terraform validate` passes, partial backend accepts `-backend-config` flags correctly**
 
 ## Acceptance criteria
 

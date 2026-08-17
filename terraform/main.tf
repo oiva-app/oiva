@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
     aws = {
@@ -7,6 +7,8 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {}
 }
 
 provider "aws" {
@@ -45,6 +47,10 @@ module "oiva" {
   postgres_allocated_storage = var.postgres_allocated_storage
   postgres_backup_retention  = var.postgres_backup_retention
   postgres_multi_az          = var.postgres_multi_az
+
+  postgres_deletion_protection       = var.postgres_deletion_protection
+  postgres_skip_final_snapshot       = var.postgres_skip_final_snapshot
+  postgres_final_snapshot_identifier = var.postgres_final_snapshot_identifier
 
   create_knowledge_base_bucket = var.create_knowledge_base_bucket
   knowledge_base_s3_bucket     = var.knowledge_base_s3_bucket

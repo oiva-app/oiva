@@ -47,3 +47,13 @@ output "secret_arns" {
   description = "Secrets Manager ARNs for Oiva runtime secrets."
   value       = module.oiva.secret_arns
 }
+
+output "secret_arns_by_env_var" {
+  description = "Secrets Manager ARNs keyed by environment variable name."
+  value       = module.oiva.secret_arns_by_env_var
+}
+
+output "agent_image" {
+  description = "Container image URI for the oiva-agent container."
+  value       = var.agent_image
+}

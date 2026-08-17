@@ -327,6 +327,12 @@ variable "postgres_skip_final_snapshot" {
   default     = true
 }
 
+variable "postgres_final_snapshot_identifier" {
+  description = "Final RDS snapshot identifier. Required when postgres_skip_final_snapshot is false."
+  type        = string
+  default     = null
+}
+
 variable "postgres_database_name" {
   description = "Initial Postgres database name."
   type        = string
