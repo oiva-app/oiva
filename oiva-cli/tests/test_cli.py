@@ -84,14 +84,15 @@ def test_get_repo_root_discovers_from_subdirectory(tmp_path: Path, monkeypatch):
     assert get_repo_root() == repo
 
 
-def test_get_repo_root_not_found(tmp_path: Path, monkeypatch):
+def test_get_repo_root_not_found(tmp_path: Path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     with pytest.raises(typer.Exit) as exc_info:
         get_repo_root()
     assert exc_info.value.exit_code == 1
+    assert "No Oiva repository found" in capsys.readouterr().err
 
 
-def test_get_repo_root_layout_error(tmp_path: Path, monkeypatch):
+def test_get_repo_root_layout_error(tmp_path: Path, monkeypatch, capsys):
     repo = tmp_path / "oiva"
     repo.mkdir(parents=True)
     (repo / ".oiva-repository").write_text("schema_version: 1\n")
@@ -104,6 +105,9 @@ def test_get_repo_root_layout_error(tmp_path: Path, monkeypatch):
     with pytest.raises(typer.Exit) as exc_info:
         get_repo_root()
     assert exc_info.value.exit_code == 1
+    err = capsys.readouterr().err
+    assert "Repository layout invalid" in err
+    assert "terraform/main.tf" in err
 
 
 def test_get_repo_root_layout_error_does_not_poison_cache(tmp_path: Path, monkeypatch):
@@ -160,7 +164,7 @@ def test_get_config_path_cache_invalidated_on_override_change(tmp_path: Path, mo
     assert exc_info.value.exit_code == 1
 
 
-def test_get_config_path_outside_checkout(tmp_path: Path, monkeypatch):
+def test_get_config_path_outside_checkout(tmp_path: Path, monkeypatch, capsys):
     repo = tmp_path / "oiva"
     _create_repo(repo)
     outside = tmp_path / "other" / "config.yaml"
@@ -172,3 +176,4 @@ def test_get_config_path_outside_checkout(tmp_path: Path, monkeypatch):
     with pytest.raises(typer.Exit) as exc_info:
         get_config_path()
     assert exc_info.value.exit_code == 1
+    assert "outside the checkout" in capsys.readouterr().err
