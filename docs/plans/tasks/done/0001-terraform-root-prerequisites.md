@@ -64,6 +64,8 @@ The child module (`modules/oiva-aws`) may need a new output for the env-name-key
 - TR-4 (minor, security): Changed `postgres_deletion_protection` default to `true` (fail-safe). Fixed.
 - TR-5 (minor, security): Added `check` block for automatic collision detection. Fixed.
 
-**Automated proof**: `terraform validate` passes. `terraform fmt -check -recursive` passes.
+**Automated proof**: `terraform validate` passes. `terraform fmt -check -recursive` passes. Re-verified on `matilda/cli` head `89e2f7a` during finish-task.
 
 **Blocked verification**: `terraform plan` and `terraform output -json` cannot run because AWS credentials are invalid (`InvalidClientTokenId`). This is an environmental blocker, not a code defect. The partial backend block accepts `-backend-config` flags correctly.
+
+**Finish-task disposition**: Feature branch `feature/terraform-root-prerequisites` was merged locally into `matilda/cli` (trunk) without PRs or CI. All review findings resolved before merge. README inspected on merged head — Terraform `>= 1.10.0` prerequisite and `deletion_protection = true` default documented in Destroy The Stack section. `write-well` audit passed during implementation. Task pointer moved from `[~]` to `[x]` and task file moved to `tasks/done/`. Review file removed.
