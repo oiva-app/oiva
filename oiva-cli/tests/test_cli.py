@@ -63,9 +63,9 @@ def test_config_option_accepted():
 def test_get_repo_root_with_explicit_repo(tmp_path: Path, monkeypatch):
     repo = tmp_path / "oiva"
     _create_repo(repo)
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
     monkeypatch.chdir(tmp_path)
-    assert get_repo_root() == repo
+    assert get_repo_root() == repo.resolve()
 
 
 def test_get_repo_root_discovers_from_cwd(tmp_path: Path, monkeypatch):
@@ -101,7 +101,7 @@ def test_get_repo_root_layout_error(tmp_path: Path, monkeypatch, capsys):
             continue
         (repo / f).parent.mkdir(parents=True, exist_ok=True)
         (repo / f).write_text("")
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
     with pytest.raises(typer.Exit) as exc_info:
         get_repo_root()
     assert exc_info.value.exit_code == 1
@@ -119,7 +119,7 @@ def test_get_repo_root_layout_error_does_not_poison_cache(tmp_path: Path, monkey
             continue
         (repo / f).parent.mkdir(parents=True, exist_ok=True)
         (repo / f).write_text("")
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
     with pytest.raises(typer.Exit):
         get_repo_root()
     with pytest.raises(typer.Exit):
@@ -136,7 +136,7 @@ def test_get_config_path_relative(tmp_path: Path, monkeypatch):
     config_file.parent.mkdir(parents=True)
     config_file.write_text("")
     monkeypatch.chdir(tmp_path)
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
     cli._state.config_override = Path("oiva/deployments/prod.yaml")
     result = get_config_path()
     assert result == config_file.resolve()
@@ -152,7 +152,7 @@ def test_get_config_path_cache_invalidated_on_override_change(tmp_path: Path, mo
     outside.parent.mkdir(parents=True)
     outside.write_text("")
     monkeypatch.chdir(tmp_path)
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
 
     cli._state.config_override = Path("oiva/deployments/prod.yaml")
     result = get_config_path()
@@ -171,7 +171,7 @@ def test_get_config_path_outside_checkout(tmp_path: Path, monkeypatch, capsys):
     outside.parent.mkdir(parents=True)
     outside.write_text("")
     monkeypatch.chdir(tmp_path)
-    cli._state.repo_override = repo
+    cli._state.repo_override = repo.resolve()
     cli._state.config_override = outside
     with pytest.raises(typer.Exit) as exc_info:
         get_config_path()

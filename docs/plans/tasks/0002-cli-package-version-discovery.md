@@ -42,3 +42,9 @@ Global Typer options `--repo` and `--config` resolve relative to the caller's CW
 - [ ] `--config` resolves relative to CWD and rejects a path outside the checkout
 - [ ] Green bear wordmark renders in a TTY and plain text without a TTY
 - [ ] Tests pass for discovery, version, and non-TTY fallback
+
+## Review decisions
+
+- skipped (minor): TR-4 — Tests mutate private _state — _state/_reset_state are intentional test seams; refactoring to ctx.obj is out of scope for this task
+- skipped (minor): TR-7 — Unused deps boto3/pydantic/pyyaml — deps pre-declared for upcoming plan tasks per PRD Python stack decision
+- accepted (security): TR-10 — Marker hijack on shared filesystems — v1 single-operator from personal checkout; attack requires write access to ancestor dir on shared filesystem; low probability
