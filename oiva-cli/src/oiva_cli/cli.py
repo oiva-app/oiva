@@ -26,7 +26,6 @@ class _State:
     repo_override: Path | None = None
     config_override: Path | None = None
     _repo_root: Path | None = None
-    _config_path: Path | None = None
 
 
 _state = _State()
@@ -86,22 +85,15 @@ def get_repo_root() -> Path:
 
 def get_config_path() -> Path | None:
     """Resolve the --config option relative to CWD and verify checkout containment."""
-    if _state._config_path is not None:
-        return _state._config_path
-
     if _state.config_override is None:
         return None
 
     repo_root = get_repo_root()
     try:
-        _state._config_path = resolve_config(
-            _state.config_override, Path.cwd(), repo_root
-        )
+        return resolve_config(_state.config_override, Path.cwd(), repo_root)
     except ValueError as exc:
         typer.echo(str(exc), err=True)
         raise typer.Exit(1)
-
-    return _state._config_path
 
 
 @app.command()

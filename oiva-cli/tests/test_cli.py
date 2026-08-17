@@ -136,6 +136,28 @@ def test_get_config_path_relative(tmp_path: Path, monkeypatch):
     assert result == config_file.resolve()
 
 
+def test_get_config_path_cache_invalidated_on_override_change(tmp_path: Path, monkeypatch):
+    repo = tmp_path / "oiva"
+    _create_repo(repo)
+    config_file = repo / "deployments" / "prod.yaml"
+    config_file.parent.mkdir(parents=True)
+    config_file.write_text("")
+    outside = tmp_path / "other" / "config.yaml"
+    outside.parent.mkdir(parents=True)
+    outside.write_text("")
+    monkeypatch.chdir(tmp_path)
+    cli._state.repo_override = repo
+
+    cli._state.config_override = Path("oiva/deployments/prod.yaml")
+    result = get_config_path()
+    assert result == config_file.resolve()
+
+    cli._state.config_override = outside
+    with pytest.raises(typer.Exit) as exc_info:
+        get_config_path()
+    assert exc_info.value.exit_code == 1
+
+
 def test_get_config_path_outside_checkout(tmp_path: Path, monkeypatch):
     repo = tmp_path / "oiva"
     _create_repo(repo)
