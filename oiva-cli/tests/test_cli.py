@@ -54,7 +54,7 @@ def test_repo_option_accepted():
 def test_config_option_accepted():
     result = runner.invoke(app, ["--config", "/tmp/foo.yaml", "version"])
     assert result.exit_code == 0
-    assert cli._state.config_override is not None
+    assert cli._state.config_override == Path("/tmp/foo.yaml").resolve()
 
 
 # --- get_repo_root ---

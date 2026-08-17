@@ -52,7 +52,7 @@ def main(
 ) -> None:
     """Oiva CLI for managing deployments on AWS."""
     _state.repo_override = repo.resolve() if repo else None
-    _state.config_override = config
+    _state.config_override = config.resolve() if config else None
 
 
 def get_repo_root() -> Path:
