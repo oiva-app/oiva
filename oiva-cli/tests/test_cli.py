@@ -104,6 +104,22 @@ def test_get_repo_root_layout_error(tmp_path: Path, monkeypatch):
     assert exc_info.value.exit_code == 1
 
 
+def test_get_repo_root_layout_error_does_not_poison_cache(tmp_path: Path, monkeypatch):
+    repo = tmp_path / "oiva"
+    repo.mkdir(parents=True)
+    (repo / ".oiva-repository").write_text("schema_version: 1\n")
+    for f in REQUIRED_FILES:
+        if f == "terraform/main.tf":
+            continue
+        (repo / f).parent.mkdir(parents=True, exist_ok=True)
+        (repo / f).write_text("")
+    cli._state.repo_override = repo
+    with pytest.raises(typer.Exit):
+        get_repo_root()
+    with pytest.raises(typer.Exit):
+        get_repo_root()
+
+
 # --- get_config_path ---
 
 

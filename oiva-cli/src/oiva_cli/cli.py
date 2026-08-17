@@ -66,20 +66,21 @@ def get_repo_root() -> Path:
         return _state._repo_root
 
     if _state.repo_override is not None:
-        _state._repo_root = _state.repo_override
+        root = _state.repo_override
     else:
         try:
-            _state._repo_root = discover_repository(Path.cwd())
+            root = discover_repository(Path.cwd())
         except RepositoryNotFound as exc:
             typer.echo(str(exc), err=True)
             raise typer.Exit(1)
 
     try:
-        validate_layout(_state._repo_root)
+        validate_layout(root)
     except LayoutError as exc:
         typer.echo(str(exc), err=True)
         raise typer.Exit(1)
 
+    _state._repo_root = root
     return _state._repo_root
 
 
