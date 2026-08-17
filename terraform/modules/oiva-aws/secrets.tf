@@ -53,6 +53,16 @@ locals {
   )
 }
 
+check "secret_key_collision" {
+  assert {
+    condition = length(setintersection(
+      toset([for key in keys(local.fixed_placeholder_secret_names) : upper(key)]),
+      var.llm_provider_secret_env_vars
+    )) == 0
+    error_message = "llm_provider_secret_env_vars must not contain environment variable names that collide with fixed secret keys (uppercased). A fixed secret and an LLM provider secret share the same env-var name, which would cause merge() to silently drop one ARN."
+  }
+}
+
 resource "aws_secretsmanager_secret" "placeholder" {
   for_each = local.placeholder_secrets
 

@@ -155,7 +155,7 @@ variable "postgres_multi_az" {
 variable "postgres_deletion_protection" {
   description = "Whether RDS deletion protection is enabled."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "postgres_skip_final_snapshot" {
@@ -168,6 +168,11 @@ variable "postgres_final_snapshot_identifier" {
   description = "Final RDS snapshot identifier. Required when postgres_skip_final_snapshot is false."
   type        = string
   default     = null
+
+  validation {
+    condition     = var.postgres_skip_final_snapshot ? true : var.postgres_final_snapshot_identifier != null
+    error_message = "postgres_final_snapshot_identifier must be set when postgres_skip_final_snapshot is false."
+  }
 }
 
 variable "create_knowledge_base_bucket" {

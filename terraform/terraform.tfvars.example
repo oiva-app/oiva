@@ -42,6 +42,11 @@ slack_channel_id = "C0123456789"
 # postgres_allocated_storage = 20
 # postgres_multi_az          = true
 # postgres_backup_retention  = 7
+# postgres_deletion_protection defaults to true (fail-safe). Set to false to
+# allow terraform destroy to delete the RDS instance.
+# postgres_deletion_protection       = true
+# postgres_skip_final_snapshot       = true
+# postgres_final_snapshot_identifier = "oiva-final-snapshot"
 
 # Knowledge-base S3 defaults. knowledge_base_force_destroy=true lets
 # `terraform destroy` delete uploaded knowledge-base files in the beginner setup.
