@@ -180,6 +180,9 @@ scratch-docs/
 
 reviews/
 
+# Oiva CLI local state
+.oiva/secrets/
+
 # Terraform local state and local variable files
 **/.terraform/
 *.tfstate

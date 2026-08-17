@@ -22,15 +22,15 @@ Global Typer options `--repo` and `--config` resolve relative to the caller's CW
 
 ## Implementation work
 
-- [ ] Create `oiva-cli/pyproject.toml` with dependencies, console script `oiva = oiva_cli.cli:app`, and project metadata
-- [ ] Create `oiva-cli/src/oiva_cli/__init__.py` and `oiva-cli/src/oiva_cli/cli.py` with a Typer app
-- [ ] Create `.oiva-repository` marker at repo root with `schema_version: 1`
-- [ ] Implement repository discovery: upward marker walk, `--repo` global option, layout validation, actionable error when not found
-- [ ] Implement `--config` global option with path resolution and checkout-containment check
-- [ ] Implement `oiva version` command
-- [ ] Implement Rich bear wordmark rendering (green, TTY-aware)
-- [ ] Add `.oiva/secrets/` to `.gitignore` (the CLI's local state directory)
-- [ ] Write tests: marker discovery from root and subdirectories, `--repo` resolution, layout validation, version output, non-TTY fallback
+- [x] Create `oiva-cli/pyproject.toml` with dependencies, console script `oiva = oiva_cli.cli:app`, and project metadata
+- [x] Create `oiva-cli/src/oiva_cli/__init__.py` and `oiva-cli/src/oiva_cli/cli.py` with a Typer app
+- [x] Create `.oiva-repository` marker at repo root with `schema_version: 1`
+- [x] Implement repository discovery: upward marker walk, `--repo` global option, layout validation, actionable error when not found
+- [x] Implement `--config` global option with path resolution and checkout-containment check
+- [x] Implement `oiva version` command
+- [x] Implement Rich bear wordmark rendering (green, TTY-aware)
+- [x] Add `.oiva/secrets/` to `.gitignore` (the CLI's local state directory)
+- [x] Write tests: marker discovery from root and subdirectories, `--repo` resolution, layout validation, version output, non-TTY fallback
 
 ## Acceptance criteria
 
