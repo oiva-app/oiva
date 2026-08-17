@@ -35,10 +35,35 @@ The child module (`modules/oiva-aws`) may need a new output for the env-name-key
 
 ## Acceptance criteria
 
-- [ ] `terraform validate` succeeds with no errors
-- [ ] `terraform plan -var-file=terraform.tfvars.example` produces a valid plan
-- [ ] `terraform output -json` includes `agent_image` with the current input value
-- [ ] `terraform output -json` includes an env-name-keyed secret ARN map where keys are environment variable names (`OPENAI_API_KEY`, `GITHUB_PAT`, `HONEYCOMB_API_KEY`, etc.) and values are ARN strings
-- [ ] `terraform version` constraint reads `>= 1.10.0`
-- [ ] Root variables include `postgres_deletion_protection`, `postgres_skip_final_snapshot`, `knowledge_base_force_destroy` with sensible defaults
-- [ ] A partial `backend "s3" {}` block exists with no hardcoded bucket/key/region values
+- [x] `terraform validate` succeeds with no errors
+- [ ] `terraform plan -var-file=terraform.tfvars.example` produces a valid plan — **blocked: AWS credentials invalid (`InvalidClientTokenId`)**
+- [ ] `terraform output -json` includes `agent_image` with the current input value — **blocked: requires `terraform plan`/`apply` (AWS credentials invalid); output declared in `terraform/outputs.tf`**
+- [ ] `terraform output -json` includes an env-name-keyed secret ARN map where keys are environment variable names (`OPENAI_API_KEY`, `GITHUB_PAT`, `HONEYCOMB_API_KEY`, etc.) and values are ARN strings — **blocked: requires `terraform plan`/`apply` (AWS credentials invalid); output declared in `terraform/outputs.tf` and `terraform/modules/oiva-aws/outputs.tf`**
+- [x] `terraform version` constraint reads `>= 1.10.0`
+- [x] Root variables include `postgres_deletion_protection`, `postgres_skip_final_snapshot`, `knowledge_base_force_destroy` with sensible defaults
+- [x] A partial `backend "s3" {}` block exists with no hardcoded bucket/key/region values
+
+## Completion record
+
+**Built**: Bumped `required_version` to `>= 1.10.0`. Added partial `backend "s3" { use_lockfile = true }` block. Surfaced `postgres_deletion_protection`, `postgres_skip_final_snapshot`, `postgres_final_snapshot_identifier`, `knowledge_base_force_destroy` as root-level pass-throughs. Added `agent_image` and `secret_arns_by_env_var` outputs (child module + root).
+
+**Decisions**:
+- `use_lockfile = true` set in the partial backend block (not just passed via `-backend-config`) because it is a configuration constant, not a per-deployment coordinate. (TR-1)
+- `postgres_deletion_protection` defaults to `true` (fail-safe) in both root and child module. Direct `terraform destroy` is blocked unless the operator explicitly disables protection. The CLI will override this for disposable deployments. (TR-4)
+- Cross-variable validation added to `postgres_final_snapshot_identifier` in both root and child module: fails at plan time when `skip_final_snapshot = false` and no identifier is provided. (TR-3)
+- `check "secret_key_collision"` block added to `secrets.tf` to dynamically detect collisions between fixed secret keys (uppercased) and `llm_provider_secret_env_vars`, replacing the manually-synced hardcoded validation list as the primary guard. (TR-5)
+
+**Files changed**: `terraform/main.tf`, `terraform/variables.tf`, `terraform/outputs.tf`, `terraform/terraform.tfvars.example`, `terraform/README.md`, `terraform/modules/oiva-aws/variables.tf`, `terraform/modules/oiva-aws/secrets.tf`, `terraform/modules/oiva-aws/outputs.tf`
+
+**README disposition**: Updated Terraform version prerequisite from `>= 1.5.0` to `>= 1.10.0`. Replaced "beginner defaults" paragraph in Destroy The Stack with concrete instructions for the `deletion_protection = true` default. `write-well` audit passed: no em dashes, no AI tells, direct and actionable prose.
+
+**Review outcome**: 5 findings (1 major, 4 minor) raised by `task-review`. All 5 resolved via `review-fix-worker`:
+- TR-1 (major, spec): Added `use_lockfile = true` to backend block. Fixed.
+- TR-2 (minor, standards): Added three RDS safety variables to `terraform.tfvars.example`. Fixed.
+- TR-3 (minor, bug): Added cross-variable validation to both root and child module. Fixed.
+- TR-4 (minor, security): Changed `postgres_deletion_protection` default to `true` (fail-safe). Fixed.
+- TR-5 (minor, security): Added `check` block for automatic collision detection. Fixed.
+
+**Automated proof**: `terraform validate` passes. `terraform fmt -check -recursive` passes.
+
+**Blocked verification**: `terraform plan` and `terraform output -json` cannot run because AWS credentials are invalid (`InvalidClientTokenId`). This is an environmental blocker, not a code defect. The partial backend block accepts `-backend-config` flags correctly.
