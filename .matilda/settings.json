@@ -24,7 +24,9 @@
       "Bash(upper)",
       "Bash(eof)",
       "Bash(gh *)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(mv *)",
+      "Bash(rm *)"
     ]
   },
   "$version": 5

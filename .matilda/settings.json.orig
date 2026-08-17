@@ -23,7 +23,9 @@
       "Bash(python3 *)",
       "Bash(upper)",
       "Bash(eof)",
-      "Bash(gh *)"
+      "Bash(gh *)",
+      "Bash(grep *)",
+      "Bash(mv *)"
     ]
   },
   "$version": 5
