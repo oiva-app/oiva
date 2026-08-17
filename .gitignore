@@ -178,6 +178,8 @@ src/agent/src/mastra/public/reports/
 
 scratch-docs/
 
+reviews/
+
 # Terraform local state and local variable files
 **/.terraform/
 *.tfstate

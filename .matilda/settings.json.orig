@@ -1,7 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "Skill(mainy)"
+      "Skill(mainy)",
+      "Bash(which *)",
+      "Bash(terraform *)",
+      "Bash(git checkout *)",
+      "Bash(do)",
+      "Bash(then)",
+      "Bash(exit *)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(})",
+      "Bash(else)",
+      "Bash(mkdir *)",
+      "Bash(printf *)",
+      "Bash(env)",
+      "Bash(aws *)",
+      "Bash(git commit *)",
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(python3 *)",
+      "Bash(upper)",
+      "Bash(eof)",
+      "Bash(gh *)"
     ]
-  }
+  },
+  "$version": 5
 }
