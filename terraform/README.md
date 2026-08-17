@@ -62,7 +62,7 @@ Before deploying Oiva, make sure you have:
 
 - an AWS account
 - AWS CLI v2 installed
-- Terraform `>= 1.5.0` installed
+- Terraform `>= 1.10.0` installed
 - Docker installed
 - access to a container registry where you can push the Oiva image
 - a public domain name for Oiva
@@ -702,7 +702,7 @@ To copy knowledge-base files out of the managed S3 bucket:
 aws s3 sync "s3://$(terraform output -raw knowledge_base_bucket)/" ./oiva-knowledge-base-backup
 ```
 
-For production data, also decide how you want to preserve the RDS Postgres database before destroying the stack. The beginner defaults are optimized for easy cleanup, not long-term data retention.
+For production data, also decide how you want to preserve the RDS Postgres database before destroying the stack. RDS deletion protection is on by default, so `terraform destroy` will fail on the database unless you set `postgres_deletion_protection = false` in `terraform.tfvars` and apply it first. If you want a final snapshot, also set `postgres_skip_final_snapshot = false` and provide a `postgres_final_snapshot_identifier`.
 
 If you registered your domain outside AWS and delegated DNS to Route 53, Terraform does not undo that registrar-level delegation. After destroying the stack, update your domain registrar if you want the domain to use different authoritative name servers.
 
