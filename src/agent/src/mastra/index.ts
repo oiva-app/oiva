@@ -1,5 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
-import { PinoLogger } from "@mastra/loggers";
+import { logger } from "./observability/logging";
 import { LibSQLStore } from "@mastra/libsql";
 import { DuckDBStore } from "@mastra/duckdb";
 import { MastraCompositeStore } from "@mastra/core/storage";
@@ -30,7 +30,9 @@ import { installShutdownSignalHandlers } from "@/runtime/shutdown-state";
 installShutdownSignalHandlers();
 
 const mastraStorageUrl =
-  env.NODE_ENV === "production" ? "file:/tmp/mastra/mastra.db" : "file:./mastra.db";
+  env.NODE_ENV === "production"
+    ? "file:/tmp/mastra/mastra.db"
+    : "file:./mastra.db";
 const observabilityStoragePath =
   env.NODE_ENV === "production" ? "/tmp/mastra/mastra.duckdb" : "mastra.duckdb";
 
@@ -71,10 +73,7 @@ export const mastra = new Mastra({
       }).getStore("observability"),
     },
   }),
-  logger: new PinoLogger({
-    name: "Mastra",
-    level: "info",
-  }),
+  logger,
   observability: new Observability({
     configs: {
       default: {

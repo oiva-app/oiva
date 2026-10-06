@@ -154,6 +154,22 @@ export async function alertHookHandler(c: Context) {
   void run
     .start({
       inputData: { incidentId: incident.id, alertContext },
+      // Stamp the root trace span with incident identity so a whole
+      // investigation is queryable in Honeycomb by incident, trigger,
+      // dataset, etc. (TracingOptions.metadata → root span.)
+      tracingOptions: {
+        metadata: {
+          "app.incident.id": incident.id,
+          "app.run.id": run.runId,
+          "app.alert.source": SOURCE,
+          "app.alert.trigger_name": triggerName,
+          "app.alert.environment": alertContext.environment,
+          "app.alert.vendor_instance_id": vendorInstanceId,
+          "app.correlation": "new",
+          ...(dataset ? { "app.alert.dataset": dataset } : {}),
+          ...(queryId ? { "app.alert.query_id": queryId } : {}),
+        },
+      },
     })
     .catch((err: unknown) => {
       const reason = err instanceof Error ? err.message : String(err);

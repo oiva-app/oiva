@@ -7,7 +7,10 @@ import {
   investigationTraceSchema,
   supervisorAgentOutputSchema,
 } from "@/domain/investigation";
-import { incidentReportSchema, reportAgentOutputSchema } from "@/domain/incident-report";
+import {
+  incidentReportSchema,
+  reportAgentOutputSchema,
+} from "@/domain/incident-report";
 import { progressReporter } from "@/slack";
 import type { InvestigationStep } from "@/domain/investigation";
 import {
@@ -198,7 +201,10 @@ const generateReport = createStep({
         throw new Error("generateReport: invalid agent output");
       }
     } catch (err) {
-      console.error(err);
+      mastra.getLogger().error("generateReport: report agent failed", {
+        incidentId: state.incidentId,
+        err,
+      });
       await failIncident(state.incidentId, failureReason(err));
       throw err;
     }
@@ -225,7 +231,10 @@ const generateReport = createStep({
         reportJson: { ...report, investigationSteps },
       });
     } catch (err) {
-      console.error("generateReport: failed to insert report", err);
+      mastra.getLogger().error("generateReport: failed to insert report", {
+        incidentId: state.incidentId,
+        err,
+      });
       await failIncident(state.incidentId, failureReason(err));
       throw err;
     }

@@ -34,6 +34,7 @@ vi.mock("../../../src/mastra/config/env", () => ({
 
 const { SlackProgressReporter } =
   await import("../../../src/mastra/slack/progress-reporter");
+const { logger } = await import("../../../src/mastra/observability/logging");
 
 const alert: AlertContext = {
   status: "TRIGGERED",
@@ -162,7 +163,7 @@ describe("SlackProgressReporter", () => {
     mockFns.postMessage.mockResolvedValue({ ts: "T1", channel: "C-default" });
     mockFns.update.mockResolvedValue({});
     const errorSpy = vi
-      .spyOn(console, "error")
+      .spyOn(logger, "error")
       .mockImplementation(() => undefined);
     vi.spyOn(repo, "persistLiveUpdateSnapshot").mockRejectedValue(
       new Error("db down"),
@@ -258,7 +259,7 @@ describe("SlackProgressReporter", () => {
       await vi.runAllTimersAsync();
 
       const errorSpy = vi
-        .spyOn(console, "error")
+        .spyOn(logger, "error")
         .mockImplementation(() => undefined);
       mockFns.update.mockRejectedValue(new Error("slack update failed"));
       mockFns.postMessage.mockClear();
@@ -309,7 +310,7 @@ describe("SlackProgressReporter", () => {
   describe("safe wrapper", () => {
     it("swallows Slack API errors and logs structured fields", async () => {
       const errorSpy = vi
-        .spyOn(console, "error")
+        .spyOn(logger, "error")
         .mockImplementation(() => undefined);
       mockFns.postMessage.mockRejectedValue(new Error("rate_limited"));
       const incident = await repo.create();

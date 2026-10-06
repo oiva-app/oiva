@@ -1,3 +1,4 @@
+import { logger } from "@/observability/logging";
 import { createTool, Tool } from "@mastra/core/tools";
 import { SpanType } from "@mastra/core/observability";
 import {
@@ -165,7 +166,7 @@ export function wrapTools(
   > = {};
   for (const [key, tool] of Object.entries(tools)) {
     if (!tool) {
-      console.warn(
+      logger.warn(
         `[wrapTools] skipping wrap: "${key}" not provided by the tool source`,
       );
       continue;

@@ -6,7 +6,7 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
         cors:
-          allowed_origins:                                                             
+          allowed_origins:
             - "http://localhost:*"
             - "http://127.0.0.1:*"
             # - ${env:CORS_ALLOWED_ORIGIN}    # Todo - implement narrow CORS policy
@@ -20,7 +20,7 @@ processors:
     attributes:
       - key: service.name
         value: not_yet_configured
-        action: insert   # Don't overwrite if it already exists
+        action: insert # Don't overwrite if it already exists
   batch:
     timeout: 1s
     send_batch_size: 1024
@@ -29,7 +29,7 @@ exporters:
   # SEND TO STDOUT
   debug:
     verbosity: detailed
-  
+
   # SEND TO HONEYCOMB
   otlp_http/honeycomb:
     endpoint: "https://api.honeycomb.io:443"
@@ -46,8 +46,8 @@ service:
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [debug]  # TODO - honeycomb not yet implemented
+      exporters: [debug] # TODO - honeycomb not yet implemented
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [debug]  # TODO - honeycomb not yet implemented
+      exporters: [debug, otlp_http/honeycomb]
