@@ -1,4 +1,8 @@
-import { Workspace, LocalFilesystem, LocalSandbox } from '@mastra/core/workspace';
+import {
+  Workspace,
+  LocalFilesystem,
+  LocalSandbox,
+} from "@mastra/core/workspace";
 import type { AnyWorkspace } from "@mastra/core/workspace";
 import { RequestContext } from "@mastra/core/request-context";
 import { execFile } from "node:child_process";
@@ -10,6 +14,7 @@ import { promisify } from "node:util";
 import { env } from "@/config/env";
 import {
   getCodebaseRoot,
+  getContainedClonePath,
   getKnowledgeBaseMirrorPath,
   getWorkspaceRoot,
 } from "./workspace-paths";
@@ -80,7 +85,10 @@ esac
   }
 }
 
-async function runGit(args: string[], options?: { env?: NodeJS.ProcessEnv; signal?: AbortSignal }) {
+async function runGit(
+  args: string[],
+  options?: { env?: NodeJS.ProcessEnv; signal?: AbortSignal },
+) {
   await execFileAsync("git", args, {
     env: options?.env ?? process.env,
     signal: options?.signal,
@@ -94,7 +102,9 @@ function assertInitCurrent(
   signal: AbortSignal,
 ) {
   if (signal.aborted || inFlight.get(incidentId)?.token !== token) {
-    throw new Error(`Codebase workspace initialization was cancelled for incidentId ${incidentId}`);
+    throw new Error(
+      `Codebase workspace initialization was cancelled for incidentId ${incidentId}`,
+    );
   }
 }
 
@@ -112,16 +122,13 @@ async function cloneRepositories(
     assertInitCurrent(incidentId, token, controller.signal);
     const clonePath = getContainedClonePath(codebaseRoot, repository.name);
 
-    return runGit([
-      "clone",
-      "--shallow-since",
-      shallowSince,
-      repository.url,
-      clonePath,
-    ], {
-      env: gitEnv,
-      signal: controller.signal,
-    });
+    return runGit(
+      ["clone", "--shallow-since", shallowSince, repository.url, clonePath],
+      {
+        env: gitEnv,
+        signal: controller.signal,
+      },
+    );
   });
 
   let firstFailure: unknown;
@@ -146,48 +153,30 @@ async function cloneRepositories(
   assertInitCurrent(incidentId, token, controller.signal);
 }
 
-function getContainedClonePath(codebaseRoot: string, repositoryName: string) {
-  const resolvedCodebaseRoot = path.resolve(codebaseRoot);
-  const clonePath = path.resolve(path.join(codebaseRoot, repositoryName));
-
-  if (
-    clonePath === resolvedCodebaseRoot ||
-    !clonePath.startsWith(`${resolvedCodebaseRoot}${path.sep}`)
-  ) {
-    throw new Error(
-      `Repository name escapes codebase root: ${repositoryName}`,
-    );
-  }
-
-  return clonePath;
-}
-
 function createWorkspace(incidentId: string) {
   const codebaseRoot = getCodebaseRoot(incidentId);
 
-  return new Workspace(
-    {
-      mounts: {
-        [KNOWLEDGE_BASE_MOUNT]: new LocalFilesystem({
-          basePath: getKnowledgeBaseMirrorPath(incidentId),
-          readOnly: true,
-        }),
-        [CODEBASE_MOUNT]: new LocalFilesystem({
-          basePath: codebaseRoot,
-        }),
-      },
-      sandbox: new LocalSandbox({
-        workingDirectory: codebaseRoot,
+  return new Workspace({
+    mounts: {
+      [KNOWLEDGE_BASE_MOUNT]: new LocalFilesystem({
+        basePath: getKnowledgeBaseMirrorPath(incidentId),
+        readOnly: true,
       }),
-      onMount: ({ mountPath }) => {
-        if (mountPath === CODEBASE_MOUNT) return false;
-        if (mountPath === KNOWLEDGE_BASE_MOUNT) return false;
-      },
-      lsp: true,
-      bm25: true,
-      autoIndexPaths: [CODEBASE_MOUNT],
+      [CODEBASE_MOUNT]: new LocalFilesystem({
+        basePath: codebaseRoot,
+      }),
     },
-  );
+    sandbox: new LocalSandbox({
+      workingDirectory: codebaseRoot,
+    }),
+    onMount: ({ mountPath }) => {
+      if (mountPath === CODEBASE_MOUNT) return false;
+      if (mountPath === KNOWLEDGE_BASE_MOUNT) return false;
+    },
+    lsp: true,
+    bm25: true,
+    autoIndexPaths: [CODEBASE_MOUNT],
+  });
 }
 
 async function initCodebaseAgentWorkspace(
@@ -229,7 +218,9 @@ async function initCodebaseAgentWorkspace(
   }
 }
 
-export function prepareCodebaseAgentWorkspace(incidentId: string): Promise<AnyWorkspace> {
+export function prepareCodebaseAgentWorkspace(
+  incidentId: string,
+): Promise<AnyWorkspace> {
   const workspace = workspacesByIncidentId.get(incidentId);
   if (workspace) {
     return Promise.resolve(workspace);
@@ -242,12 +233,15 @@ export function prepareCodebaseAgentWorkspace(incidentId: string): Promise<AnyWo
 
   const controller = new AbortController();
   const token = Symbol(incidentId);
-  const promise = initCodebaseAgentWorkspace(incidentId, token, controller)
-    .finally(() => {
-      if (inFlight.get(incidentId)?.token === token) {
-        inFlight.delete(incidentId);
-      }
-    });
+  const promise = initCodebaseAgentWorkspace(
+    incidentId,
+    token,
+    controller,
+  ).finally(() => {
+    if (inFlight.get(incidentId)?.token === token) {
+      inFlight.delete(incidentId);
+    }
+  });
 
   inFlight.set(incidentId, { promise, controller, token });
   return promise;
@@ -274,15 +268,23 @@ export async function cleanupCodebaseAgentWorkspace(incidentId: string) {
   await fs.rm(workspaceRoot, { recursive: true, force: true });
 }
 
-export function getCodebaseAgentWorkspace({ requestContext }: { requestContext: RequestContext }) {
+export function getCodebaseAgentWorkspace({
+  requestContext,
+}: {
+  requestContext: RequestContext;
+}) {
   const incidentId = requestContext.get("incidentId");
   if (typeof incidentId !== "string" || incidentId.length === 0) {
-    throw new Error("getCodebaseAgentWorkspace: incidentId missing from request context");
+    throw new Error(
+      "getCodebaseAgentWorkspace: incidentId missing from request context",
+    );
   }
 
   const workspace = workspacesByIncidentId.get(incidentId);
   if (!workspace) {
-    throw new Error(`getCodebaseAgentWorkspace: workspace not prepared for incidentId ${incidentId}`);
+    throw new Error(
+      `getCodebaseAgentWorkspace: workspace not prepared for incidentId ${incidentId}`,
+    );
   }
 
   return workspace;
